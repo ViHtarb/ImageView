@@ -42,6 +42,7 @@ import android.graphics.drawable.shapes.OvalShape;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DimenRes;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
@@ -58,6 +59,8 @@ import com.bumptech.glide.RequestManager;
  * with inherited glide implementation
  */
 public class ImageView extends AppCompatImageView {
+    private static final String TAG = ImageView.class.getSimpleName();
+
     public enum Mode {
         NORMAL,
         CIRCLE
@@ -115,7 +118,7 @@ public class ImageView extends AppCompatImageView {
         mElevation = a.getDimension(R.styleable.ImageView_elevation, 0f);
 
         mBorderColor = a.getColor(R.styleable.ImageView_borderColor, Color.BLACK);
-        mBorderWidth = a.getDimensionPixelSize(R.styleable.ImageView_borderWidth, 0);
+        mBorderWidth = a.getDimensionPixelSize(R.styleable.ImageView_borderDepth, 0);
         mBorderOverlay = a.getBoolean(R.styleable.ImageView_borderOverlay, false);
 
         a.recycle();
@@ -128,11 +131,6 @@ public class ImageView extends AppCompatImageView {
             mManager = Glide.with(context);
         }
     }
-
-/*    @Override
-    public ScaleType getScaleType() {
-        return mMode == Mode.CIRCLE ? ScaleType.CENTER_CROP : super.getScaleType();
-    }*/
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -197,23 +195,18 @@ public class ImageView extends AppCompatImageView {
         }
     }
 
-    @Override
-    public CharSequence getAccessibilityClassName() {
-        return ImageView.class.getSimpleName();
-    }
-
     public void setImageURL(String url) {
         mManager.load(url).error(mErrorDrawable).into(this);
 
         if (BuildConfig.DEBUG) {
-            Log.d(getAccessibilityClassName().toString(), "imageURL = " + url);
+            Log.d(TAG, "imageURL = " + url);
         }
     }
 
-    public void setErrorResource(@DrawableRes int resourceId) {
-        if (resourceId != mErrorResource) {
-            mErrorResource = resourceId;
-            setErrorDrawable(ContextCompat.getDrawable(getContext(), resourceId));
+    public void setErrorDrawable(@DrawableRes int resId) {
+        if (resId != mErrorResource) {
+            mErrorResource = resId;
+            setErrorDrawable(ContextCompat.getDrawable(getContext(), resId));
         }
     }
 
@@ -249,7 +242,7 @@ public class ImageView extends AppCompatImageView {
         return mMode;
     }
 
-    public void setMode(Mode mode) {
+    public void setMode(@NonNull Mode mode) {
         if (mode != mMode) {
             mMode = mode;
 

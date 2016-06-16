@@ -16,7 +16,9 @@
         android:id="@+id/image_view"
         android:layout_width="68dp"
         android:layout_height="68dp"
-        app:mode="normal"/>
+        app:mode="normal"
+        app:borderColor="@color/colorAccent"
+        app:borderDepth="2dp"/>
 
     <Button
         android:id="@+id/button_test"
