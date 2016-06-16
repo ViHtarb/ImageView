@@ -52,7 +52,6 @@ import android.util.AttributeSet;
  * {@link Mode#NORMAL} or {@link Mode#CIRCLE}
  */
 public class ImageView extends AppCompatImageView {
-    private static final String TAG = ImageView.class.getSimpleName();
 
     public enum Mode {
         NORMAL,

@@ -48,7 +48,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
@@ -59,8 +58,6 @@ import com.bumptech.glide.RequestManager;
  * with inherited glide implementation
  */
 public class ImageView extends AppCompatImageView {
-    private static final String TAG = ImageView.class.getSimpleName();
-
     public enum Mode {
         NORMAL,
         CIRCLE
@@ -197,10 +194,6 @@ public class ImageView extends AppCompatImageView {
 
     public void setImageURL(String url) {
         mManager.load(url).error(mErrorDrawable).into(this);
-
-        if (BuildConfig.DEBUG) {
-            Log.d(TAG, "imageURL = " + url);
-        }
     }
 
     public void setErrorDrawable(@DrawableRes int resId) {
