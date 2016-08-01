@@ -66,8 +66,6 @@ public class ImageView extends AppCompatImageView {
     private float mRadius;
     private float mBorderRadius;
 
-    private float mElevation;
-
     private Mode mMode;
 
     private RectF mDrawableRect = new RectF();
@@ -98,22 +96,14 @@ public class ImageView extends AppCompatImageView {
         final int mode = a.getInteger(R.styleable.ImageView_mode, Mode.NORMAL.ordinal());
         setMode(Mode.values()[mode]);
 
-        mElevation = a.getDimension(R.styleable.ImageView_elevation, 0f);
+        float elevation = a.getDimension(R.styleable.ImageView_elevation, 0f);
+        ViewCompat.setElevation(this, elevation);
 
         mBorderColor = a.getColor(R.styleable.ImageView_borderColor, Color.BLACK);
         mBorderWidth = a.getDimensionPixelSize(R.styleable.ImageView_borderDepth, 0);
         mBorderOverlay = a.getBoolean(R.styleable.ImageView_borderOverlay, false);
 
         a.recycle();
-
-        if (mElevation > 0) {
-            ViewCompat.setElevation(this, mElevation);
-        }
-    }
-
-    @Override
-    public void setElevation(float elevation) {
-        super.setElevation(elevation);
     }
 
     @Override
