@@ -42,6 +42,7 @@ import android.graphics.drawable.shapes.OvalShape;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DimenRes;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
@@ -51,6 +52,7 @@ import android.util.AttributeSet;
  * {@link Mode#NORMAL} or {@link Mode#CIRCLE}
  */
 public class ImageView extends AppCompatImageView {
+
     public enum Mode {
         NORMAL,
         CIRCLE
@@ -63,8 +65,6 @@ public class ImageView extends AppCompatImageView {
 
     private float mRadius;
     private float mBorderRadius;
-
-    private float mElevation;
 
     private Mode mMode;
 
@@ -96,23 +96,15 @@ public class ImageView extends AppCompatImageView {
         final int mode = a.getInteger(R.styleable.ImageView_mode, Mode.NORMAL.ordinal());
         setMode(Mode.values()[mode]);
 
-        mElevation = a.getDimension(R.styleable.ImageView_elevation, 0f);
+        float elevation = a.getDimension(R.styleable.ImageView_elevation, 0f);
+        ViewCompat.setElevation(this, elevation);
 
         mBorderColor = a.getColor(R.styleable.ImageView_borderColor, Color.BLACK);
-        mBorderWidth = a.getDimensionPixelSize(R.styleable.ImageView_borderWidth, 0);
+        mBorderWidth = a.getDimensionPixelSize(R.styleable.ImageView_borderDepth, 0);
         mBorderOverlay = a.getBoolean(R.styleable.ImageView_borderOverlay, false);
 
         a.recycle();
-
-        if (mElevation > 0) {
-            ViewCompat.setElevation(this, mElevation);
-        }
     }
-
-/*    @Override
-    public ScaleType getScaleType() {
-        return mMode == Mode.CIRCLE ? ScaleType.CENTER_CROP : super.getScaleType();
-    }*/
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -177,11 +169,6 @@ public class ImageView extends AppCompatImageView {
         }
     }
 
-    @Override
-    public CharSequence getAccessibilityClassName() {
-        return ImageView.class.getSimpleName();
-    }
-
     public void setBorderColor(@ColorInt int color) {
         if (color != mBorderColor) {
             mBorderColor = color;
@@ -208,7 +195,7 @@ public class ImageView extends AppCompatImageView {
         return mMode;
     }
 
-    public void setMode(Mode mode) {
+    public void setMode(@NonNull Mode mode) {
         if (mode != mMode) {
             mMode = mode;
 

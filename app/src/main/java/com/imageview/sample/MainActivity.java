@@ -24,9 +24,8 @@
 
 package com.imageview.sample;
 
-import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
@@ -40,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final ImageView imageView = (ImageView) findViewById(R.id.image_view);
-        imageView.setImageURL("https://pp.vk.me/c626130/v626130343/1268e/myejo7kSU24.jpg");
+        imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
 
         Button button = (Button) findViewById(R.id.button_test);
         button.setOnClickListener(new View.OnClickListener() {
@@ -51,8 +50,6 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     imageView.setMode(ImageView.Mode.NORMAL);
                 }
-                imageView.setBorderWidth(R.dimen.activity_horizontal_margin);
-                imageView.setBorderColor(Color.GRAY);
             }
         });
     }
