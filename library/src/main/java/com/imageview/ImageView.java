@@ -37,13 +37,10 @@ import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.OvalShape;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DimenRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 
@@ -78,8 +75,6 @@ public class ImageView extends AppCompatImageView {
     private Bitmap mBitmap;
     private BitmapShader mBitmapShader;
 
-    private ShapeDrawable mShapeDrawable;
-
     public ImageView(Context context) {
         this(context, null);
     }
@@ -95,9 +90,6 @@ public class ImageView extends AppCompatImageView {
 
         final int mode = a.getInteger(R.styleable.ImageView_mode, Mode.NORMAL.ordinal());
         setMode(Mode.values()[mode]);
-
-        float elevation = a.getDimension(R.styleable.ImageView_elevation, 0f);
-        ViewCompat.setElevation(this, elevation);
 
         mBorderColor = a.getColor(R.styleable.ImageView_borderColor, Color.BLACK);
         mBorderWidth = a.getDimensionPixelSize(R.styleable.ImageView_borderDepth, 0);
@@ -210,12 +202,6 @@ public class ImageView extends AppCompatImageView {
     private void init() {
         if (mBitmap == null || mBitmapPaint == null || mMode != Mode.CIRCLE) {
             return;
-        }
-
-        if (mShapeDrawable == null && getBackground() == null) {
-            mShapeDrawable = new ShapeDrawable(new OvalShape());
-            mShapeDrawable.getPaint().setColor(Color.TRANSPARENT);
-            setBackgroundDrawable(mShapeDrawable);
         }
 
         mBitmapShader = new BitmapShader(mBitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
