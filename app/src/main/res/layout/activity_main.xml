@@ -12,10 +12,11 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.imageview.sample.MainActivity">
 
-    <com.imageview.ImageView
+    <com.imageview.glide.ImageView
         android:id="@+id/image_view"
         android:layout_width="68dp"
         android:layout_height="68dp"
+        android:background="@drawable/corners"
         app:mode="normal"
         app:borderColor="@color/colorAccent"
         app:borderDepth="2dp"/>

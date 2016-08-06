@@ -3,7 +3,7 @@
     <attr name="imageViewStyle" format="reference"/>
 
     <declare-styleable name="ImageView">
-        <attr name="elevation"/>
+        <attr name="cornerRadius" format="dimension"/>
         <attr name="borderDepth" format="dimension"/>
         <attr name="borderColor" format="color"/>
         <attr name="borderOverlay" format="boolean"/>
