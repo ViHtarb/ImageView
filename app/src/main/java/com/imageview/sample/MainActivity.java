@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
         final ImageView imageView = (ImageView) findViewById(R.id.image_view);
         //imageView.setClipToOutline(true);
-        imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
+        //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
 
         Button button = (Button) findViewById(R.id.button_test);
         button.setOnClickListener(new View.OnClickListener() {
