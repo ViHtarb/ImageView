@@ -16,8 +16,8 @@
         android:id="@+id/image_view"
         android:layout_width="68dp"
         android:layout_height="68dp"
-        android:background="@drawable/ic_android"
-        app:mode="circle"/>
+        android:src="@drawable/ic_android"
+        app:mode="normal"/>
 
     <Button
         android:id="@+id/button_test"

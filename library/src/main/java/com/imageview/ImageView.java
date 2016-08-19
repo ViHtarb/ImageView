@@ -101,7 +101,7 @@ public class ImageView extends AppCompatImageView {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mMode == Mode.NORMAL && getDrawable() instanceof VectorDrawable) {
+        if (mMode == Mode.NORMAL || getDrawable() instanceof VectorDrawable) {
             super.onDraw(canvas);
             return;
         }
