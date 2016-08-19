@@ -37,6 +37,7 @@ import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DimenRes;
 import android.support.annotation.DrawableRes;
@@ -100,7 +101,7 @@ public class ImageView extends AppCompatImageView {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mMode == Mode.NORMAL) {
+        if (mMode == Mode.NORMAL && getDrawable() instanceof VectorDrawable) {
             super.onDraw(canvas);
             return;
         }
@@ -200,7 +201,7 @@ public class ImageView extends AppCompatImageView {
     }
 
     private void init() {
-        if (mBitmap == null || mBitmapPaint == null || mMode != Mode.CIRCLE) {
+        if (mBitmap == null || mBitmapPaint == null || mMode != Mode.CIRCLE || getDrawable() instanceof VectorDrawable) {
             return;
         }
 
