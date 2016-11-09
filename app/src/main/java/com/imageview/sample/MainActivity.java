@@ -29,7 +29,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import com.imageview.glide.ImageView;
+import com.imageview.ImageView;
 
 public class MainActivity extends AppCompatActivity {
 

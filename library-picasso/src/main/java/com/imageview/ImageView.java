@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.imageview.picasso;
+package com.imageview;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -32,14 +32,15 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 
+import com.imageview.picasso.*;
 import com.squareup.picasso.Picasso;
 
 /**
  * Image view implementation with switchable modes
- * {@link Mode#NORMAL} or {@link Mode#CIRCLE}
+ * {@link ImageView.Mode#NORMAL} or {@link ImageView.Mode#CIRCLE}
  * with inherited picasso implementation
  */
-public class ImageView extends com.imageview.ImageView {
+public class ImageView extends com.imageview.core.integration.ImageView {
 
     private long mErrorResource;
     private Drawable mErrorDrawable;
@@ -50,15 +51,15 @@ public class ImageView extends com.imageview.ImageView {
     }
 
     public ImageView(Context context, AttributeSet attrs) {
-        this(context, attrs, R.attr.imageViewStyle);
+        this(context, attrs, com.imageview.picasso.R.attr.imageViewStyle);
     }
 
     public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ImageView, defStyleAttr, 0);
+        TypedArray a = context.obtainStyledAttributes(attrs, com.imageview.picasso.R.styleable.ImageView, defStyleAttr, 0);
 
-        Drawable errorDrawable = a.getDrawable(R.styleable.ImageView_error);
+        Drawable errorDrawable = a.getDrawable(com.imageview.picasso.R.styleable.ImageView_error);
         setErrorDrawable(errorDrawable != null ? errorDrawable : getDrawable());
 
         a.recycle();
@@ -68,6 +69,7 @@ public class ImageView extends com.imageview.ImageView {
         }
     }
 
+    @Override
     public void setImageURL(String url) {
         mManager.load(url).error(mErrorDrawable).into(this);
     }

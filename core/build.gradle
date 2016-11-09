@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-apply from: '../maven_push.gradle'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -10,6 +9,9 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
     }
     buildTypes {
         release {
@@ -21,7 +23,10 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.squareup.picasso:picasso:2.5.2'
-    compile project(':core-integration')
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    testCompile 'junit:junit:' + rootProject.ext.junitVersion
+    compile 'com.android.support:appcompat-v7:' + rootProject.ext.supportLibraryVersion
 }

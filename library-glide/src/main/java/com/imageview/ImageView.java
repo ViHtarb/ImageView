@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.imageview.glide;
+package com.imageview;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -34,13 +34,14 @@ import android.util.AttributeSet;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
+import com.imageview.glide.*;
 
 /**
  * Image view implementation with switchable modes
- * {@link Mode#NORMAL} or {@link Mode#CIRCLE}
+ * {@link ImageView.Mode#NORMAL} or {@link ImageView.Mode#CIRCLE}
  * with inherited glide implementation
  */
-public class ImageView extends com.imageview.ImageView {
+public class ImageView extends com.imageview.core.integration.ImageView {
 
     private long mErrorResource;
     private Drawable mErrorDrawable;
@@ -52,15 +53,15 @@ public class ImageView extends com.imageview.ImageView {
     }
 
     public ImageView(Context context, AttributeSet attrs) {
-        this(context, attrs, R.attr.imageViewStyle);
+        this(context, attrs, com.imageview.glide.R.attr.imageViewStyle);
     }
 
     public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ImageView, defStyleAttr, 0);
+        TypedArray a = context.obtainStyledAttributes(attrs, com.imageview.glide.R.styleable.ImageView, defStyleAttr, 0);
 
-        Drawable errorDrawable = a.getDrawable(R.styleable.ImageView_error);
+        Drawable errorDrawable = a.getDrawable(com.imageview.glide.R.styleable.ImageView_error);
         setErrorDrawable(errorDrawable != null ? errorDrawable : getDrawable());
 
         a.recycle();
@@ -70,6 +71,7 @@ public class ImageView extends com.imageview.ImageView {
         }
     }
 
+    @Override
     public void setImageURL(String url) {
         mManager.load(url).error(mErrorDrawable).into(this);
     }

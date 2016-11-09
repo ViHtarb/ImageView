@@ -12,7 +12,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.imageview.sample.MainActivity">
 
-    <com.imageview.glide.ImageView
+    <com.imageview.ImageView
         android:id="@+id/image_view"
         android:layout_width="68dp"
         android:layout_height="68dp"
