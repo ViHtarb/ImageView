@@ -29,7 +29,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import com.imageview.ImageView;
+import com.imageview.core.ImageViewNew;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final ImageView imageView = (ImageView) findViewById(R.id.image_view);
+        final ImageViewNew imageView = (ImageViewNew) findViewById(R.id.image_view);
         //imageView.setClipToOutline(true);
         //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
 
@@ -46,11 +46,11 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (imageView.getMode() == ImageView.Mode.NORMAL) {
+/*                if (imageView.getMode() == ImageView.Mode.NORMAL) {
                     imageView.setMode(ImageView.Mode.CIRCLE);
                 } else {
                     imageView.setMode(ImageView.Mode.NORMAL);
-                }
+                }*/
             }
         });
     }
