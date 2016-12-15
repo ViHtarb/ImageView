@@ -8,16 +8,20 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.RadialGradient;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.VectorDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DimenRes;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
+import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 
@@ -52,6 +56,18 @@ public abstract class ImageView extends AppCompatImageView {
     private Bitmap mBitmap;
     private BitmapShader mBitmapShader;
 
+
+    private static final int KEY_SHADOW_COLOR = 0x1E000000;
+    private static final int FILL_SHADOW_COLOR = 0x3D000000;
+    // PX
+    private static final float X_OFFSET = 0f;
+    private static final float Y_OFFSET = 1.75f;
+    private static final float SHADOW_RADIUS = 3.5f;
+
+    int mShadowRadius;
+
+    private ShapeDrawable mBackgroundDrawable;
+
     public ImageView(Context context) {
         this(context, null);
     }
@@ -69,13 +85,40 @@ public abstract class ImageView extends AppCompatImageView {
         setMode(Mode.values()[mode]);
 
         mBorderColor = a.getColor(R.styleable.ImageView_borderColor, Color.BLACK);
-        mBorderWidth = a.getDimensionPixelSize(R.styleable.ImageView_borderDepth, 0);
+        mBorderWidth = a.getDimensionPixelSize(R.styleable.ImageView_borderWidth, 0);
         mBorderOverlay = a.getBoolean(R.styleable.ImageView_borderOverlay, false);
 
         a.recycle();
+
+        // TODO only for circle mode
+
+        final float density = getContext().getResources().getDisplayMetrics().density;
+        final int shadowYOffset = (int) (density * Y_OFFSET);
+        final int shadowXOffset = (int) (density * X_OFFSET);
+
+        mShadowRadius = (int) (density * SHADOW_RADIUS);
+
+        if (elevationSupported()) {
+            mBackgroundDrawable = new ShapeDrawable(new OvalShape());
+        } else {
+            mBackgroundDrawable = new ShapeDrawable(new OvalShadow(mShadowRadius));
+            mBackgroundDrawable.getPaint().setShadowLayer(mShadowRadius, shadowXOffset, shadowYOffset, KEY_SHADOW_COLOR);
+
+            ViewCompat.setLayerType(this, ViewCompat.LAYER_TYPE_SOFTWARE, mBackgroundDrawable.getPaint());
+
+            final int padding = mShadowRadius; // set padding so the inner image sits correctly within the shadow.
+            setPadding(padding, padding, padding, padding);
+        }
+        mBackgroundDrawable.getPaint().setColor(Color.GREEN);
+        setBackgroundDrawable(mBackgroundDrawable);
+        //ViewCompat.setBackground(this, ResourcesCompat.getDrawable(getResources(), R.drawable.ic_album, null));
     }
 
-    @Override
+    private boolean elevationSupported() {
+        return android.os.Build.VERSION.SDK_INT >= 21;
+    }
+
+   /* @Override
     protected void onDraw(Canvas canvas) {
         if (mMode == Mode.NORMAL || getDrawable() instanceof VectorDrawable) {
             super.onDraw(canvas);
@@ -97,16 +140,17 @@ public abstract class ImageView extends AppCompatImageView {
         if (mBorderWidth != 0) {
             canvas.drawCircle(cx, cy, mBorderRadius, mBorderPaint);
         }
-    }
+    }*/
 
-    @Override
+/*    @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
         if (mMode == Mode.CIRCLE) {
             init();
         }
-    }
+    }*/
+/*
 
     @Override
     public void setImageBitmap(Bitmap bitmap) {
@@ -114,16 +158,6 @@ public abstract class ImageView extends AppCompatImageView {
 
         if (mMode == Mode.CIRCLE) {
             mBitmap = bitmap;
-            init();
-        }
-    }
-
-    @Override
-    public void setImageResource(@DrawableRes int resId) {
-        super.setImageResource(resId);
-
-        if (mMode == Mode.CIRCLE) {
-            mBitmap = getBitmap(getDrawable());
             init();
         }
     }
@@ -137,6 +171,7 @@ public abstract class ImageView extends AppCompatImageView {
             init();
         }
     }
+*/
 
     public void setBorderColor(@ColorInt int color) {
         if (color != mBorderColor) {
@@ -174,6 +209,10 @@ public abstract class ImageView extends AppCompatImageView {
             invalidate();
             init();
         }
+    }
+
+    private void initBorders() {
+
     }
 
     private void init() {
@@ -249,6 +288,37 @@ public abstract class ImageView extends AppCompatImageView {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    private class OvalShadow extends OvalShape {
+        private RadialGradient mRadialGradient;
+        private Paint mShadowPaint;
+
+        OvalShadow(int shadowRadius) {
+            super();
+            mShadowPaint = new Paint();
+            mShadowRadius = shadowRadius;
+            updateRadialGradient((int) rect().width());
+        }
+
+        @Override
+        protected void onResize(float width, float height) {
+            super.onResize(width, height);
+            updateRadialGradient((int) width);
+        }
+
+        @Override
+        public void draw(Canvas canvas, Paint paint) {
+            final int viewWidth = ImageView.this.getWidth();
+            final int viewHeight = ImageView.this.getHeight();
+            canvas.drawCircle(viewWidth / 2, viewHeight / 2, viewWidth / 2, mShadowPaint);
+            canvas.drawCircle(viewWidth / 2, viewHeight / 2, viewWidth / 2 - mShadowRadius, paint);
+        }
+
+        private void updateRadialGradient(int diameter) {
+            mRadialGradient = new RadialGradient(diameter / 2, diameter / 2, mShadowRadius, new int[] { FILL_SHADOW_COLOR, Color.TRANSPARENT }, null, Shader.TileMode.CLAMP);
+            mShadowPaint.setShader(mRadialGradient);
         }
     }
 }
