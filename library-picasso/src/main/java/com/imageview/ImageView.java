@@ -25,15 +25,11 @@
 package com.imageview;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 
-import com.imageview.picasso.*;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
 
 /**
  * Image view implementation with switchable modes
@@ -42,8 +38,6 @@ import com.squareup.picasso.Picasso;
  */
 public class ImageView extends com.imageview.core.integration.ImageView {
 
-    private long mErrorResource;
-    private Drawable mErrorDrawable;
     private Picasso mManager;
 
     public ImageView(Context context) {
@@ -57,13 +51,6 @@ public class ImageView extends com.imageview.core.integration.ImageView {
     public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, com.imageview.picasso.R.styleable.ImageView, defStyleAttr, 0);
-
-        Drawable errorDrawable = a.getDrawable(com.imageview.picasso.R.styleable.ImageView_error);
-        setErrorDrawable(errorDrawable != null ? errorDrawable : getDrawable());
-
-        a.recycle();
-
         if (!isInEditMode()) {
             mManager = Picasso.with(context);
         }
@@ -71,19 +58,17 @@ public class ImageView extends com.imageview.core.integration.ImageView {
 
     @Override
     public void setImageURL(String url) {
-        mManager.load(url).error(mErrorDrawable).into(this);
-    }
+        RequestCreator requestCreator = mManager.load(url);
 
-    public void setErrorDrawable(@DrawableRes int resId) {
-        if (resId != mErrorResource) {
-            mErrorResource = resId;
-            setErrorDrawable(ContextCompat.getDrawable(getContext(), resId));
+        Drawable placeholderDrawable = getPlaceholderDrawable();
+        if (placeholderDrawable != null) {
+            requestCreator.placeholder(placeholderDrawable);
         }
-    }
 
-    public void setErrorDrawable(@Nullable Drawable drawable) {
-        if (drawable != mErrorDrawable) {
-            mErrorDrawable = drawable;
+        Drawable errorDrawable = getErrorDrawable();
+        if (errorDrawable != null) {
+            requestCreator.error(errorDrawable);
         }
+        requestCreator.into(this);
     }
 }

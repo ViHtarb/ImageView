@@ -25,16 +25,10 @@
 package com.imageview;
 
 import android.content.Context;
-import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.imageview.glide.*;
 
 /**
  * Image view implementation with switchable modes
@@ -42,9 +36,6 @@ import com.imageview.glide.*;
  * with inherited glide implementation
  */
 public class ImageView extends com.imageview.core.integration.ImageView {
-
-    private long mErrorResource;
-    private Drawable mErrorDrawable;
 
     protected RequestManager mManager;
 
@@ -59,13 +50,6 @@ public class ImageView extends com.imageview.core.integration.ImageView {
     public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, com.imageview.glide.R.styleable.ImageView, defStyleAttr, 0);
-
-        Drawable errorDrawable = a.getDrawable(com.imageview.glide.R.styleable.ImageView_error);
-        setErrorDrawable(errorDrawable != null ? errorDrawable : getDrawable());
-
-        a.recycle();
-
         if (!isInEditMode()) {
             mManager = Glide.with(context);
         }
@@ -73,19 +57,6 @@ public class ImageView extends com.imageview.core.integration.ImageView {
 
     @Override
     public void setImageURL(String url) {
-        mManager.load(url).error(mErrorDrawable).into(this);
-    }
-
-    public void setErrorDrawable(@DrawableRes int resId) {
-        if (resId != mErrorResource) {
-            mErrorResource = resId;
-            setErrorDrawable(ContextCompat.getDrawable(getContext(), resId));
-        }
-    }
-
-    public void setErrorDrawable(@Nullable Drawable drawable) {
-        if (drawable != mErrorDrawable) {
-            mErrorDrawable = drawable;
-        }
+        mManager.load(url).placeholder(getPlaceholderDrawable()).error(getErrorDrawable()).into(this);
     }
 }

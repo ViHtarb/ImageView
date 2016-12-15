@@ -46,11 +46,12 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (imageView.getMode() == ImageView.Mode.NORMAL) {
+/*                if (imageView.getMode() == ImageView.Mode.NORMAL) {
                     imageView.setMode(ImageView.Mode.CIRCLE);
                 } else {
                     imageView.setMode(ImageView.Mode.NORMAL);
-                }
+                }*/
+                imageView.setImageURL("https://pp.vk.me/c604531/v604531553/1d0f6/9gae9OTT_xo.jpg");
             }
         });
     }
