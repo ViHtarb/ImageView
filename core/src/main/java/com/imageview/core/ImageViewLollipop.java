@@ -37,22 +37,22 @@ import static android.os.Build.VERSION_CODES.LOLLIPOP;
 @TargetApi(LOLLIPOP)
 class ImageViewLollipop extends ImageViewIcs { // TODO for android L and more need implement by outlines
 
-    ImageViewLollipop(ImageView view, ViewDelegate viewDelegate) {
+    protected ImageViewLollipop(ImageView view, ViewDelegate viewDelegate) {
         super(view, viewDelegate);
     }
 
     /*    @Override
-    void setImageDrawable(Drawable drawable) {
+    protected void setImageDrawable(Drawable drawable) {
         mViewDelegate.setImageDrawable(drawable);
     }
 
     @Override
-    CircularBorderDrawable newCircularDrawable() {
-        return new CircularBorderDrawableLollipop();
+    protected BorderDrawable newCircularDrawable() {
+        return new BorderDrawableLollipop();
     }*/
 
     @Override
-    GradientDrawable newGradientDrawableForShape() {
+    protected GradientDrawable newGradientDrawableForShape() {
         return new AlwaysStatefulGradientDrawable();
     }
 
@@ -62,7 +62,7 @@ class ImageViewLollipop extends ImageViewIcs { // TODO for android L and more ne
      * stateful and the tint doesn't work for state changes. We workaround it by saying that we
      * are always stateful. If we don't have a stateful tint, the change is ignored anyway.
      **/
-    static class AlwaysStatefulGradientDrawable extends GradientDrawable {
+    protected static class AlwaysStatefulGradientDrawable extends GradientDrawable {
         @Override
         public boolean isStateful() {
             return true;

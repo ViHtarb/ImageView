@@ -30,11 +30,6 @@ import android.util.AttributeSet;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 
-/**
- * Image view implementation with switchable modes
- * {@link ImageView.Mode#NORMAL} or {@link ImageView.Mode#CIRCLE}
- * with inherited glide implementation
- */
 public class ImageView extends com.imageview.core.integration.ImageView {
 
     protected RequestManager mManager;

@@ -39,18 +39,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final ImageView imageView = (ImageView) findViewById(R.id.image_view);
-        //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
+        imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
 
         Button button = (Button) findViewById(R.id.button_test);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-/*                if (imageView.getMode() == ImageView.Mode.NORMAL) {
-                    imageView.setMode(ImageView.Mode.CIRCLE);
-                } else {
-                    imageView.setMode(ImageView.Mode.NORMAL);
-                }*/
-                imageView.setImageURL("https://pp.vk.me/c604531/v604531553/1d0f6/9gae9OTT_xo.jpg");
+                //imageView.setBorderColor(Color.GREEN);
+                //imageView.setImageURL("https://pp.vk.me/c604531/v604531553/1d0f6/9gae9OTT_xo.jpg");
+                imageView.setCircle(!imageView.isCircle());
             }
         });
     }

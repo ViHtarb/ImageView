@@ -18,18 +18,17 @@ package com.imageview.core;
 
 import android.annotation.TargetApi;
 import android.graphics.Outline;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 
 /**
- * Lollipop version of {@link CircularBorderDrawable}.
+ * Lollipop version of {@link BorderDrawable}.
  */
 @RequiresApi(LOLLIPOP)
 @TargetApi(LOLLIPOP)
-class CircularBorderDrawableLollipop extends CircularBorderDrawable {
+class BorderDrawableLollipop extends BorderDrawable {
 
     @Override
     public void getOutline(@NonNull Outline outline) {

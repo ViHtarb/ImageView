@@ -27,20 +27,17 @@ package com.imageview.core;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
-import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import android.support.v4.graphics.ColorUtils;
 
 /**
- * A drawable which draws an oval 'border'.
+ * A drawable which draws an 'border'.
  */
-class CircularBorderDrawable extends Drawable {
+class BorderDrawable extends Drawable {
 
     /**
      * We actually draw the stroke wider than the border size given. This is to reduce any
@@ -49,28 +46,25 @@ class CircularBorderDrawable extends Drawable {
      */
     private static final float DRAW_STROKE_WIDTH_MULTIPLE = 1.3333f;
 
+    private boolean isCircle;
+
+    private int mCurrentBorderTintColor;
+    private ColorStateList mBorderColor;
+
+    protected int mBorderWidth;
+
     protected final Paint mPaint;
     protected final Rect mRect = new Rect();
     protected final RectF mRectF = new RectF();
 
-    protected int mBorderWidth;
-
-    private ColorStateList mBorderColor;
-    private int mCurrentBorderTintColor;
-
-    private boolean mInvalidateShader = true;
-
-    public CircularBorderDrawable() {
+    public BorderDrawable() {
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setStyle(Paint.Style.STROKE);
     }
 
     @Override
     public void draw(@NonNull Canvas canvas) {
-        if (mInvalidateShader) {
-            mPaint.setShader(createGradientShader());
-            mInvalidateShader = false;
-        }
+        mPaint.setColor(mCurrentBorderTintColor);
 
         final float halfBorderWidth = mPaint.getStrokeWidth() / 2f;
         final RectF rectF = mRectF;
@@ -85,8 +79,12 @@ class CircularBorderDrawable extends Drawable {
         rectF.bottom -= halfBorderWidth;
 
         canvas.save();
-        // Draw the oval
-        canvas.drawOval(rectF, mPaint);
+
+        if (isCircle) {
+            canvas.drawOval(rectF, mPaint);
+        } else {
+            canvas.drawRect(rectF, mPaint);
+        }
         canvas.restore();
     }
 
@@ -115,11 +113,6 @@ class CircularBorderDrawable extends Drawable {
     }
 
     @Override
-    protected void onBoundsChange(Rect bounds) {
-        mInvalidateShader = true;
-    }
-
-    @Override
     public boolean isStateful() {
         return (mBorderColor != null && mBorderColor.isStateful()) || super.isStateful();
     }
@@ -129,24 +122,28 @@ class CircularBorderDrawable extends Drawable {
         if (mBorderColor != null) {
             final int newColor = mBorderColor.getColorForState(state, mCurrentBorderTintColor);
             if (newColor != mCurrentBorderTintColor) {
-                mInvalidateShader = true;
                 mCurrentBorderTintColor = newColor;
+                invalidateSelf();
+                return true;
             }
         }
-        if (mInvalidateShader) {
+        return false;
+    }
+
+    protected void setCircle(boolean isCircle) {
+        if (this.isCircle != isCircle) {
+            this.isCircle = isCircle;
             invalidateSelf();
         }
-        return mInvalidateShader;
     }
 
     /**
      * Set the border width
      */
-    void setBorderWidth(int width) {
+    protected void setBorderWidth(int width) {
         if (mBorderWidth != width) {
             mBorderWidth = width;
             mPaint.setStrokeWidth(width * DRAW_STROKE_WIDTH_MULTIPLE);
-            mInvalidateShader = true;
             invalidateSelf();
         }
     }
@@ -154,44 +151,13 @@ class CircularBorderDrawable extends Drawable {
     /**
      * Set the border color
      */
-    void setBorderColor(ColorStateList color) {
-        if (color != null) {
-            mCurrentBorderTintColor = color.getColorForState(getState(), mCurrentBorderTintColor);
+    protected void setBorderColor(ColorStateList color) {
+        if (mBorderColor != color) {
+            if (color != null) {
+                mCurrentBorderTintColor = color.getColorForState(getState(), mCurrentBorderTintColor);
+            }
+            mBorderColor = color;
+            invalidateSelf();
         }
-        mBorderColor = color;
-        mInvalidateShader = true;
-        invalidateSelf();
-    }
-
-    /**
-     * Creates a vertical {@link LinearGradient}
-     */
-    private Shader createGradientShader() {
-        final Rect rect = mRect;
-        copyBounds(rect);
-
-        final float borderRatio = mBorderWidth / rect.height();
-
-        final int[] colors = new int[6];
-        colors[0] = ColorUtils.compositeColors(0, mCurrentBorderTintColor);
-        colors[1] = ColorUtils.compositeColors(0, mCurrentBorderTintColor);
-        colors[2] = ColorUtils.compositeColors(0, mCurrentBorderTintColor);
-        colors[3] = ColorUtils.compositeColors(0, mCurrentBorderTintColor);
-        colors[4] = ColorUtils.compositeColors(0, mCurrentBorderTintColor);
-        colors[5] = ColorUtils.compositeColors(0, mCurrentBorderTintColor);
-
-        final float[] positions = new float[6];
-        positions[0] = 0f;
-        positions[1] = borderRatio;
-        positions[2] = 0.5f;
-        positions[3] = 0.5f;
-        positions[4] = 1f - borderRatio;
-        positions[5] = 1f;
-
-        return new LinearGradient(
-                0, rect.top,
-                0, rect.bottom,
-                colors, positions,
-                Shader.TileMode.CLAMP);
     }
 }

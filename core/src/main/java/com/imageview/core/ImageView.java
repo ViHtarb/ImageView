@@ -42,22 +42,19 @@ import android.util.Log;
 
 /**
  * Image view implementation with switchable modes
- * {@link Mode#NORMAL} or {@link Mode#CIRCLE}
+ * // TODO implement corners for not circle drawing
  */
 public abstract class ImageView extends AppCompatImageView {
 
     private static final String LOG_TAG = "ImageView";
 
-    public enum Mode {
-        NORMAL,
-        CIRCLE
-    }
-
-    private ColorStateList mBackgroundTint;
-    private PorterDuff.Mode mBackgroundTintMode;
+    private boolean isCircle;
 
     private int mBorderWidth;
     private ColorStateList mBorderColor;
+
+    private ColorStateList mBackgroundTint;
+    private PorterDuff.Mode mBackgroundTintMode;
 
     private ImageViewImpl mImpl;
 
@@ -74,8 +71,7 @@ public abstract class ImageView extends AppCompatImageView {
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ImageView, defStyleAttr, 0);
 
-        final int mode = a.getInteger(R.styleable.ImageView_mode, Mode.NORMAL.ordinal());
-        //setMode(Mode.values()[mode]);
+        isCircle = a.getBoolean(R.styleable.ImageView_circle, false);
 
         mBorderWidth = a.getDimensionPixelSize(R.styleable.ImageView_borderWidth, 0);
         mBorderColor = a.getColorStateList(R.styleable.ImageView_borderColor);
@@ -83,21 +79,9 @@ public abstract class ImageView extends AppCompatImageView {
         mBackgroundTint = ViewCompat.getBackgroundTintList(this);
         mBackgroundTintMode = ViewCompat.getBackgroundTintMode(this);
 
-        getImpl().setBackgroundDrawable(mBackgroundTint, mBackgroundTintMode, mBorderWidth, mBorderColor);
+        getImpl().setBackgroundDrawable(mBackgroundTint, mBackgroundTintMode, mBorderWidth, mBorderColor, isCircle);
 
         a.recycle();
-    }
-
-    /**
-     * Returns the tint applied to the background drawable, if specified.
-     *
-     * @return the tint applied to the background drawable
-     * @see #setBackgroundTintList(ColorStateList)
-     */
-    @Nullable
-    @Override
-    public ColorStateList getBackgroundTintList() {
-        return mBackgroundTint;
     }
 
     /**
@@ -115,17 +99,15 @@ public abstract class ImageView extends AppCompatImageView {
     }
 
     /**
-     * Returns the blending mode used to apply the tint to the background
-     * drawable, if specified.
+     * Returns the tint applied to the background drawable, if specified.
      *
-     * @return the blending mode used to apply the tint to the background
-     *         drawable
-     * @see #setBackgroundTintMode(PorterDuff.Mode)
+     * @return the tint applied to the background drawable
+     * @see #setBackgroundTintList(ColorStateList)
      */
     @Nullable
     @Override
-    public PorterDuff.Mode getBackgroundTintMode() {
-        return mBackgroundTintMode;
+    public ColorStateList getBackgroundTintList() {
+        return mBackgroundTint;
     }
 
     /**
@@ -144,10 +126,18 @@ public abstract class ImageView extends AppCompatImageView {
         }
     }
 
+    /**
+     * Returns the blending mode used to apply the tint to the background
+     * drawable, if specified.
+     *
+     * @return the blending mode used to apply the tint to the background
+     *         drawable
+     * @see #setBackgroundTintMode(PorterDuff.Mode)
+     */
     @Nullable
     @Override
-    public ColorStateList getSupportBackgroundTintList() {
-        return getBackgroundTintList();
+    public PorterDuff.Mode getBackgroundTintMode() {
+        return mBackgroundTintMode;
     }
 
     @Override
@@ -157,13 +147,19 @@ public abstract class ImageView extends AppCompatImageView {
 
     @Nullable
     @Override
-    public PorterDuff.Mode getSupportBackgroundTintMode() {
-        return getBackgroundTintMode();
+    public ColorStateList getSupportBackgroundTintList() {
+        return getBackgroundTintList();
     }
 
     @Override
     public void setSupportBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) {
         setBackgroundTintMode(tintMode);
+    }
+
+    @Nullable
+    @Override
+    public PorterDuff.Mode getSupportBackgroundTintMode() {
+        return getBackgroundTintMode();
     }
 
     @Override
@@ -203,15 +199,36 @@ public abstract class ImageView extends AppCompatImageView {
         }
     }
 
+    public int getBorderWidth() {
+        return mBorderWidth;
+    }
+
     public void setBorderColor(@ColorInt int color) {
         setBorderColor(ColorStateList.valueOf(color));
     }
 
     public void setBorderColor(ColorStateList color) {
-        if (!mBorderColor.equals(color)) {
+        if (mBorderColor != color) {
             mBorderColor = color;
             getImpl().setBorderColor(color);
         }
+    }
+
+    public ColorStateList getBorderColor() {
+        return mBorderColor;
+    }
+
+    public void setCircle(boolean isCircle) {
+        if (this.isCircle != isCircle) {
+            this.isCircle = isCircle;
+            getImpl().setCircle(isCircle);
+
+            setImageDrawable(getDrawable());
+        }
+    }
+
+    public boolean isCircle() {
+        return isCircle;
     }
 
     private ImageViewImpl getImpl() {

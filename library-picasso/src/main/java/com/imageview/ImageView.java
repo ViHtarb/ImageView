@@ -31,11 +31,6 @@ import android.util.AttributeSet;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 
-/**
- * Image view implementation with switchable modes
- * {@link ImageView.Mode#NORMAL} or {@link ImageView.Mode#CIRCLE}
- * with inherited picasso implementation
- */
 public class ImageView extends com.imageview.core.integration.ImageView {
 
     private Picasso mManager;

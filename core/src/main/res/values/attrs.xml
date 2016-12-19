@@ -4,10 +4,6 @@
         <attr name="cornerRadius" format="dimension"/>
         <attr name="borderWidth" format="dimension"/>
         <attr name="borderColor" format="color"/>
-        <attr name="borderOverlay" format="boolean"/>
-        <attr name="mode">
-            <enum name="normal" value="0"/>
-            <enum name="circle" value="1"/>
-        </attr>
+        <attr name="circle" format="boolean"/>
     </declare-styleable>
 </resources>

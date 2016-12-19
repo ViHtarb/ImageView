@@ -36,7 +36,7 @@ import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 @TargetApi(ICE_CREAM_SANDWICH)
 class ImageViewIcs extends ImageViewGingerbread {
 
-    ImageViewIcs(ImageView view, ViewDelegate viewDelegate) {
+    protected ImageViewIcs(ImageView view, ViewDelegate viewDelegate) {
         super(view, viewDelegate);
     }
 }

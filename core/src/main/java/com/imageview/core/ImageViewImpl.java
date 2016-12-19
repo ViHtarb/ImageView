@@ -33,64 +33,68 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.support.annotation.ColorInt;
 
 /**
  * Created by Viнt@rь on 18.12.2016
  */
 abstract class ImageViewImpl {
 
-    Drawable mShapeDrawable;
-    CircularBorderDrawable mBorderDrawable;
-    Drawable mContentBackground;
+    protected Drawable mShapeDrawable;
+    protected BorderDrawable mBorderDrawable;
+    protected Drawable mContentBackground;
 
-    final ImageView mView;
-    final ViewDelegate mViewDelegate;
+    protected final ImageView mView;
+    protected final ViewDelegate mViewDelegate;
 
-    ImageViewImpl(ImageView view, ViewDelegate viewDelegate) {
+    protected ImageViewImpl(ImageView view, ViewDelegate viewDelegate) {
         mView = view;
         mViewDelegate = viewDelegate;
     }
 
-    abstract void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, int borderWidth, ColorStateList borderColor);
+    protected abstract void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, int borderWidth, ColorStateList borderColor, boolean isCircle);
 
-    abstract void setBackgroundTintList(ColorStateList tint);
+    protected abstract void setBackgroundTintList(ColorStateList tint);
 
-    abstract void setBackgroundTintMode(PorterDuff.Mode tintMode);
+    protected abstract void setBackgroundTintMode(PorterDuff.Mode tintMode);
 
-    abstract void setImageDrawable(Drawable drawable);
+    protected abstract void setImageDrawable(Drawable drawable);
 
-    void setBorderWidth(int width) {
+    protected void setCircle(boolean isCircle) {
+        mBorderDrawable.setCircle(isCircle);
+    }
+
+    protected void setBorderWidth(int width) {
         mBorderDrawable.setBorderWidth(width);
     }
 
-    void setBorderColor(ColorStateList color) {
+    protected void setBorderColor(ColorStateList color) {
         mBorderDrawable.setBorderColor(color);
     }
 
-    CircularBorderDrawable createBorderDrawable(int width, ColorStateList color) {
-        CircularBorderDrawable borderDrawable = newCircularDrawable();
+    protected BorderDrawable createBorderDrawable(int width, ColorStateList color, boolean isCircle) {
+        BorderDrawable borderDrawable = newBorderDrawable();
         borderDrawable.setBorderWidth(width);
         borderDrawable.setBorderColor(color);
+        borderDrawable.setCircle(isCircle);
         return borderDrawable;
     }
 
-    CircularBorderDrawable newCircularDrawable() {
-        return new CircularBorderDrawable();
+    protected BorderDrawable newBorderDrawable() {
+        return new BorderDrawable();
     }
 
-    GradientDrawable createShapeDrawable() {
+    protected GradientDrawable createShapeDrawable() {
         GradientDrawable d = newGradientDrawableForShape();
         d.setShape(GradientDrawable.OVAL);
         d.setColor(Color.WHITE);
         return d;
     }
 
-    GradientDrawable newGradientDrawableForShape() {
+    protected GradientDrawable newGradientDrawableForShape() {
         return new GradientDrawable();
     }
 
-    protected Bitmap getBitmap(Drawable drawable) {
+    protected final Bitmap getBitmap(Drawable drawable) {
         if (drawable == null) {
             return null;
         }
