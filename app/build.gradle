@@ -29,5 +29,5 @@ dependencies {
     })
     testCompile 'junit:junit:' + rootProject.ext.junitVersion
     compile 'com.android.support:appcompat-v7:' + rootProject.ext.supportLibraryVersion
-    compile project(':core')
+    compile project(':library-glide')
 }

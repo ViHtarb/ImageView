@@ -1,29 +1,44 @@
+/*
+ * The MIT License (MIT)
+ * <p/>
+ * Copyright (c) 2016. Viнt@rь
+ * <p/>
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * <p/>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * <p/>
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package com.imageview.core;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.BitmapShader;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.RadialGradient;
-import android.graphics.RectF;
-import android.graphics.Shader;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.VectorDrawable;
-import android.graphics.drawable.shapes.OvalShape;
+import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DimenRes;
-import android.support.annotation.NonNull;
-import android.support.v4.content.res.ResourcesCompat;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
+import android.util.Log;
 
 /**
  * Image view implementation with switchable modes
@@ -31,49 +46,27 @@ import android.util.AttributeSet;
  */
 public abstract class ImageView extends AppCompatImageView {
 
+    private static final String LOG_TAG = "ImageView";
+
     public enum Mode {
         NORMAL,
         CIRCLE
     }
 
-    private boolean mBorderOverlay;
+    private ColorStateList mBackgroundTint;
+    private PorterDuff.Mode mBackgroundTintMode;
 
-    private int mBorderColor;
     private int mBorderWidth;
+    private ColorStateList mBorderColor;
 
-    private float mRadius;
-    private float mBorderRadius;
-
-    private Mode mMode;
-
-    private RectF mDrawableRect = new RectF();
-    private RectF mBorderRect = new RectF();
-
-    private Matrix mShaderMatrix = new Matrix();
-    private Paint mBitmapPaint = new Paint();
-    private Paint mBorderPaint = new Paint();
-
-    private Bitmap mBitmap;
-    private BitmapShader mBitmapShader;
-
-
-    private static final int KEY_SHADOW_COLOR = 0x1E000000;
-    private static final int FILL_SHADOW_COLOR = 0x3D000000;
-    // PX
-    private static final float X_OFFSET = 0f;
-    private static final float Y_OFFSET = 1.75f;
-    private static final float SHADOW_RADIUS = 3.5f;
-
-    int mShadowRadius;
-
-    private ShapeDrawable mBackgroundDrawable;
+    private ImageViewImpl mImpl;
 
     public ImageView(Context context) {
         this(context, null);
     }
 
     public ImageView(Context context, AttributeSet attrs) {
-        this(context, attrs, R.attr.imageViewStyle);
+        this(context, attrs, 0);
     }
 
     public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -82,243 +75,172 @@ public abstract class ImageView extends AppCompatImageView {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ImageView, defStyleAttr, 0);
 
         final int mode = a.getInteger(R.styleable.ImageView_mode, Mode.NORMAL.ordinal());
-        setMode(Mode.values()[mode]);
+        //setMode(Mode.values()[mode]);
 
-        mBorderColor = a.getColor(R.styleable.ImageView_borderColor, Color.BLACK);
         mBorderWidth = a.getDimensionPixelSize(R.styleable.ImageView_borderWidth, 0);
-        mBorderOverlay = a.getBoolean(R.styleable.ImageView_borderOverlay, false);
+        mBorderColor = a.getColorStateList(R.styleable.ImageView_borderColor);
+
+        mBackgroundTint = ViewCompat.getBackgroundTintList(this);
+        mBackgroundTintMode = ViewCompat.getBackgroundTintMode(this);
+
+        getImpl().setBackgroundDrawable(mBackgroundTint, mBackgroundTintMode, mBorderWidth, mBorderColor);
 
         a.recycle();
-
-        // TODO only for circle mode
-
-        final float density = getContext().getResources().getDisplayMetrics().density;
-        final int shadowYOffset = (int) (density * Y_OFFSET);
-        final int shadowXOffset = (int) (density * X_OFFSET);
-
-        mShadowRadius = (int) (density * SHADOW_RADIUS);
-
-        if (elevationSupported()) {
-            mBackgroundDrawable = new ShapeDrawable(new OvalShape());
-        } else {
-            mBackgroundDrawable = new ShapeDrawable(new OvalShadow(mShadowRadius));
-            mBackgroundDrawable.getPaint().setShadowLayer(mShadowRadius, shadowXOffset, shadowYOffset, KEY_SHADOW_COLOR);
-
-            ViewCompat.setLayerType(this, ViewCompat.LAYER_TYPE_SOFTWARE, mBackgroundDrawable.getPaint());
-
-            final int padding = mShadowRadius; // set padding so the inner image sits correctly within the shadow.
-            setPadding(padding, padding, padding, padding);
-        }
-        mBackgroundDrawable.getPaint().setColor(Color.GREEN);
-        setBackgroundDrawable(mBackgroundDrawable);
-        //ViewCompat.setBackground(this, ResourcesCompat.getDrawable(getResources(), R.drawable.ic_album, null));
     }
 
-    private boolean elevationSupported() {
-        return android.os.Build.VERSION.SDK_INT >= 21;
-    }
-
-   /* @Override
-    protected void onDraw(Canvas canvas) {
-        if (mMode == Mode.NORMAL || getDrawable() instanceof VectorDrawable) {
-            super.onDraw(canvas);
-            return;
-        }
-
-        if (getDrawable() == null) {
-            return;
-        }
-
-        if (getWidth() == 0 || getHeight() == 0) {
-            return;
-        }
-
-        float cx = getWidth() / 2f, cy = getHeight() / 2f;
-
-        canvas.drawCircle(cx, cy, mRadius, mBitmapPaint);
-
-        if (mBorderWidth != 0) {
-            canvas.drawCircle(cx, cy, mBorderRadius, mBorderPaint);
-        }
-    }*/
-
-/*    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-
-        if (mMode == Mode.CIRCLE) {
-            init();
-        }
-    }*/
-/*
-
+    /**
+     * Returns the tint applied to the background drawable, if specified.
+     *
+     * @return the tint applied to the background drawable
+     * @see #setBackgroundTintList(ColorStateList)
+     */
+    @Nullable
     @Override
-    public void setImageBitmap(Bitmap bitmap) {
-        super.setImageBitmap(bitmap);
+    public ColorStateList getBackgroundTintList() {
+        return mBackgroundTint;
+    }
 
-        if (mMode == Mode.CIRCLE) {
-            mBitmap = bitmap;
-            init();
+    /**
+     * Applies a tint to the background drawable. Does not modify the current tint
+     * mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+     *
+     * @param tint the tint to apply, may be {@code null} to clear tint
+     */
+    @Override
+    public void setBackgroundTintList(@Nullable ColorStateList tint) {
+        if (mBackgroundTint != tint) {
+            mBackgroundTint = tint;
+            getImpl().setBackgroundTintList(tint);
         }
+    }
+
+    /**
+     * Returns the blending mode used to apply the tint to the background
+     * drawable, if specified.
+     *
+     * @return the blending mode used to apply the tint to the background
+     *         drawable
+     * @see #setBackgroundTintMode(PorterDuff.Mode)
+     */
+    @Nullable
+    @Override
+    public PorterDuff.Mode getBackgroundTintMode() {
+        return mBackgroundTintMode;
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setBackgroundTintList(ColorStateList)}} to the background
+     * drawable. The default mode is {@link PorterDuff.Mode#SRC_IN}.
+     *
+     * @param tintMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     */
+    @Override
+    public void setBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) {
+        if (mBackgroundTintMode != tintMode) {
+            mBackgroundTintMode = tintMode;
+            getImpl().setBackgroundTintMode(tintMode);
+        }
+    }
+
+    @Nullable
+    @Override
+    public ColorStateList getSupportBackgroundTintList() {
+        return getBackgroundTintList();
     }
 
     @Override
-    public void setImageDrawable(Drawable drawable) {
-        super.setImageDrawable(drawable);
-
-        if (mMode == Mode.CIRCLE) {
-            mBitmap = getBitmap(drawable);
-            init();
-        }
+    public void setSupportBackgroundTintList(@Nullable ColorStateList tint) {
+        setBackgroundTintList(tint);
     }
-*/
 
-    public void setBorderColor(@ColorInt int color) {
-        if (color != mBorderColor) {
-            mBorderColor = color;
-            init();
-        }
+    @Nullable
+    @Override
+    public PorterDuff.Mode getSupportBackgroundTintMode() {
+        return getBackgroundTintMode();
+    }
+
+    @Override
+    public void setSupportBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) {
+        setBackgroundTintMode(tintMode);
+    }
+
+    @Override
+    public void setBackgroundDrawable(Drawable background) {
+        Log.i(LOG_TAG, "Setting a custom background is not supported.");
+    }
+
+    @Override
+    public void setBackgroundResource(@DrawableRes int resId) {
+        Log.i(LOG_TAG, "Setting a custom background is not supported.");
+    }
+
+    @Override
+    public void setBackgroundColor(@ColorInt int color) {
+        Log.i(LOG_TAG, "Setting a custom background is not supported.");
+    }
+
+    @Override
+    public void setImageBitmap(Bitmap bm) {
+        super.setImageBitmap(bm);
+        getImpl().setImageDrawable(getDrawable());
+    }
+
+    @Override
+    public void setImageDrawable(@Nullable Drawable drawable) {
+        getImpl().setImageDrawable(drawable);
     }
 
     public void setBorderWidth(@DimenRes int resId) {
-        int width = getResources().getDimensionPixelOffset(resId);
-        if (width != mBorderWidth) {
-            mBorderWidth = width;
-            init();
+        setBorderWidth(getResources().getDimension(resId));
+    }
+
+    public void setBorderWidth(float width) {
+        if (mBorderWidth != width) {
+            mBorderWidth = Math.round(width);
+            getImpl().setBorderWidth(mBorderWidth);
         }
     }
 
-    public void setBorderOverlay(boolean overlay) {
-        if (overlay != mBorderOverlay) {
-            mBorderOverlay = overlay;
-            init();
+    public void setBorderColor(@ColorInt int color) {
+        setBorderColor(ColorStateList.valueOf(color));
+    }
+
+    public void setBorderColor(ColorStateList color) {
+        if (!mBorderColor.equals(color)) {
+            mBorderColor = color;
+            getImpl().setBorderColor(color);
         }
     }
 
-    public Mode getMode() {
-        return mMode;
-    }
-
-    public void setMode(@NonNull Mode mode) {
-        if (mode != mMode) {
-            mMode = mode;
-
-            if (mBitmap == null) {
-                mBitmap = getBitmap(getDrawable());
-            }
-            invalidate();
-            init();
+    private ImageViewImpl getImpl() {
+        if (mImpl == null) {
+            mImpl = createImpl();
         }
+        return mImpl;
     }
 
-    private void initBorders() {
-
-    }
-
-    private void init() {
-        if (mBitmap == null || mBitmapPaint == null || mMode != Mode.CIRCLE || getDrawable() instanceof VectorDrawable) {
-            return;
-        }
-
-        mBitmapShader = new BitmapShader(mBitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
-
-        mBitmapPaint.setAntiAlias(true);
-        mBitmapPaint.setShader(mBitmapShader);
-
-        mBorderPaint.setStyle(Paint.Style.STROKE);
-        mBorderPaint.setAntiAlias(true);
-        mBorderPaint.setColor(mBorderColor);
-        mBorderPaint.setStrokeWidth(mBorderWidth);
-
-        mBorderRect.set(0, 0, getWidth(), getHeight());
-        mBorderRadius = Math.min((mBorderRect.height() - mBorderWidth) / 2f, (mBorderRect.width() - mBorderWidth) / 2f);
-
-        mDrawableRect.set(mBorderRect);
-        if (!mBorderOverlay) {
-            mDrawableRect.inset(mBorderWidth, mBorderWidth);
-        }
-        mRadius = Math.min(mDrawableRect.height() / 2f, mDrawableRect.width() / 2f);
-
-        updateShaderMatrix();
-    }
-
-    private void updateShaderMatrix() {
-        float scale;
-        float dx = 0;
-        float dy = 0;
-
-        mShaderMatrix.set(null);
-        mDrawableRect.set(0, 0, getWidth(), getHeight());
-
-        if (mBitmap.getWidth() * mDrawableRect.height() > mDrawableRect.width() * mBitmap.getHeight()) {
-            scale = mDrawableRect.height() / (float) mBitmap.getHeight();
-            dx = (mDrawableRect.width() - mBitmap.getWidth() * scale) * 0.5f;
+    private ImageViewImpl createImpl() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return new ImageViewLollipop(this, new ViewDelegateImpl());
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            return new ImageViewIcs(this, new ViewDelegateImpl());
         } else {
-            scale = mDrawableRect.width() / (float) mBitmap.getWidth();
-            dy = (mDrawableRect.height() - mBitmap.getHeight() * scale) * 0.5f;
-        }
-
-        mShaderMatrix.setScale(scale, scale);
-        mShaderMatrix.postTranslate((int) (dx + 0.5f) + mDrawableRect.left, (int) (dy + 0.5f) + mDrawableRect.top);
-
-        mBitmapShader.setLocalMatrix(mShaderMatrix);
-    }
-
-    private Bitmap getBitmap(Drawable drawable) {
-        if (drawable == null) {
-            return null;
-        }
-
-        if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable) drawable).getBitmap();
-        }
-
-        try {
-            Bitmap bitmap;
-            if (drawable instanceof ColorDrawable) {
-                bitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888);
-            } else {
-                bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-            }
-
-            Canvas canvas = new Canvas(bitmap);
-            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-            drawable.draw(canvas);
-            return bitmap;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            return new ImageViewGingerbread(this, new ViewDelegateImpl());
         }
     }
 
-    private class OvalShadow extends OvalShape {
-        private RadialGradient mRadialGradient;
-        private Paint mShadowPaint;
+    private class ViewDelegateImpl implements ViewDelegate {
 
-        OvalShadow(int shadowRadius) {
-            super();
-            mShadowPaint = new Paint();
-            mShadowRadius = shadowRadius;
-            updateRadialGradient((int) rect().width());
+        @Override
+        public void setBackgroundDrawable(Drawable background) {
+            ImageView.super.setBackgroundDrawable(background);
         }
 
         @Override
-        protected void onResize(float width, float height) {
-            super.onResize(width, height);
-            updateRadialGradient((int) width);
-        }
-
-        @Override
-        public void draw(Canvas canvas, Paint paint) {
-            final int viewWidth = ImageView.this.getWidth();
-            final int viewHeight = ImageView.this.getHeight();
-            canvas.drawCircle(viewWidth / 2, viewHeight / 2, viewWidth / 2, mShadowPaint);
-            canvas.drawCircle(viewWidth / 2, viewHeight / 2, viewWidth / 2 - mShadowRadius, paint);
-        }
-
-        private void updateRadialGradient(int diameter) {
-            mRadialGradient = new RadialGradient(diameter / 2, diameter / 2, mShadowRadius, new int[] { FILL_SHADOW_COLOR, Color.TRANSPARENT }, null, Shader.TileMode.CLAMP);
-            mShadowPaint.setShader(mRadialGradient);
+        public void setImageDrawable(Drawable drawable) {
+            ImageView.super.setImageDrawable(drawable);
         }
     }
 }

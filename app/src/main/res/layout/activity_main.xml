@@ -16,8 +16,11 @@
         android:id="@+id/image_view"
         android:layout_width="68dp"
         android:layout_height="68dp"
-        android:src="@drawable/ic_image"
-        app:placeholder="@drawable/ic_placeholder"
+        android:src="@drawable/ic_noavatar"
+        app:borderColor="@color/colorAccent"
+        app:borderWidth="2dp"
+        app:mode="circle"
+        app:placeholder="@drawable/ic_noavatar"
         app:error="@drawable/ic_error"/>
 
     <Button

@@ -44,7 +44,7 @@ public class ImageView extends com.imageview.core.integration.ImageView {
     }
 
     public ImageView(Context context, AttributeSet attrs) {
-        this(context, attrs, com.imageview.glide.R.attr.imageViewStyle);
+        this(context, attrs, 0);
     }
 
     public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {

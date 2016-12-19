@@ -37,7 +37,7 @@ public class ImageView extends com.imageview.core.ImageView {
     }
 
     public ImageView(Context context, AttributeSet attrs) {
-        this(context, attrs, com.imageview.core.R.attr.imageViewStyle);
+        this(context, attrs, 0);
     }
 
     public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {

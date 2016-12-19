@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final ImageView imageView = (ImageView) findViewById(R.id.image_view);
-        //imageView.setClipToOutline(true);
         //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
 
         Button button = (Button) findViewById(R.id.button_test);
