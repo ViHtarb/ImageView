@@ -35,21 +35,16 @@ import static android.os.Build.VERSION_CODES.LOLLIPOP;
  */
 @RequiresApi(LOLLIPOP)
 @TargetApi(LOLLIPOP)
-class ImageViewLollipop extends ImageViewIcs { // TODO for android L and more need implement by outlines
+class ImageViewLollipop extends ImageViewIcs {
 
     protected ImageViewLollipop(ImageView view, ViewDelegate viewDelegate) {
         super(view, viewDelegate);
     }
 
-    /*    @Override
-    protected void setImageDrawable(Drawable drawable) {
-        mViewDelegate.setImageDrawable(drawable);
-    }
-
     @Override
-    protected BorderDrawable newCircularDrawable() {
+    protected BorderDrawable newBorderDrawable() {
         return new BorderDrawableLollipop();
-    }*/
+    }
 
     @Override
     protected GradientDrawable newGradientDrawableForShape() {

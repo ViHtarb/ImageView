@@ -18,6 +18,7 @@ package com.imageview.core;
 
 import android.annotation.TargetApi;
 import android.graphics.Outline;
+import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 
@@ -32,7 +33,15 @@ class BorderDrawableLollipop extends BorderDrawable {
 
     @Override
     public void getOutline(@NonNull Outline outline) {
-        copyBounds(mRect);
-        outline.setOval(mRect);
+        final Rect bounds = copyBounds();
+        if (isCircle) {
+            outline.setOval(bounds);
+        } else {
+            if (mCornerRadius > 0) {
+                outline.setRoundRect(bounds, mCornerRadius);
+            } else {
+                outline.setRect(bounds);
+            }
+        }
     }
 }

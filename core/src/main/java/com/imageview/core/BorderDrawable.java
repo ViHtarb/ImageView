@@ -46,46 +46,52 @@ class BorderDrawable extends Drawable {
      */
     private static final float DRAW_STROKE_WIDTH_MULTIPLE = 1.3333f;
 
-    private boolean isCircle;
+    protected boolean isCircle;
 
     private int mCurrentBorderTintColor;
     private ColorStateList mBorderColor;
 
     protected int mBorderWidth;
+    protected float mCornerRadius;
 
-    protected final Paint mPaint;
+    protected final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     protected final Rect mRect = new Rect();
     protected final RectF mRectF = new RectF();
 
     public BorderDrawable() {
-        mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setStyle(Paint.Style.STROKE);
     }
 
     @Override
     public void draw(@NonNull Canvas canvas) {
-        mPaint.setColor(mCurrentBorderTintColor);
+        if (mPaint.getStrokeWidth() > 0) {
+            mPaint.setColor(mCurrentBorderTintColor);
 
-        final float halfBorderWidth = mPaint.getStrokeWidth() / 2f;
-        final RectF rectF = mRectF;
+            final float halfBorderWidth = mPaint.getStrokeWidth() / 2f;
+            final RectF rectF = mRectF;
 
-        // We need to inset the oval bounds by half the border width. This is because stroke draws
-        // the center of the border on the dimension. Whereas we want the stroke on the inside.
-        copyBounds(mRect);
-        rectF.set(mRect);
-        rectF.left += halfBorderWidth;
-        rectF.top += halfBorderWidth;
-        rectF.right -= halfBorderWidth;
-        rectF.bottom -= halfBorderWidth;
+            // We need to inset the oval bounds by half the border width. This is because stroke draws
+            // the center of the border on the dimension. Whereas we want the stroke on the inside.
+            copyBounds(mRect);
+            rectF.set(mRect);
+            rectF.left += halfBorderWidth;
+            rectF.top += halfBorderWidth;
+            rectF.right -= halfBorderWidth;
+            rectF.bottom -= halfBorderWidth;
 
-        canvas.save();
+            canvas.save();
 
-        if (isCircle) {
-            canvas.drawOval(rectF, mPaint);
-        } else {
-            canvas.drawRect(rectF, mPaint);
+            if (isCircle) {
+                canvas.drawOval(rectF, mPaint);
+            } else {
+                if (mCornerRadius > 0) {
+                    canvas.drawRoundRect(rectF, mCornerRadius, mCornerRadius, mPaint);
+                } else {
+                    canvas.drawRect(rectF, mPaint);
+                }
+            }
+            canvas.restore();
         }
-        canvas.restore();
     }
 
     @Override
@@ -157,6 +163,13 @@ class BorderDrawable extends Drawable {
                 mCurrentBorderTintColor = color.getColorForState(getState(), mCurrentBorderTintColor);
             }
             mBorderColor = color;
+            invalidateSelf();
+        }
+    }
+
+    protected void setCornerRadius(float radius) {
+        if (mCornerRadius != radius) {
+            mCornerRadius = radius;
             invalidateSelf();
         }
     }

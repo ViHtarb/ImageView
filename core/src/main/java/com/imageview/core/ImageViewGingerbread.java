@@ -29,7 +29,6 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.graphics.drawable.VectorDrawable;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
@@ -45,7 +44,7 @@ class ImageViewGingerbread extends ImageViewImpl {
     }
 
     @Override
-    protected void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, int borderWidth, ColorStateList borderColor, boolean isCircle) {
+    protected void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, boolean isCircle, int borderWidth, ColorStateList borderColor, float cornerRadius) {
         // Now we need to tint the original background with the tint, using
         // an InsetDrawable if we have a border width
         mShapeDrawable = DrawableCompat.wrap(createShapeDrawable());
@@ -54,16 +53,8 @@ class ImageViewGingerbread extends ImageViewImpl {
             DrawableCompat.setTintMode(mShapeDrawable, backgroundTintMode);
         }
 
-        final Drawable content;
-        if (borderWidth > 0) {
-            mBorderDrawable = createBorderDrawable(borderWidth, borderColor, isCircle);
-            content = new LayerDrawable(new Drawable[] {mBorderDrawable, mShapeDrawable});
-        } else {
-            mBorderDrawable = null;
-            content = mShapeDrawable;
-        }
-
-        mContentBackground = content;
+        mBorderDrawable = createBorderDrawable(isCircle, borderWidth, borderColor, cornerRadius);
+        mContentBackground = new LayerDrawable(new Drawable[] {mBorderDrawable, mShapeDrawable});
         mViewDelegate.setBackgroundDrawable(mContentBackground);
     }
 
@@ -83,21 +74,25 @@ class ImageViewGingerbread extends ImageViewImpl {
 
     @Override
     protected void setImageDrawable(Drawable drawable) {
-        boolean isVector = drawable instanceof VectorDrawable;
-        boolean isTransition = drawable instanceof TransitionDrawable;
-        if (!isVector && !isTransition) {
-            drawable = createRoundedDrawable(drawable);
-        } else if (isTransition) {
-            final TransitionDrawable transitionDrawable = (TransitionDrawable) drawable;
-            for (int i = 0; i < transitionDrawable.getNumberOfLayers(); i++) {
-                Drawable childDrawable = transitionDrawable.getDrawable(i);
-                if (!(childDrawable instanceof VectorDrawable)) {
-                    int id = transitionDrawable.getId(i);
-                    if (id == View.NO_ID) {
-                        id = i;
-                        transitionDrawable.setId(i, id);
+        if (mView.getCornerRadius() > 0 || mView.isCircle()) {
+            boolean isVector = isVector(drawable);
+            boolean isTransition = isTransition(drawable);
+
+            if (!isVector && !isTransition) {
+                drawable = createRoundedDrawable(drawable);
+            } else if (isTransition) {
+                final TransitionDrawable transitionDrawable = (TransitionDrawable) drawable;
+                for (int i = 0; i < transitionDrawable.getNumberOfLayers(); i++) {
+                    Drawable childDrawable = transitionDrawable.getDrawable(i);
+                    isVector = isVector(childDrawable);
+                    if (!isVector) {
+                        int id = transitionDrawable.getId(i);
+                        if (id == View.NO_ID) {
+                            id = i;
+                            transitionDrawable.setId(i, id);
+                        }
+                        transitionDrawable.setDrawableByLayerId(id, createRoundedDrawable(childDrawable));
                     }
-                    transitionDrawable.setDrawableByLayerId(id, createRoundedDrawable(childDrawable));
                 }
             }
         }
@@ -114,7 +109,14 @@ class ImageViewGingerbread extends ImageViewImpl {
         } else {
             roundedBitmapDrawable = (RoundedBitmapDrawable) drawable;
         }
-        roundedBitmapDrawable.setCircular(mView.isCircle());
+
+        if (mView.isCircle()) {
+            roundedBitmapDrawable.setCornerRadius(0);
+            roundedBitmapDrawable.setCircular(true);
+        } else {
+            roundedBitmapDrawable.setCircular(false);
+            roundedBitmapDrawable.setCornerRadius(mView.getCornerRadius() / 3);
+        }
 
         return roundedBitmapDrawable;
     }

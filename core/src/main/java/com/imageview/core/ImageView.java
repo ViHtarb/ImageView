@@ -42,7 +42,7 @@ import android.util.Log;
 
 /**
  * Image view implementation with switchable modes
- * // TODO implement corners for not circle drawing
+ * // TODO implement AppCompat support tinting
  */
 public abstract class ImageView extends AppCompatImageView {
 
@@ -52,6 +52,7 @@ public abstract class ImageView extends AppCompatImageView {
 
     private int mBorderWidth;
     private ColorStateList mBorderColor;
+    private float mCornerRadius;
 
     private ColorStateList mBackgroundTint;
     private PorterDuff.Mode mBackgroundTintMode;
@@ -75,11 +76,12 @@ public abstract class ImageView extends AppCompatImageView {
 
         mBorderWidth = a.getDimensionPixelSize(R.styleable.ImageView_borderWidth, 0);
         mBorderColor = a.getColorStateList(R.styleable.ImageView_borderColor);
+        mCornerRadius = a.getDimension(R.styleable.ImageView_cornerRadius, 0);
 
         mBackgroundTint = ViewCompat.getBackgroundTintList(this);
         mBackgroundTintMode = ViewCompat.getBackgroundTintMode(this);
 
-        getImpl().setBackgroundDrawable(mBackgroundTint, mBackgroundTintMode, mBorderWidth, mBorderColor, isCircle);
+        getImpl().setBackgroundDrawable(mBackgroundTint, mBackgroundTintMode, isCircle, mBorderWidth, mBorderColor, mCornerRadius);
 
         a.recycle();
     }
@@ -140,6 +142,7 @@ public abstract class ImageView extends AppCompatImageView {
         return mBackgroundTintMode;
     }
 
+/* // TODO override methods for tinting from AppCompat
     @Override
     public void setSupportBackgroundTintList(@Nullable ColorStateList tint) {
         setBackgroundTintList(tint);
@@ -161,6 +164,7 @@ public abstract class ImageView extends AppCompatImageView {
     public PorterDuff.Mode getSupportBackgroundTintMode() {
         return getBackgroundTintMode();
     }
+*/
 
     @Override
     public void setBackgroundDrawable(Drawable background) {
@@ -186,6 +190,19 @@ public abstract class ImageView extends AppCompatImageView {
     @Override
     public void setImageDrawable(@Nullable Drawable drawable) {
         getImpl().setImageDrawable(drawable);
+    }
+
+    public void setCircle(boolean isCircle) {
+        if (this.isCircle != isCircle) {
+            this.isCircle = isCircle;
+            getImpl().setCircle(isCircle);
+
+            setImageDrawable(getDrawable());
+        }
+    }
+
+    public boolean isCircle() {
+        return isCircle;
     }
 
     public void setBorderWidth(@DimenRes int resId) {
@@ -218,17 +235,19 @@ public abstract class ImageView extends AppCompatImageView {
         return mBorderColor;
     }
 
-    public void setCircle(boolean isCircle) {
-        if (this.isCircle != isCircle) {
-            this.isCircle = isCircle;
-            getImpl().setCircle(isCircle);
+    public void setCornerRadius(@DimenRes int resId) {
+        setCornerRadius(getResources().getDimension(resId));
+    }
 
-            setImageDrawable(getDrawable());
+    public void setCornerRadius(float radius) {
+        if (mCornerRadius != radius) {
+            mCornerRadius = radius;
+            getImpl().setCornerRadius(radius);
         }
     }
 
-    public boolean isCircle() {
-        return isCircle;
+    public float getCornerRadius() {
+        return mCornerRadius;
     }
 
     private ImageViewImpl getImpl() {

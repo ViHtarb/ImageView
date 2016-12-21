@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="ImageView">
-        <attr name="cornerRadius" format="dimension"/>
+        <attr name="circle" format="boolean"/>
         <attr name="borderWidth" format="dimension"/>
         <attr name="borderColor" format="color"/>
-        <attr name="circle" format="boolean"/>
+        <attr name="cornerRadius" format="dimension"/>
     </declare-styleable>
 </resources>
