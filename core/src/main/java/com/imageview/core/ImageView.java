@@ -205,21 +205,6 @@ public abstract class ImageView extends AppCompatImageView {
         return isCircle;
     }
 
-    public void setBorderWidth(@DimenRes int resId) {
-        setBorderWidth(getResources().getDimension(resId));
-    }
-
-    public void setBorderWidth(float width) {
-        if (mBorderWidth != width) {
-            mBorderWidth = Math.round(width);
-            getImpl().setBorderWidth(mBorderWidth);
-        }
-    }
-
-    public int getBorderWidth() {
-        return mBorderWidth;
-    }
-
     public void setBorderColor(@ColorInt int color) {
         setBorderColor(ColorStateList.valueOf(color));
     }
@@ -233,6 +218,21 @@ public abstract class ImageView extends AppCompatImageView {
 
     public ColorStateList getBorderColor() {
         return mBorderColor;
+    }
+
+    public void setBorderWidth(@DimenRes int resId) {
+        setBorderWidth(getResources().getDimension(resId));
+    }
+
+    public void setBorderWidth(float width) {
+        if (mBorderWidth != width) {
+            mBorderWidth = Math.round(width);
+            getImpl().setBorderWidth(mBorderWidth);
+        }
+    }
+
+    public int getBorderWidth() {
+        return mBorderWidth;
     }
 
     public void setCornerRadius(@DimenRes int resId) {
