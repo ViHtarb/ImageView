@@ -62,13 +62,17 @@ public abstract class ImageView extends com.imageview.core.ImageView {
         a.recycle();
     }
 
-    public void setDummyDrawable(@DrawableRes int resId) {
-        setDummyDrawable(AppCompatResources.getDrawable(getContext(), resId));
-    }
+    @Override
+    public void setImageDrawable(@Nullable Drawable drawable) {
+        if (getDrawable() == mErrorDrawable) {
+            mErrorDrawable = drawable;
+        }
 
-    public void setDummyDrawable(Drawable drawable) {
-        setPlaceholderDrawable(drawable);
-        setErrorDrawable(drawable);
+        if (getDrawable() == mPlaceholderDrawable) {
+            mPlaceholderDrawable = drawable;
+        }
+
+        super.setImageDrawable(drawable);
     }
 
     public void setPlaceholderDrawable(@DrawableRes int resId) {

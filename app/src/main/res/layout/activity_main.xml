@@ -19,7 +19,6 @@
         android:layout_margin="8dp"
         android:clickable="true"
         android:scaleType="centerCrop"
-        android:foreground="?selectableItemBackground"
         android:elevation="4dp"
         app:cornerRadius="10dp"
         app:circle="false"/>

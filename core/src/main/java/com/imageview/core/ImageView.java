@@ -35,6 +35,7 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.DimenRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -42,9 +43,6 @@ import android.util.Log;
 /**
  * Image view implementation with switchable modes
  * // TODO implement AppCompat support tinting
- * // TODO implement elevation for non android L
- * // TODO implement pressedTranslationZ
- * // TODO implement touchFeedback
  */
 public abstract class ImageView extends AppCompatImageView {
 
@@ -80,11 +78,8 @@ public abstract class ImageView extends AppCompatImageView {
         mBorderColor = a.getColorStateList(R.styleable.ImageView_borderColor);
         mCornerRadius = a.getDimension(R.styleable.ImageView_cornerRadius, 0);
 
-/*        mBackgroundTint = ViewCompat.getBackgroundTintList(this);
-        mBackgroundTintMode = ViewCompat.getBackgroundTintMode(this);*/
-
-        mBackgroundTint = a.getColorStateList(R.styleable.ImageView_android_backgroundTint);
-        mBackgroundTintMode = parseTintMode(a.getInt(R.styleable.ImageView_android_backgroundTintMode, -1), null);
+        mBackgroundTint = ViewCompat.getBackgroundTintList(this);
+        mBackgroundTintMode = ViewCompat.getBackgroundTintMode(this);
 
         getImpl().setBackgroundDrawable(mBackgroundTint, mBackgroundTintMode, isCircle, mBorderWidth, mBorderColor, mCornerRadius);
 
@@ -282,24 +277,6 @@ public abstract class ImageView extends AppCompatImageView {
         @Override
         public void setImageDrawable(Drawable drawable) {
             ImageView.super.setImageDrawable(drawable);
-        }
-    }
-
-    // TODO replace it
-    static PorterDuff.Mode parseTintMode(int value, PorterDuff.Mode defaultMode) {
-        switch (value) {
-            case 3:
-                return PorterDuff.Mode.SRC_OVER;
-            case 5:
-                return PorterDuff.Mode.SRC_IN;
-            case 9:
-                return PorterDuff.Mode.SRC_ATOP;
-            case 14:
-                return PorterDuff.Mode.MULTIPLY;
-            case 15:
-                return PorterDuff.Mode.SCREEN;
-            default:
-                return defaultMode;
         }
     }
 }
