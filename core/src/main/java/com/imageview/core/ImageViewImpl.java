@@ -34,7 +34,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.graphics.drawable.VectorDrawable;
 import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 
@@ -44,6 +43,7 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 abstract class ImageViewImpl {
 
     protected Drawable mShapeDrawable;
+    protected Drawable mRippleDrawable;
     protected BorderDrawable mBorderDrawable;
     protected Drawable mContentBackground;
 
@@ -66,8 +66,8 @@ abstract class ImageViewImpl {
     protected void setCircle(boolean isCircle) {
         mBorderDrawable.setCircle(isCircle);
 
-        GradientDrawable gradientDrawable = DrawableCompat.unwrap(mShapeDrawable);
-        gradientDrawable.setShape(isCircle ? GradientDrawable.OVAL : GradientDrawable.RECTANGLE);
+        GradientDrawable shapeDrawable = DrawableCompat.unwrap(mShapeDrawable);
+        shapeDrawable.setShape(isCircle ? GradientDrawable.OVAL : GradientDrawable.RECTANGLE);
     }
 
     protected void setBorderColor(ColorStateList color) {
@@ -111,7 +111,7 @@ abstract class ImageViewImpl {
     }
 
     protected boolean isVector(Drawable drawable) {
-        return drawable instanceof VectorDrawable || drawable instanceof VectorDrawableCompat;
+        return drawable instanceof VectorDrawableCompat;
     }
 
     protected boolean isTransition(Drawable drawable) {
