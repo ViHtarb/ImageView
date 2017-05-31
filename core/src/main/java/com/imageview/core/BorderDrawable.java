@@ -33,6 +33,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * A drawable which draws an 'border'.
@@ -48,10 +49,10 @@ class BorderDrawable extends Drawable {
 
     protected boolean isCircle;
 
-    private int mCurrentBorderTintColor;
-    private ColorStateList mBorderColor;
+    private int mCurrentColor;
+    private ColorStateList mTint;
 
-    protected int mBorderWidth;
+    protected int mWidth;
     protected float mCornerRadius;
 
     protected final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -65,7 +66,7 @@ class BorderDrawable extends Drawable {
     @Override
     public void draw(@NonNull Canvas canvas) {
         if (mPaint.getStrokeWidth() > 0) {
-            mPaint.setColor(mCurrentBorderTintColor);
+            mPaint.setColor(mCurrentColor);
 
             final float halfBorderWidth = mPaint.getStrokeWidth() / 2f;
             final RectF rectF = mRectF;
@@ -96,7 +97,7 @@ class BorderDrawable extends Drawable {
 
     @Override
     public boolean getPadding(@NonNull Rect padding) {
-        final int borderWidth = Math.round(mBorderWidth);
+        final int borderWidth = Math.round(mWidth);
         padding.set(borderWidth, borderWidth, borderWidth, borderWidth);
         return true;
     }
@@ -114,21 +115,32 @@ class BorderDrawable extends Drawable {
     }
 
     @Override
-    public int getOpacity() {
-        return mBorderWidth > 0 ? PixelFormat.TRANSLUCENT : PixelFormat.TRANSPARENT;
+    public void setTintList(@Nullable ColorStateList tint) {
+        if (mTint != tint) {
+            if (tint != null) {
+                mCurrentColor = tint.getColorForState(getState(), mCurrentColor);
+            }
+            mTint = tint;
+            invalidateSelf();
+        }
     }
 
     @Override
     public boolean isStateful() {
-        return (mBorderColor != null && mBorderColor.isStateful()) || super.isStateful();
+        return (mTint != null && mTint.isStateful()) || super.isStateful();
+    }
+
+    @Override
+    public int getOpacity() {
+        return mWidth > 0 ? PixelFormat.TRANSLUCENT : PixelFormat.TRANSPARENT;
     }
 
     @Override
     protected boolean onStateChange(int[] state) {
-        if (mBorderColor != null) {
-            final int newColor = mBorderColor.getColorForState(state, mCurrentBorderTintColor);
-            if (newColor != mCurrentBorderTintColor) {
-                mCurrentBorderTintColor = newColor;
+        if (mTint != null) {
+            final int newColor = mTint.getColorForState(state, mCurrentColor);
+            if (newColor != mCurrentColor) {
+                mCurrentColor = newColor;
                 invalidateSelf();
                 return true;
             }
@@ -146,23 +158,10 @@ class BorderDrawable extends Drawable {
     /**
      * Set the border width
      */
-    protected void setBorderWidth(int width) {
-        if (mBorderWidth != width) {
-            mBorderWidth = width;
+    protected void setWidth(int width) {
+        if (mWidth != width) {
+            mWidth = width;
             mPaint.setStrokeWidth(width * DRAW_STROKE_WIDTH_MULTIPLE);
-            invalidateSelf();
-        }
-    }
-
-    /**
-     * Set the border color
-     */
-    protected void setBorderColor(ColorStateList color) {
-        if (mBorderColor != color) {
-            if (color != null) {
-                mCurrentBorderTintColor = color.getColorForState(getState(), mCurrentBorderTintColor);
-            }
-            mBorderColor = color;
             invalidateSelf();
         }
     }

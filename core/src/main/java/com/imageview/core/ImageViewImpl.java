@@ -70,12 +70,12 @@ abstract class ImageViewImpl {
         shapeDrawable.setShape(isCircle ? GradientDrawable.OVAL : GradientDrawable.RECTANGLE);
     }
 
-    protected void setBorderWidth(int width) {
-        mBorderDrawable.setBorderWidth(width);
+    protected void setBorderColor(ColorStateList color) {
+        mBorderDrawable.setTintList(color);
     }
 
-    protected void setBorderColor(ColorStateList color) {
-        mBorderDrawable.setBorderColor(color);
+    protected void setBorderWidth(int width) {
+        mBorderDrawable.setWidth(width);
     }
 
     protected void setCornerRadius(float radius) {
@@ -88,8 +88,8 @@ abstract class ImageViewImpl {
     protected BorderDrawable createBorderDrawable(boolean isCircle, int width, ColorStateList color, float cornerRadius) {
         BorderDrawable borderDrawable = newBorderDrawable();
         borderDrawable.setCircle(isCircle);
-        borderDrawable.setBorderWidth(width);
-        borderDrawable.setBorderColor(color);
+        borderDrawable.setWidth(width);
+        borderDrawable.setTintList(color);
         borderDrawable.setCornerRadius(cornerRadius);
         return borderDrawable;
     }
