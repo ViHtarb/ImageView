@@ -25,9 +25,7 @@
 package com.imageview.core;
 
 import android.annotation.TargetApi;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.VectorDrawable;
 import android.support.annotation.RequiresApi;
 
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
@@ -51,11 +49,6 @@ class ImageViewLollipop extends ImageViewIcs {
     @Override
     protected GradientDrawable newGradientDrawableForShape() {
         return new AlwaysStatefulGradientDrawable();
-    }
-
-    @Override
-    protected boolean isVector(Drawable drawable) {
-        return drawable instanceof VectorDrawable || super.isVector(drawable);
     }
 
     /**
