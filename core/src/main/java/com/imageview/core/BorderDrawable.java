@@ -52,7 +52,7 @@ class BorderDrawable extends Drawable {
     private int mCurrentColor;
     private ColorStateList mTint;
 
-    protected int mWidth;
+    protected float mWidth;
     protected float mCornerRadius;
 
     protected final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -158,7 +158,7 @@ class BorderDrawable extends Drawable {
     /**
      * Set the border width
      */
-    protected void setWidth(int width) {
+    protected void setWidth(float width) {
         if (mWidth != width) {
             mWidth = width;
             mPaint.setStrokeWidth(width * DRAW_STROKE_WIDTH_MULTIPLE);

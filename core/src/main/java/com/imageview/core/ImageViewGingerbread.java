@@ -28,7 +28,6 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -46,14 +45,14 @@ class ImageViewGingerbread extends ImageViewImpl {
     static final int[] FOCUSED_ENABLED_STATE_SET = {android.R.attr.state_focused,
             android.R.attr.state_enabled};
 
-    protected ShadowDrawableWrapper mShadowDrawable;
+    //protected ShadowDrawableWrapper mShadowDrawable;
 
     protected ImageViewGingerbread(ImageView view, ViewDelegate viewDelegate) {
         super(view, viewDelegate);
     }
 
     @Override
-    protected void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, boolean isCircle, int borderWidth, ColorStateList borderColor, float cornerRadius) {
+    protected void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, boolean isCircle, float borderWidth, ColorStateList borderColor, float cornerRadius) {
         // Now we need to tint the original background with the tint, using
         // an InsetDrawable if we have a border width
         mShapeDrawable = DrawableCompat.wrap(createShapeDrawable());
@@ -66,25 +65,25 @@ class ImageViewGingerbread extends ImageViewImpl {
         mContentBackground = new LayerDrawable(new Drawable[] {mBorderDrawable, mShapeDrawable});
         mViewDelegate.setBackgroundDrawable(mContentBackground);*/
 
-        // Now we created a mask Drawable which will be used for touch feedback.
+/*        // Now we created a mask Drawable which will be used for touch feedback.
         GradientDrawable touchFeedbackShape = createShapeDrawable();
 
         // We'll now wrap that touch feedback mask drawable with a ColorStateList. We do not need
         // to inset for any border here as LayerDrawable will nest the padding for us
         mRippleDrawable = DrawableCompat.wrap(touchFeedbackShape);
-        DrawableCompat.setTintList(mRippleDrawable, createColorStateList(Color.GREEN));
+        DrawableCompat.setTintList(mRippleDrawable, createColorStateList(Color.GREEN));*/
 
         mBorderDrawable = createBorderDrawable(isCircle, borderWidth, borderColor, cornerRadius);
-        mContentBackground = new LayerDrawable(new Drawable[] {mBorderDrawable, mShapeDrawable, mRippleDrawable});
+        mContentBackground = new LayerDrawable(new Drawable[] {mBorderDrawable, mShapeDrawable/*, mRippleDrawable*/});
 
-        mShadowDrawable = new ShadowDrawableWrapper(
+/*        mShadowDrawable = new ShadowDrawableWrapper(
                 mView.getContext(),
                 mContentBackground,
                 24,
                 24,
                 38);
-        mShadowDrawable.setAddPaddingForCorners(false);
-        mViewDelegate.setBackgroundDrawable(mShadowDrawable);
+        mShadowDrawable.setAddPaddingForCorners(false);*/
+        mViewDelegate.setBackgroundDrawable(mContentBackground);
     }
 
     @Override
@@ -150,7 +149,6 @@ class ImageViewGingerbread extends ImageViewImpl {
         return roundedBitmapDrawable;
     }
 
-
     private static ColorStateList createColorStateList(int selectedColor) {
         final int[][] states = new int[3][];
         final int[] colors = new int[3];
@@ -167,7 +165,6 @@ class ImageViewGingerbread extends ImageViewImpl {
         // Default enabled state
         states[i] = new int[0];
         colors[i] = Color.TRANSPARENT;
-        i++;
 
         return new ColorStateList(states, colors);
     }

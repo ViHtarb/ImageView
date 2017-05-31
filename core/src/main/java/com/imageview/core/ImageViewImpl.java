@@ -55,7 +55,7 @@ abstract class ImageViewImpl {
         mViewDelegate = viewDelegate;
     }
 
-    protected abstract void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, boolean isCircle, int borderWidth, ColorStateList borderColor, float cornerRadius);
+    protected abstract void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, boolean isCircle, float borderWidth, ColorStateList borderColor, float cornerRadius);
 
     protected abstract void setBackgroundTintList(ColorStateList tint);
 
@@ -74,7 +74,7 @@ abstract class ImageViewImpl {
         mBorderDrawable.setTintList(color);
     }
 
-    protected void setBorderWidth(int width) {
+    protected void setBorderWidth(float width) {
         mBorderDrawable.setWidth(width);
     }
 
@@ -85,7 +85,7 @@ abstract class ImageViewImpl {
         gradientDrawable.setCornerRadius(radius);
     }
 
-    protected BorderDrawable createBorderDrawable(boolean isCircle, int width, ColorStateList color, float cornerRadius) {
+    protected BorderDrawable createBorderDrawable(boolean isCircle, float width, ColorStateList color, float cornerRadius) {
         BorderDrawable borderDrawable = newBorderDrawable();
         borderDrawable.setCircle(isCircle);
         borderDrawable.setWidth(width);

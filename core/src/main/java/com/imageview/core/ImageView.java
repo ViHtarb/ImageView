@@ -52,9 +52,10 @@ public abstract class ImageView extends AppCompatImageView {
 
     private boolean isCircle;
 
-    private int mBorderWidth;
-    private ColorStateList mBorderColor;
+    private float mBorderWidth;
     private float mCornerRadius;
+
+    private ColorStateList mBorderColor;
 
     private ColorStateList mBackgroundTint;
     private PorterDuff.Mode mBackgroundTintMode;
@@ -231,12 +232,12 @@ public abstract class ImageView extends AppCompatImageView {
 
     public void setBorderWidth(float width) {
         if (mBorderWidth != width) {
-            mBorderWidth = Math.round(width);
+            mBorderWidth = width;
             getImpl().setBorderWidth(mBorderWidth);
         }
     }
 
-    public int getBorderWidth() {
+    public float getBorderWidth() {
         return mBorderWidth;
     }
 

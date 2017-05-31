@@ -42,8 +42,8 @@ import android.support.v7.graphics.drawable.DrawableWrapper;
  * A {@link Drawable} which wraps another drawable and
  * draws a shadow around it.
  */
-class ShadowDrawableWrapper extends DrawableWrapper {
-    // used to calculate content padding
+class ShadowDrawableWrapper /*extends DrawableWrapper*/ {
+    /*// used to calculate content padding
     static final double COS_45 = Math.cos(Math.toRadians(45));
 
     static final float SHADOW_MULTIPLIER = 1.5f;
@@ -81,9 +81,9 @@ class ShadowDrawableWrapper extends DrawableWrapper {
 
     private float mRotation;
 
-    /**
+    *//**
      * If shadow size is set to a value above max shadow, we print a warning
-     */
+     *//*
     private boolean mPrintedShadowClipWarning = false;
 
     public ShadowDrawableWrapper(Context context, Drawable content, float radius, float shadowSize, float maxShadowSize) {
@@ -102,9 +102,9 @@ class ShadowDrawableWrapper extends DrawableWrapper {
         setShadowSize(shadowSize, maxShadowSize);
     }
 
-    /**
+    *//**
      * Casts the value to an even integer.
-     */
+     *//*
     private static int toEven(float value) {
         int i = Math.round(value);
         return (i % 2 == 1) ? i - 1 : i;
@@ -367,5 +367,5 @@ class ShadowDrawableWrapper extends DrawableWrapper {
         final float content = 2 * Math.max(mRawMaxShadowSize, mCornerRadius
                 + mRawMaxShadowSize * SHADOW_MULTIPLIER / 2);
         return content + (mRawMaxShadowSize * SHADOW_MULTIPLIER) * 2;
-    }
+    }*/
 }
