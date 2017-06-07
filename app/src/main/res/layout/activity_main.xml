@@ -14,14 +14,14 @@
 
     <com.imageview.ImageView
         android:id="@+id/image_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_margin="8dp"
-        android:clickable="true"
         android:scaleType="centerCrop"
-        android:elevation="4dp"
-        app:cornerRadius="10dp"
-        app:circle="false"/>
+        android:src="@drawable/ic_placeholder"
+        app:borderWidth="2dp"
+        app:borderColor="@color/colorAccent"
+        app:circle="true"/>
 
     <Button
         android:id="@+id/button_test"

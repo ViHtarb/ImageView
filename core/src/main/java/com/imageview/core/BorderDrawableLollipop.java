@@ -17,9 +17,11 @@
 package com.imageview.core;
 
 import android.annotation.TargetApi;
+import android.content.res.ColorStateList;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 
 import static android.os.Build.VERSION_CODES.LOLLIPOP;

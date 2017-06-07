@@ -34,7 +34,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.graphics.drawable.VectorDrawable;
 import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 
@@ -44,6 +43,7 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 abstract class ImageViewImpl {
 
     protected Drawable mShapeDrawable;
+    //protected Drawable mRippleDrawable;
     protected BorderDrawable mBorderDrawable;
     protected Drawable mContentBackground;
 
@@ -55,7 +55,7 @@ abstract class ImageViewImpl {
         mViewDelegate = viewDelegate;
     }
 
-    protected abstract void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, boolean isCircle, int borderWidth, ColorStateList borderColor, float cornerRadius);
+    protected abstract void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, boolean isCircle, float borderWidth, ColorStateList borderColor, float cornerRadius);
 
     protected abstract void setBackgroundTintList(ColorStateList tint);
 
@@ -66,15 +66,15 @@ abstract class ImageViewImpl {
     protected void setCircle(boolean isCircle) {
         mBorderDrawable.setCircle(isCircle);
 
-        GradientDrawable gradientDrawable = DrawableCompat.unwrap(mShapeDrawable);
-        gradientDrawable.setShape(isCircle ? GradientDrawable.OVAL : GradientDrawable.RECTANGLE);
+        GradientDrawable shapeDrawable = DrawableCompat.unwrap(mShapeDrawable);
+        shapeDrawable.setShape(isCircle ? GradientDrawable.OVAL : GradientDrawable.RECTANGLE);
     }
 
     protected void setBorderColor(ColorStateList color) {
-        mBorderDrawable.setTintList(color);
+        mBorderDrawable.setColor(color);
     }
 
-    protected void setBorderWidth(int width) {
+    protected void setBorderWidth(float width) {
         mBorderDrawable.setWidth(width);
     }
 
@@ -85,11 +85,11 @@ abstract class ImageViewImpl {
         gradientDrawable.setCornerRadius(radius);
     }
 
-    protected BorderDrawable createBorderDrawable(boolean isCircle, int width, ColorStateList color, float cornerRadius) {
+    protected BorderDrawable createBorderDrawable(boolean isCircle, float width, ColorStateList color, float cornerRadius) {
         BorderDrawable borderDrawable = newBorderDrawable();
         borderDrawable.setCircle(isCircle);
         borderDrawable.setWidth(width);
-        borderDrawable.setTintList(color);
+        borderDrawable.setColor(color);
         borderDrawable.setCornerRadius(cornerRadius);
         return borderDrawable;
     }
@@ -111,7 +111,7 @@ abstract class ImageViewImpl {
     }
 
     protected boolean isVector(Drawable drawable) {
-        return drawable instanceof VectorDrawable || drawable instanceof VectorDrawableCompat;
+        return drawable instanceof VectorDrawableCompat;
     }
 
     protected boolean isTransition(Drawable drawable) {
