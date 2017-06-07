@@ -35,6 +35,7 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.DimenRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -77,15 +78,15 @@ public abstract class ImageView extends AppCompatImageView {
 
         isCircle = a.getBoolean(R.styleable.ImageView_circle, false);
 
-        mBorderWidth = a.getDimensionPixelSize(R.styleable.ImageView_borderWidth, 0);
+        mBorderWidth = a.getDimension(R.styleable.ImageView_borderWidth, 0);
         mBorderColor = a.getColorStateList(R.styleable.ImageView_borderColor);
         mCornerRadius = a.getDimension(R.styleable.ImageView_cornerRadius, 0);
 
-/*        mBackgroundTint = ViewCompat.getBackgroundTintList(this);
-        mBackgroundTintMode = ViewCompat.getBackgroundTintMode(this);*/
+        mBackgroundTint = ViewCompat.getBackgroundTintList(this);
+        mBackgroundTintMode = ViewCompat.getBackgroundTintMode(this);
 
-        mBackgroundTint = a.getColorStateList(R.styleable.ImageView_android_backgroundTint);
-        mBackgroundTintMode = parseTintMode(a.getInt(R.styleable.ImageView_android_backgroundTintMode, -1), null);
+        /*mBackgroundTint = a.getColorStateList(R.styleable.ImageView_android_backgroundTint);
+        mBackgroundTintMode = parseTintMode(a.getInt(R.styleable.ImageView_android_backgroundTintMode, -1), null);*/
 
         getImpl().setBackgroundDrawable(mBackgroundTint, mBackgroundTintMode, isCircle, mBorderWidth, mBorderColor, mCornerRadius);
 
@@ -286,7 +287,7 @@ public abstract class ImageView extends AppCompatImageView {
         }
     }
 
-    // TODO replace it
+/*    // TODO replace it
     static PorterDuff.Mode parseTintMode(int value, PorterDuff.Mode defaultMode) {
         switch (value) {
             case 3:
@@ -302,5 +303,5 @@ public abstract class ImageView extends AppCompatImageView {
             default:
                 return defaultMode;
         }
-    }
+    }*/
 }

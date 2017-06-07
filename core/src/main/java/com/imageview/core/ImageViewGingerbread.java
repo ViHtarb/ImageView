@@ -25,7 +25,6 @@
 package com.imageview.core;
 
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
@@ -40,10 +39,10 @@ import android.view.View;
  */
 class ImageViewGingerbread extends ImageViewImpl {
 
-    static final int[] PRESSED_ENABLED_STATE_SET = {android.R.attr.state_pressed,
+/*    static final int[] PRESSED_ENABLED_STATE_SET = {android.R.attr.state_pressed,
             android.R.attr.state_enabled};
     static final int[] FOCUSED_ENABLED_STATE_SET = {android.R.attr.state_focused,
-            android.R.attr.state_enabled};
+            android.R.attr.state_enabled};*/
 
     //protected ShadowDrawableWrapper mShadowDrawable;
 
@@ -149,7 +148,7 @@ class ImageViewGingerbread extends ImageViewImpl {
         return roundedBitmapDrawable;
     }
 
-    private static ColorStateList createColorStateList(int selectedColor) {
+/*    private static ColorStateList createColorStateList(int selectedColor) {
         final int[][] states = new int[3][];
         final int[] colors = new int[3];
         int i = 0;
@@ -167,5 +166,5 @@ class ImageViewGingerbread extends ImageViewImpl {
         colors[i] = Color.TRANSPARENT;
 
         return new ColorStateList(states, colors);
-    }
+    }*/
 }

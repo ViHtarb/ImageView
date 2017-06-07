@@ -24,6 +24,7 @@
 
 package com.imageview.sample;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final ImageView imageView = (ImageView) findViewById(R.id.image_view);
-        //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
+        imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
         //imageView.setImageURL("https://pp.vk.me/c604531/v604531553/1d0f6/9gae9OTT_xo.jpg");
         //imageView.setImageResource(R.drawable.ic_noavatar);
         //imageView.setClipToOutline(true);
@@ -48,9 +49,11 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //imageView.setBorderColor(Color.GREEN);
+                imageView.setBorderWidth(30f);
+                imageView.setBorderColor(Color.GREEN);
+                //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
                 //imageView.setImageURL("https://pp.vk.me/c604531/v604531553/1d0f6/9gae9OTT_xo.jpg");
-                imageView.setImageURL("https://s3.amazonaws.com/attached-images/point_images/a_15c85ed78d5349e1a2f984180e8efeb1.jpg");
+                //imageView.setImageURL("https://s3.amazonaws.com/attached-images/point_images/a_15c85ed78d5349e1a2f984180e8efeb1.jpg");
                 //imageView.setCircle(!imageView.isCircle());
             }
         });

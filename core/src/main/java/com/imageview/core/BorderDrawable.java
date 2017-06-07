@@ -34,6 +34,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.graphics.drawable.DrawableCompat;
 
 /**
  * A drawable which draws an 'border'.
@@ -115,17 +116,6 @@ class BorderDrawable extends Drawable {
     }
 
     @Override
-    public void setTintList(@Nullable ColorStateList tint) {
-        if (mTint != tint) {
-            if (tint != null) {
-                mCurrentColor = tint.getColorForState(getState(), mCurrentColor);
-            }
-            mTint = tint;
-            invalidateSelf();
-        }
-    }
-
-    @Override
     public boolean isStateful() {
         return (mTint != null && mTint.isStateful()) || super.isStateful();
     }
@@ -162,6 +152,16 @@ class BorderDrawable extends Drawable {
         if (mWidth != width) {
             mWidth = width;
             mPaint.setStrokeWidth(width * DRAW_STROKE_WIDTH_MULTIPLE);
+            invalidateSelf();
+        }
+    }
+
+    protected void setColor(@Nullable ColorStateList tint) {
+        if (mTint != tint) {
+            if (tint != null) {
+                mCurrentColor = tint.getColorForState(getState(), mCurrentColor);
+            }
+            mTint = tint;
             invalidateSelf();
         }
     }

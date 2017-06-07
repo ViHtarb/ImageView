@@ -43,7 +43,7 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 abstract class ImageViewImpl {
 
     protected Drawable mShapeDrawable;
-    protected Drawable mRippleDrawable;
+    //protected Drawable mRippleDrawable;
     protected BorderDrawable mBorderDrawable;
     protected Drawable mContentBackground;
 
@@ -71,7 +71,7 @@ abstract class ImageViewImpl {
     }
 
     protected void setBorderColor(ColorStateList color) {
-        mBorderDrawable.setTintList(color);
+        mBorderDrawable.setColor(color);
     }
 
     protected void setBorderWidth(float width) {
@@ -89,7 +89,7 @@ abstract class ImageViewImpl {
         BorderDrawable borderDrawable = newBorderDrawable();
         borderDrawable.setCircle(isCircle);
         borderDrawable.setWidth(width);
-        borderDrawable.setTintList(color);
+        borderDrawable.setColor(color);
         borderDrawable.setCornerRadius(cornerRadius);
         return borderDrawable;
     }
