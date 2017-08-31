@@ -39,13 +39,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final ImageView imageView = (ImageView) findViewById(R.id.image_view);
+        final ImageView imageView = findViewById(R.id.image_view);
         imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
         //imageView.setImageURL("https://pp.vk.me/c604531/v604531553/1d0f6/9gae9OTT_xo.jpg");
         //imageView.setImageResource(R.drawable.ic_noavatar);
         //imageView.setClipToOutline(true);
 
-        Button button = (Button) findViewById(R.id.button_test);
+        Button button = findViewById(R.id.button_test);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
