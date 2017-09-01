@@ -268,12 +268,13 @@ public abstract class ImageViewOld extends VisibilityAwareImageView {
 
     private ImageViewImpl createImpl() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return new ImageViewLollipop(this, new ShadowViewDelegateImpl());
+            //return new ImageViewLollipop(this, new ViewDelegateOldImpl());
         }
-        return new ImageViewImpl(this, new ShadowViewDelegateImpl());
+        //return new ImageViewImpl(this, new ViewDelegateOldImpl());
+        return null;
     }
 
-    private class ShadowViewDelegateImpl implements ShadowViewDelegate {
+    private class ViewDelegateOldImpl implements ViewDelegate {
 
         @Override
         public float getRadius() {
@@ -296,9 +297,14 @@ public abstract class ImageViewOld extends VisibilityAwareImageView {
         public boolean isCompatPaddingEnabled() {
             return false;
         }
+
+        @Override
+        public void setImageDrawable(Drawable drawable) {
+
+        }
     }
 
-    private class ViewDelegateImpl implements ViewDelegate {
+    private class ViewDelegateImpl implements ViewDelegateOld {
 
         @Override
         public void setBackgroundDrawable(Drawable background) {

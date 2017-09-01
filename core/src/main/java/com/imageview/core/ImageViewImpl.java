@@ -28,20 +28,26 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.support.v4.content.ContextCompat;
+import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.ViewCompat;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -81,16 +87,15 @@ class ImageViewImpl {
     private final Rect mTmpRect = new Rect();
 
     protected Drawable mShapeDrawable;
-    protected Drawable mRippleDrawable;
-    protected CircularBorderDrawable mBorderDrawable;
+    protected BorderDrawable mBorderDrawable;
     protected Drawable mContentBackground;
 
     protected ShadowDrawableWrapper mShadowDrawable;
 
     private final StateListAnimator mStateListAnimator;
 
-    protected final VisibilityAwareImageView mView;
-    protected final ShadowViewDelegate mShadowViewDelegate;
+    protected final ImageView mView;
+    protected final ViewDelegate mViewDelegate;
 
     private ViewTreeObserver.OnPreDrawListener mPreDrawListener;
 
@@ -99,9 +104,9 @@ class ImageViewImpl {
         void onHidden();
     }
 
-    protected ImageViewImpl(VisibilityAwareImageView view, ShadowViewDelegate shadowViewDelegate) {
+    protected ImageViewImpl(ImageView view, ViewDelegate viewDelegate) {
         mView = view;
-        mShadowViewDelegate = shadowViewDelegate;
+        mViewDelegate = viewDelegate;
 
         mStateListAnimator = new StateListAnimator();
 
@@ -116,7 +121,7 @@ class ImageViewImpl {
         mRotation = mView.getRotation();
     }
 
-    void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, int rippleColor, int borderWidth) {
+    protected void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, boolean isCircle, float cornerRadius, float borderWidth, ColorStateList borderColor) {
         // Now we need to tint the original background with the tint, using
         // an InsetDrawable if we have a border width
         mShapeDrawable = DrawableCompat.wrap(createShapeDrawable());
@@ -125,91 +130,115 @@ class ImageViewImpl {
             DrawableCompat.setTintMode(mShapeDrawable, backgroundTintMode);
         }
 
-        // Now we created a mask Drawable which will be used for touch feedback.
-        GradientDrawable touchFeedbackShape = createShapeDrawable();
-
-        // We'll now wrap that touch feedback mask drawable with a ColorStateList. We do not need
-        // to inset for any border here as LayerDrawable will nest the padding for us
-        mRippleDrawable = DrawableCompat.wrap(touchFeedbackShape);
-        DrawableCompat.setTintList(mRippleDrawable, createColorStateList(rippleColor));
-
-        final Drawable[] layers;
-        if (borderWidth > 0) {
-            mBorderDrawable = createBorderDrawable(borderWidth, backgroundTint);
-            layers = new Drawable[] {mBorderDrawable, mShapeDrawable, mRippleDrawable};
-        } else {
-            mBorderDrawable = null;
-            layers = new Drawable[] {mShapeDrawable, mRippleDrawable};
-        }
-
-        mContentBackground = new LayerDrawable(layers);
+        mBorderDrawable = createBorderDrawable(isCircle, cornerRadius, borderWidth, borderColor);
+        mContentBackground = new LayerDrawable(new Drawable[] {mBorderDrawable, mShapeDrawable});
 
         mShadowDrawable = new ShadowDrawableWrapper(
                 mView.getContext(),
                 mContentBackground,
-                mShadowViewDelegate.getRadius(),
+                mViewDelegate.getRadius(),
                 mElevation,
                 mElevation + mPressedTranslationZ);
         mShadowDrawable.setAddPaddingForCorners(false);
-        mShadowViewDelegate.setBackgroundDrawable(mShadowDrawable);
+        mViewDelegate.setBackgroundDrawable(mShadowDrawable);
     }
 
-    void setBackgroundTintList(ColorStateList tint) {
+    protected void setBackgroundTintList(ColorStateList tint) {
         if (mShapeDrawable != null) {
             DrawableCompat.setTintList(mShapeDrawable, tint);
         }
         if (mBorderDrawable != null) {
-            mBorderDrawable.setBorderTint(tint);
+            //mBorderDrawable.setBorderTint(tint); // TODO
         }
     }
 
-    void setBackgroundTintMode(PorterDuff.Mode tintMode) {
+    protected void setBackgroundTintMode(PorterDuff.Mode tintMode) {
         if (mShapeDrawable != null) {
             DrawableCompat.setTintMode(mShapeDrawable, tintMode);
         }
     }
 
+    protected void setImageDrawable(Drawable drawable) {
+        if (mView.getCornerRadius() > 0 || mView.isCircle()) {
+            boolean isTransition = isTransition(drawable);
 
-    void setRippleColor(int rippleColor) {
-        if (mRippleDrawable != null) {
-            DrawableCompat.setTintList(mRippleDrawable, createColorStateList(rippleColor));
+            if (!isVector(drawable) && !isTransition) {
+                drawable = createRoundedDrawable(drawable);
+            } else if (isTransition) {
+                final TransitionDrawable transitionDrawable = (TransitionDrawable) drawable;
+                for (int i = 0; i < transitionDrawable.getNumberOfLayers(); i++) {
+                    Drawable childDrawable = transitionDrawable.getDrawable(i);
+                    if (!isVector(childDrawable)) {
+                        int id = transitionDrawable.getId(i);
+                        if (id == View.NO_ID) {
+                            id = i;
+                            transitionDrawable.setId(i, id);
+                        }
+                        transitionDrawable.setDrawableByLayerId(id, createRoundedDrawable(childDrawable));
+                    }
+                }
+            }
         }
+
+        mViewDelegate.setImageDrawable(drawable);
     }
 
-    final void setElevation(float elevation) {
+    protected void setCircle(boolean isCircle) {
+        mBorderDrawable.setCircle(isCircle);
+
+        GradientDrawable shapeDrawable = DrawableCompat.unwrap(mShapeDrawable);
+        shapeDrawable.setShape(isCircle ? GradientDrawable.OVAL : GradientDrawable.RECTANGLE);
+    }
+
+    protected void setCornerRadius(float radius) {
+        mBorderDrawable.setCornerRadius(radius);
+
+        GradientDrawable gradientDrawable = DrawableCompat.unwrap(mShapeDrawable);
+        gradientDrawable.setCornerRadius(radius);
+    }
+
+    protected void setBorderWidth(float width) {
+        mBorderDrawable.setWidth(width);
+    }
+
+    protected void setBorderColor(ColorStateList color) {
+        mBorderDrawable.setColor(color);
+    }
+
+    protected float getElevation() {
+        return mElevation;
+    }
+
+    protected final void setElevation(float elevation) {
         if (mElevation != elevation) {
             mElevation = elevation;
             onElevationsChanged(elevation, mPressedTranslationZ);
         }
     }
 
-    float getElevation() {
-        return mElevation;
-    }
-
-    final void setPressedTranslationZ(float translationZ) {
+    protected final void setPressedTranslationZ(float translationZ) {
         if (mPressedTranslationZ != translationZ) {
             mPressedTranslationZ = translationZ;
             onElevationsChanged(mElevation, translationZ);
         }
     }
 
-    void onElevationsChanged(float elevation, float pressedTranslationZ) {
+    protected void onElevationsChanged(float elevation, float pressedTranslationZ) {
         if (mShadowDrawable != null) {
             mShadowDrawable.setShadowSize(elevation, elevation + mPressedTranslationZ);
             updatePadding();
         }
     }
 
-    void onDrawableStateChanged(int[] state) {
+    protected void onDrawableStateChanged(int[] state) {
         mStateListAnimator.setState(state);
     }
 
-    void jumpDrawableToCurrentState() {
+    protected void jumpDrawableToCurrentState() {
         mStateListAnimator.jumpToCurrentState();
     }
 
-    void hide(@Nullable final InternalVisibilityChangedListener listener, final boolean fromUser) {
+    protected void hide(@Nullable final InternalVisibilityChangedListener listener, final boolean fromUser) {
         if (isOrWillBeHidden()) {
             // We either are or will soon be hidden, skip the call
             return;
@@ -245,8 +274,7 @@ class ImageViewImpl {
                             mAnimState = ANIM_STATE_NONE;
 
                             if (!mCancelled) {
-                                mView.internalSetVisibility(fromUser ? View.GONE : View.INVISIBLE,
-                                        fromUser);
+                                mView.internalSetVisibility(fromUser ? View.GONE : View.INVISIBLE, fromUser);
                                 if (listener != null) {
                                     listener.onHidden();
                                 }
@@ -262,7 +290,7 @@ class ImageViewImpl {
         }
     }
 
-    void show(@Nullable final InternalVisibilityChangedListener listener, final boolean fromUser) {
+    protected void show(@Nullable final InternalVisibilityChangedListener listener, final boolean fromUser) {
         if (isOrWillBeShown()) {
             // We either are or will soon be visible, skip the call
             return;
@@ -311,63 +339,59 @@ class ImageViewImpl {
         }
     }
 
-    final Drawable getContentBackground() {
+    protected final Drawable getContentBackground() {
         return mContentBackground;
     }
 
-    void onCompatShadowChanged() {
+    protected void onCompatShadowChanged() {
         // Ignore pre-v21
     }
 
-    final void updatePadding() {
+    protected final void updatePadding() {
         Rect rect = mTmpRect;
         getPadding(rect);
         onPaddingUpdated(rect);
-        mShadowViewDelegate.setShadowPadding(rect.left, rect.top, rect.right, rect.bottom);
+        mViewDelegate.setShadowPadding(rect.left, rect.top, rect.right, rect.bottom);
     }
 
-    void getPadding(Rect rect) {
+    protected void getPadding(Rect rect) {
         mShadowDrawable.getPadding(rect);
     }
 
-    void onPaddingUpdated(Rect padding) {}
+    protected void onPaddingUpdated(Rect padding) {}
 
-    void onAttachedToWindow() {
+    protected void onAttachedToWindow() {
         if (requirePreDrawListener()) {
             ensurePreDrawListener();
             mView.getViewTreeObserver().addOnPreDrawListener(mPreDrawListener);
         }
     }
 
-    void onDetachedFromWindow() {
+    protected void onDetachedFromWindow() {
         if (mPreDrawListener != null) {
             mView.getViewTreeObserver().removeOnPreDrawListener(mPreDrawListener);
             mPreDrawListener = null;
         }
     }
 
-    boolean requirePreDrawListener() {
+    protected boolean requirePreDrawListener() {
         return true;
     }
 
-    CircularBorderDrawable createBorderDrawable(int borderWidth, ColorStateList backgroundTint) {
-        final Context context = mView.getContext();
-        CircularBorderDrawable borderDrawable = newCircularDrawable();
-        borderDrawable.setGradientColors(
-                ContextCompat.getColor(context, R.color.design_fab_stroke_top_outer_color),
-                ContextCompat.getColor(context, R.color.design_fab_stroke_top_inner_color),
-                ContextCompat.getColor(context, R.color.design_fab_stroke_end_inner_color),
-                ContextCompat.getColor(context, R.color.design_fab_stroke_end_outer_color));
-        borderDrawable.setBorderWidth(borderWidth);
-        borderDrawable.setBorderTint(backgroundTint);
+    protected BorderDrawable createBorderDrawable(boolean isCircle, float cornerRadius, float width, ColorStateList color) {
+        BorderDrawable borderDrawable = newBorderDrawable();
+        borderDrawable.setCircle(isCircle);
+        borderDrawable.setWidth(width);
+        borderDrawable.setColor(color);
+        borderDrawable.setCornerRadius(cornerRadius);
         return borderDrawable;
     }
 
-    CircularBorderDrawable newCircularDrawable() {
-        return new CircularBorderDrawable();
+    protected BorderDrawable newBorderDrawable() {
+        return new BorderDrawable();
     }
 
-    void onPreDraw() {
+    protected void onPreDraw() {
         final float rotation = mView.getRotation();
         if (mRotation != rotation) {
             mRotation = rotation;
@@ -387,18 +411,19 @@ class ImageViewImpl {
         }
     }
 
-    GradientDrawable createShapeDrawable() {
+    protected GradientDrawable createShapeDrawable() {
         GradientDrawable d = newGradientDrawableForShape();
-        d.setShape(GradientDrawable.OVAL);
-        d.setColor(Color.WHITE);
+        d.setShape(mView.isCircle() ? GradientDrawable.OVAL : GradientDrawable.RECTANGLE);
+        d.setCornerRadius(mView.getCornerRadius());
+        d.setColor(Color.TRANSPARENT);
         return d;
     }
 
-    GradientDrawable newGradientDrawableForShape() {
+    protected GradientDrawable newGradientDrawableForShape() {
         return new GradientDrawable();
     }
 
-    boolean isOrWillBeShown() {
+    protected boolean isOrWillBeShown() {
         if (mView.getVisibility() != View.VISIBLE) {
             // If we not currently visible, return true if we're animating to be shown
             return mAnimState == ANIM_STATE_SHOWING;
@@ -480,7 +505,7 @@ class ImageViewImpl {
         }
     }
 
-    private static ColorStateList createColorStateList(int selectedColor) {
+/*    private static ColorStateList createColorStateList(int selectedColor) {
         final int[][] states = new int[3][];
         final int[] colors = new int[3];
         int i = 0;
@@ -499,7 +524,7 @@ class ImageViewImpl {
         //i++;
 
         return new ColorStateList(states, colors);
-    }
+    }*/
 
     private boolean shouldAnimateVisibilityChange() {
         return ViewCompat.isLaidOut(mView) && !mView.isInEditMode();
@@ -525,7 +550,63 @@ class ImageViewImpl {
             mShadowDrawable.setRotation(-mRotation);
         }
         if (mBorderDrawable != null) {
-            mBorderDrawable.setRotation(-mRotation);
+            //mBorderDrawable.setRotation(-mRotation); // TODO
+        }
+    }
+
+    protected Drawable createRoundedDrawable(Drawable drawable) {
+        RoundedBitmapDrawable roundedBitmapDrawable;
+
+        if (!(drawable instanceof RoundedBitmapDrawable)) {
+            roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, getBitmap(drawable));
+            roundedBitmapDrawable.setAntiAlias(true);
+        } else {
+            roundedBitmapDrawable = (RoundedBitmapDrawable) drawable;
+        }
+
+        if (mView.isCircle()) {
+            roundedBitmapDrawable.setCornerRadius(0);
+            roundedBitmapDrawable.setCircular(true);
+        } else {
+            roundedBitmapDrawable.setCircular(false);
+            roundedBitmapDrawable.setCornerRadius(mView.getCornerRadius() / 3);
+        }
+
+        return roundedBitmapDrawable;
+    }
+
+    protected boolean isVector(Drawable drawable) {
+        return drawable instanceof VectorDrawableCompat;
+    }
+
+    protected boolean isTransition(Drawable drawable) {
+        return drawable instanceof TransitionDrawable;
+    }
+
+    protected final Bitmap getBitmap(Drawable drawable) {
+        if (drawable == null) {
+            return null;
+        }
+
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+        }
+
+        try {
+            Bitmap bitmap;
+            if (drawable instanceof ColorDrawable) {
+                bitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888);
+            } else {
+                bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            }
+
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            drawable.draw(canvas);
+            return bitmap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

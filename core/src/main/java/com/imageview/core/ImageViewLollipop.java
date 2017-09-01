@@ -9,7 +9,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -26,12 +25,26 @@ class ImageViewLollipop extends ImageViewImpl {
 
     private InsetDrawable mInsetDrawable;
 
-    ImageViewLollipop(VisibilityAwareImageView view, ShadowViewDelegate shadowViewDelegate) {
-        super(view, shadowViewDelegate);
+    protected ImageViewLollipop(ImageView view, ViewDelegate viewDelegate) {
+        super(view, viewDelegate);
     }
 
     @Override
-    void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, int rippleColor, int borderWidth) {
+    protected void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, boolean isCircle, float cornerRadius, float borderWidth, ColorStateList borderColor) {
+        // Now we need to tint the shape background with the tint
+        mShapeDrawable = DrawableCompat.wrap(createShapeDrawable());
+        DrawableCompat.setTintList(mShapeDrawable, backgroundTint);
+        if (backgroundTintMode != null) {
+            DrawableCompat.setTintMode(mShapeDrawable, backgroundTintMode);
+        }
+
+        mBorderDrawable = createBorderDrawable(isCircle, cornerRadius, borderWidth, borderColor);
+        mContentBackground = new LayerDrawable(new Drawable[] {mBorderDrawable, mShapeDrawable/*, mRippleDrawable*/});
+        mViewDelegate.setBackgroundDrawable(mContentBackground);
+    }
+/*
+    @Override
+    protected void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, int rippleColor, float borderWidth) {
         // Now we need to tint the shape background with the tint
         mShapeDrawable = DrawableCompat.wrap(createShapeDrawable());
         DrawableCompat.setTintList(mShapeDrawable, backgroundTint);
@@ -48,24 +61,15 @@ class ImageViewLollipop extends ImageViewImpl {
             rippleContent = mShapeDrawable;
         }
 
-        mRippleDrawable = new RippleDrawable(ColorStateList.valueOf(rippleColor), rippleContent, null);
+        //mRippleDrawable = new RippleDrawable(ColorStateList.valueOf(rippleColor), rippleContent, null);
 
-        mContentBackground = mRippleDrawable;
+        mContentBackground = rippleContent;
 
-        mShadowViewDelegate.setBackgroundDrawable(mRippleDrawable);
-    }
-
-    @Override
-    void setRippleColor(int rippleColor) {
-        if (mRippleDrawable instanceof RippleDrawable) {
-            ((RippleDrawable) mRippleDrawable).setColor(ColorStateList.valueOf(rippleColor));
-        } else {
-            super.setRippleColor(rippleColor);
-        }
-    }
+        mViewDelegate.setBackgroundDrawable(mContentBackground);
+    }*/
 
     @Override
-    void onElevationsChanged(final float elevation, final float pressedTranslationZ) {
+    protected void onElevationsChanged(final float elevation, final float pressedTranslationZ) {
         if (Build.VERSION.SDK_INT == 21) {
             // Animations produce NPE in version 21. Bluntly set the values instead (matching the
             // logic in the animations below).
@@ -108,11 +112,9 @@ class ImageViewLollipop extends ImageViewImpl {
                 // because setting the delay (on the next animation) via "setDelay" or "after"
                 // can trigger a NPE between android versions 22 and 24 (due to a framework
                 // bug). The issue has been fixed in version 25.
-                animators.add(ObjectAnimator.ofFloat(mView, View.TRANSLATION_Z,
-                        mView.getTranslationZ()).setDuration(PRESSED_ANIM_DELAY));
+                animators.add(ObjectAnimator.ofFloat(mView, View.TRANSLATION_Z, mView.getTranslationZ()).setDuration(PRESSED_ANIM_DELAY));
             }
-            animators.add(ObjectAnimator.ofFloat(mView, View.TRANSLATION_Z, 0f)
-                    .setDuration(PRESSED_ANIM_DURATION));
+            animators.add(ObjectAnimator.ofFloat(mView, View.TRANSLATION_Z, 0f).setDuration(PRESSED_ANIM_DURATION));
             set.playSequentially(animators.toArray(new ObjectAnimator[0]));
             set.setInterpolator(ANIM_INTERPOLATOR);
             stateListAnimator.addState(ENABLED_STATE_SET, set);
@@ -127,7 +129,7 @@ class ImageViewLollipop extends ImageViewImpl {
             mView.setStateListAnimator(stateListAnimator);
         }
 
-        if (mShadowViewDelegate.isCompatPaddingEnabled()) {
+        if (mViewDelegate.isCompatPaddingEnabled()) {
             updatePadding();
         }
     }
@@ -138,55 +140,52 @@ class ImageViewLollipop extends ImageViewImpl {
     }
 
     @Override
-    void onCompatShadowChanged() {
+    protected void onCompatShadowChanged() {
         updatePadding();
     }
 
     @Override
-    void onPaddingUpdated(Rect padding) {
-        if (mShadowViewDelegate.isCompatPaddingEnabled()) {
-            mInsetDrawable = new InsetDrawable(mRippleDrawable,
-                    padding.left, padding.top, padding.right, padding.bottom);
-            mShadowViewDelegate.setBackgroundDrawable(mInsetDrawable);
+    protected void onPaddingUpdated(Rect padding) {
+        if (mViewDelegate.isCompatPaddingEnabled()) {
+            mInsetDrawable = new InsetDrawable(mContentBackground, padding.left, padding.top, padding.right, padding.bottom);
+            mViewDelegate.setBackgroundDrawable(mInsetDrawable);
         } else {
-            mShadowViewDelegate.setBackgroundDrawable(mRippleDrawable);
+            mViewDelegate.setBackgroundDrawable(mContentBackground);
         }
     }
 
     @Override
-    void onDrawableStateChanged(int[] state) {
+    protected void onDrawableStateChanged(int[] state) {
         // no-op
     }
 
     @Override
-    void jumpDrawableToCurrentState() {
+    protected void jumpDrawableToCurrentState() {
         // no-op
     }
 
     @Override
-    boolean requirePreDrawListener() {
+    protected boolean requirePreDrawListener() {
         return false;
     }
 
     @Override
-    CircularBorderDrawable newCircularDrawable() {
-        return new CircularBorderDrawableLollipop();
+    protected BorderDrawable newBorderDrawable() {
+        return new BorderDrawableLollipop();
     }
 
     @Override
-    GradientDrawable newGradientDrawableForShape() {
+    protected GradientDrawable newGradientDrawableForShape() {
         return new AlwaysStatefulGradientDrawable();
     }
 
     @Override
-    void getPadding(Rect rect) {
-        if (mShadowViewDelegate.isCompatPaddingEnabled()) {
-            final float radius = mShadowViewDelegate.getRadius();
+    protected void getPadding(Rect rect) {
+        if (mViewDelegate.isCompatPaddingEnabled()) {
+            final float radius = mViewDelegate.getRadius();
             final float maxShadowSize = getElevation() + mPressedTranslationZ;
-            final int hPadding = (int) Math.ceil(
-                    ShadowDrawableWrapper.calculateHorizontalPadding(maxShadowSize, radius, false));
-            final int vPadding = (int) Math.ceil(
-                    ShadowDrawableWrapper.calculateVerticalPadding(maxShadowSize, radius, false));
+            final int hPadding = (int) Math.ceil(ShadowDrawableWrapper.calculateHorizontalPadding(maxShadowSize, radius, false));
+            final int vPadding = (int) Math.ceil(ShadowDrawableWrapper.calculateVerticalPadding(maxShadowSize, radius, false));
             rect.set(hPadding, vPadding, hPadding, vPadding);
         } else {
             rect.set(0, 0, 0, 0);

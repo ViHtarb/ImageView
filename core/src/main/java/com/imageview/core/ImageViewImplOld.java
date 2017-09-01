@@ -48,9 +48,9 @@ abstract class ImageViewImplOld {
     protected Drawable mContentBackground;
 
     protected final ImageViewOld mView;
-    protected final ViewDelegate mViewDelegate;
+    protected final ViewDelegateOld mViewDelegate;
 
-    protected ImageViewImplOld(ImageViewOld view, ViewDelegate viewDelegate) {
+    protected ImageViewImplOld(ImageViewOld view, ViewDelegateOld viewDelegate) {
         mView = view;
         mViewDelegate = viewDelegate;
     }

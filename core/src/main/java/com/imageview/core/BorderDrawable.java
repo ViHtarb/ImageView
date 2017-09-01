@@ -139,7 +139,7 @@ class BorderDrawable extends Drawable {
     }
 
     protected void setCircle(boolean isCircle) {
-        if (this.isCircle != isCircle) {
+        if (this.isCircle != isCircle) { // TODO check is it need?
             this.isCircle = isCircle;
             invalidateSelf();
         }

@@ -18,7 +18,6 @@ package com.imageview.core;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
@@ -35,7 +34,6 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.AppBarLayoutUtils;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -67,24 +65,24 @@ public abstract class ImageView extends VisibilityAwareImageView {
     private static final String LOG_TAG = ImageView.class.getSimpleName();
 
     /**
-     * Callback to be invoked when the visibility of a FloatingActionButton changes.
+     * Callback to be invoked when the visibility of a ImageView changes.
      */
     public abstract static class OnVisibilityChangedListener {
         /**
          * Called when a FloatingActionButton has been
          * {@link #show(OnVisibilityChangedListener) shown}.
          *
-         * @param fab the FloatingActionButton that was shown.
+         * @param imageView the ImageView that was shown.
          */
-        public void onShown(ImageView fab) {}
+        public void onShown(ImageView imageView) {}
 
         /**
          * Called when a FloatingActionButton has been
          * {@link #hide(OnVisibilityChangedListener) hidden}.
          *
-         * @param fab the FloatingActionButton that was hidden.
+         * @param imageView the ImageView that was hidden.
          */
-        public void onHidden(ImageView fab) {}
+        public void onHidden(ImageView imageView) {}
     }
 
     //private ColorStateList mBackgroundTint;
@@ -97,16 +95,9 @@ public abstract class ImageView extends VisibilityAwareImageView {
 
     private ColorStateList mBorderColor;
 
-    //private int mRippleColor;
-    //private int mSize;
-    private int mImagePadding;
-    //private int mMaxImageSize;
-
     private boolean mCompatPadding;
     private final Rect mShadowPadding = new Rect();
     private final Rect mTouchArea = new Rect();
-
-    //private AppCompatImageHelper mImageHelper;
 
     private ImageViewImpl mImpl;
 
@@ -121,12 +112,9 @@ public abstract class ImageView extends VisibilityAwareImageView {
     public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        //ThemeUtils.checkAppCompatTheme(context);
-
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ImageView, defStyleAttr, 0);
         //mBackgroundTint = a.getColorStateList(R.styleable.FloatingActionButton_backgroundTint); // this implementing from AppCompatImageHelper
         //mBackgroundTintMode = ViewUtils.parseTintMode(a.getInt(R.styleable.FloatingActionButton_backgroundTintMode, -1), null); // this implementing from AppCompatImageHelper
-        //mRippleColor = a.getColor(R.styleable.FloatingActionButton_rippleColor, 0); // TODO is it need?
 
         isCircle = a.getBoolean(R.styleable.ImageView_circle, false);
 
@@ -134,24 +122,12 @@ public abstract class ImageView extends VisibilityAwareImageView {
         mBorderWidth = a.getDimensionPixelSize(R.styleable.ImageView_borderWidth, 0);
         mBorderColor = a.getColorStateList(R.styleable.ImageView_borderColor);
 
-
-
-
-
-
-
         final float elevation = a.getDimension(R.styleable.ImageView_android_elevation, 0f);
         final float pressedTranslationZ = a.getDimension(R.styleable.ImageView_pressedTranslationZ, 0f); // TODO is need?
-        //mCompatPadding = a.getBoolean(R.styleable.FloatingActionButton_useCompatPadding, false); // TODO is it need?
+        //mCompatPadding = a.getBoolean(R.styleable.FloatingActionButton_useCompatPadding, false); // TODO is need?
         a.recycle();
 
-        // TODO used in AppCompatImageView
-        //mImageHelper = new AppCompatImageHelper(this);
-        //mImageHelper.loadFromAttributes(attrs, defStyleAttr);
-
-        //mMaxImageSize = (int) getResources().getDimension(R.dimen.design_fab_image_size); // TODO not need
-
-        //getImpl().setBackgroundDrawable(mBackgroundTint, mBackgroundTintMode, mRippleColor, mBorderWidth);
+        getImpl().setBackgroundDrawable(ViewCompat.getBackgroundTintList(this), ViewCompat.getBackgroundTintMode(this), isCircle, mCornerRadius, mBorderWidth, mBorderColor);
         getImpl().setElevation(elevation);
         getImpl().setPressedTranslationZ(pressedTranslationZ);
     }
@@ -160,7 +136,6 @@ public abstract class ImageView extends VisibilityAwareImageView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int preferredSize = /*getSizeDimension()*/getWidth();
 
-        mImagePadding = /*(*/preferredSize/* - mMaxImageSize)*/ / 2;
         getImpl().updatePadding();
 
         final int w = resolveAdjustedSize(preferredSize, widthMeasureSpec);
@@ -177,45 +152,17 @@ public abstract class ImageView extends VisibilityAwareImageView {
     }
 
     /**
-     * Returns the ripple color for this button.
-     *
-     * @return the ARGB color used for the ripple
-     * @see #setRippleColor(int)
-     */
-/*    @ColorInt
-    public int getRippleColor() {
-        return mRippleColor;
-    }*/
-
-    /**
-     * Sets the ripple color for this button.
-     *
-     * <p>When running on devices with KitKat or below, we draw this color as a filled circle
-     * rather than a ripple.</p>
-     *
-     * @param color ARGB color to use for the ripple
-     * @attr ref android.support.design.R.styleable#FloatingActionButton_rippleColor
-     * @see #getRippleColor()
-     */
-/*    public void setRippleColor(@ColorInt int color) {
-        if (mRippleColor != color) {
-            mRippleColor = color;
-            getImpl().setRippleColor(color);
-        }
-    }*/
-
-    /**
      * Returns the tint applied to the background drawable, if specified.
      *
      * @return the tint applied to the background drawable
      * @see #setBackgroundTintList(ColorStateList)
      */
-    @Nullable
+/*    @Nullable
     @Override
     public ColorStateList getBackgroundTintList() {
         return ViewCompat.getBackgroundTintList(this); // TODO
-        /*return mBackgroundTint;*/
-    }
+        *//*return mBackgroundTint;*//*
+    }*/
 
     /**
      * Applies a tint to the background drawable. Does not modify the current tint
@@ -223,14 +170,14 @@ public abstract class ImageView extends VisibilityAwareImageView {
      *
      * @param tint the tint to apply, may be {@code null} to clear tint
      */
-    @Override
+/*    @Override
     public void setBackgroundTintList(@Nullable ColorStateList tint) {
         ViewCompat.setBackgroundTintList(this, tint); // TODO
-        /*if (mBackgroundTint != tint) {
+        *//*if (mBackgroundTint != tint) {
             mBackgroundTint = tint;
             getImpl().setBackgroundTintList(tint);
-        }*/
-    }
+        }*//*
+    }*/
 
     /**
      * Returns the blending mode used to apply the tint to the background
@@ -240,12 +187,12 @@ public abstract class ImageView extends VisibilityAwareImageView {
      *         drawable
      * @see #setBackgroundTintMode(PorterDuff.Mode)
      */
-    @Nullable
+/*    @Nullable
     @Override
     public PorterDuff.Mode getBackgroundTintMode() {
         return ViewCompat.getBackgroundTintMode(this); // TODO
-        /*return mBackgroundTintMode;*/
-    }
+        *//*return mBackgroundTintMode;*//*
+    }*/
 
     /**
      * Specifies the blending mode used to apply the tint specified by
@@ -255,14 +202,14 @@ public abstract class ImageView extends VisibilityAwareImageView {
      * @param tintMode the blending mode used to apply the tint, may be
      *                 {@code null} to clear tint
      */
-    @Override
+/*    @Override
     public void setBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) {
         ViewCompat.setBackgroundTintMode(this, tintMode); // TODO
-/*        if (mBackgroundTintMode != tintMode) {
+*//*        if (mBackgroundTintMode != tintMode) {
             mBackgroundTintMode = tintMode;
             getImpl().setBackgroundTintMode(tintMode);
-        }*/
-    }
+        }*//*
+    }*/
 
     @Override
     public void setBackgroundDrawable(Drawable background) {
@@ -282,25 +229,29 @@ public abstract class ImageView extends VisibilityAwareImageView {
     @Override
     public void setImageBitmap(Bitmap bm) { // TODO
         super.setImageBitmap(bm);
-        //getImpl().setImageDrawable(getDrawable());
+        getImpl().setImageDrawable(getDrawable());
     }
 
     @Override
     public void setImageDrawable(@Nullable Drawable drawable) { // TODO
-        //getImpl().setImageDrawable(drawable);
+        getImpl().setImageDrawable(drawable);
+    }
+
+    public boolean isCircle() {
+        return isCircle;
     }
 
     public void setCircle(boolean isCircle) {
         if (this.isCircle != isCircle) {
             this.isCircle = isCircle;
-            //getImpl().setCircle(isCircle);
+            getImpl().setCircle(isCircle);
 
             setImageDrawable(getDrawable()); // TODO fix it
         }
     }
 
-    public boolean isCircle() {
-        return isCircle;
+    public float getCornerRadius() {
+        return mCornerRadius;
     }
 
     public void setCornerRadius(@DimenRes int resId) {
@@ -310,12 +261,12 @@ public abstract class ImageView extends VisibilityAwareImageView {
     public void setCornerRadius(float radius) {
         if (mCornerRadius != radius) {
             mCornerRadius = radius;
-            //getImpl().setCornerRadius(radius);
+            getImpl().setCornerRadius(radius);
         }
     }
 
-    public float getCornerRadius() {
-        return mCornerRadius;
+    public float getBorderWidth() {
+        return mBorderWidth;
     }
 
     public void setBorderWidth(@DimenRes int resId) {
@@ -325,12 +276,12 @@ public abstract class ImageView extends VisibilityAwareImageView {
     public void setBorderWidth(float width) {
         if (mBorderWidth != width) {
             mBorderWidth = width;
-            //getImpl().setBorderWidth(mBorderWidth);
+            getImpl().setBorderWidth(mBorderWidth);
         }
     }
 
-    public float getBorderWidth() {
-        return mBorderWidth;
+    public ColorStateList getBorderColor() {
+        return mBorderColor;
     }
 
     public void setBorderColor(@ColorInt int color) {
@@ -340,12 +291,8 @@ public abstract class ImageView extends VisibilityAwareImageView {
     public void setBorderColor(ColorStateList color) {
         if (mBorderColor != color) {
             mBorderColor = color;
-            //getImpl().setBorderColor(color);
+            getImpl().setBorderColor(color);
         }
-    }
-
-    public ColorStateList getBorderColor() {
-        return mBorderColor;
     }
 
     /**
@@ -422,35 +369,6 @@ public abstract class ImageView extends VisibilityAwareImageView {
         return mCompatPadding;
     }
 
-    /**
-     * Sets the size of the button.
-     *
-     * <p>The options relate to the options available on the material design specification.
-     * {@link #SIZE_NORMAL} is larger than {@link #SIZE_MINI}. {@link #SIZE_AUTO} will choose
-     * an appropriate size based on the screen size.</p>
-     *
-     * @param size one of {@link #SIZE_NORMAL}, {@link #SIZE_MINI} or {@link #SIZE_AUTO}
-     *
-     * @attr ref android.support.design.R.styleable#FloatingActionButton_fabSize
-     */
-/*    public void setSize(@Size int size) {
-        if (size != mSize) {
-            mSize = size;
-            requestLayout();
-        }
-    }*/
-
-    /**
-     * Returns the chosen size for this button.
-     *
-     * @return one of {@link #SIZE_NORMAL}, {@link #SIZE_MINI} or {@link #SIZE_AUTO}
-     * @see #setSize(int)
-     */
-/*    @Size
-    public int getSize() {
-        return mSize;
-    }*/
-
     @Nullable
     private ImageViewImpl.InternalVisibilityChangedListener wrapOnVisibilityChangedListener(@Nullable final OnVisibilityChangedListener listener) {
         if (listener == null) {
@@ -469,28 +387,6 @@ public abstract class ImageView extends VisibilityAwareImageView {
             }
         };
     }
-
-/*    int getSizeDimension() {
-        return getSizeDimension(mSize);
-    }
-
-    private int getSizeDimension(@Size final int size) {
-        final Resources res = getResources();
-        switch (size) {
-            case SIZE_AUTO:
-                // If we're set to auto, grab the size from resources and refresh
-                final int width = res.getConfiguration().screenWidthDp;
-                final int height = res.getConfiguration().screenHeightDp;
-                return Math.max(width, height) < AUTO_MINI_LARGEST_SCREEN_WIDTH
-                        ? getSizeDimension(SIZE_MINI)
-                        : getSizeDimension(SIZE_NORMAL);
-            case SIZE_MINI:
-                return res.getDimensionPixelSize(R.dimen.design_fab_size_mini);
-            case SIZE_NORMAL:
-            default:
-                return res.getDimensionPixelSize(R.dimen.design_fab_size_normal);
-        }
-    }*/
 
     @Override
     protected void onAttachedToWindow() {
@@ -540,7 +436,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
      */
     @NonNull
     public Drawable getContentBackground() {
-        return getImpl().getContentBackground();
+        return getImpl().getContentBackground(); // TODO is need?
     }
 
     private static int resolveAdjustedSize(int desiredSize, int measureSpec) {
@@ -822,12 +718,12 @@ public abstract class ImageView extends VisibilityAwareImageView {
 
     private ImageViewImpl createImpl() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return new ImageViewLollipop(this, new ShadowDelegateImpl());
+            return new ImageViewLollipop(this, new ViewDelegateImpl());
         }
-        return new ImageViewImpl(this, new ShadowDelegateImpl());
+        return new ImageViewImpl(this, new ViewDelegateImpl());
     }
 
-    private class ShadowDelegateImpl implements ShadowViewDelegate {
+    private class ViewDelegateImpl implements ViewDelegate {
 
         @Override
         public float getRadius() {
@@ -837,13 +733,17 @@ public abstract class ImageView extends VisibilityAwareImageView {
         @Override
         public void setShadowPadding(int left, int top, int right, int bottom) {
             mShadowPadding.set(left, top, right, bottom);
-            setPadding(left + mImagePadding, top + mImagePadding,
-                    right + mImagePadding, bottom + mImagePadding);
+            setPadding(left, top, right, bottom);
         }
 
         @Override
         public void setBackgroundDrawable(Drawable background) {
             ImageView.super.setBackgroundDrawable(background);
+        }
+
+        @Override
+        public void setImageDrawable(Drawable drawable) {
+            ImageView.super.setImageDrawable(drawable);
         }
 
         @Override

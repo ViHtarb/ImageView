@@ -46,7 +46,7 @@ class ImageViewGingerbreadOld extends ImageViewImplOld {
 
     //protected ShadowDrawableWrapper mShadowDrawable;
 
-    protected ImageViewGingerbreadOld(ImageViewOld view, ViewDelegate viewDelegate) {
+    protected ImageViewGingerbreadOld(ImageViewOld view, ViewDelegateOld viewDelegate) {
         super(view, viewDelegate);
     }
 

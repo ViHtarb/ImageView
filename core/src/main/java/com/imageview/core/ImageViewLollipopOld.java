@@ -39,7 +39,7 @@ import static android.os.Build.VERSION_CODES.LOLLIPOP;
 @TargetApi(LOLLIPOP)
 class ImageViewLollipopOld extends /*ImageViewIcs*/ ImageViewGingerbreadOld {
 
-    protected ImageViewLollipopOld(ImageViewOld view, ViewDelegate viewDelegate) {
+    protected ImageViewLollipopOld(ImageViewOld view, ViewDelegateOld viewDelegate) {
         super(view, viewDelegate);
     }
 

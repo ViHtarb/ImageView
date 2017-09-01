@@ -24,34 +24,14 @@
 
 package com.imageview.core;
 
-import android.annotation.TargetApi;
-import android.content.res.ColorStateList;
-import android.graphics.Outline;
-import android.graphics.Rect;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-
-import static android.os.Build.VERSION_CODES.LOLLIPOP;
+import android.graphics.drawable.Drawable;
 
 /**
- * Lollipop version of {@link BorderDrawable}.
+ * Created by Viнt@rь on 18.12.2016
  */
-@RequiresApi(LOLLIPOP)
-@TargetApi(LOLLIPOP)
-class BorderDrawableLollipop extends BorderDrawable {
+interface ViewDelegateOld {
 
-    @Override
-    public void getOutline(@NonNull Outline outline) {
-        final Rect bounds = copyBounds();
-        if (isCircle) {
-            outline.setOval(bounds);
-        } else {
-            if (mCornerRadius > 0) {
-                outline.setRoundRect(bounds, mCornerRadius);
-            } else {
-                outline.setRect(bounds);
-            }
-        }
-    }
+    void setBackgroundDrawable(Drawable background);
+
+    void setImageDrawable(Drawable drawable);
 }

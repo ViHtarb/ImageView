@@ -35,7 +35,7 @@ import android.util.AttributeSet;
 /**
  * Created by Viнt@rь on 09.11.2016
  */
-public abstract class ImageView extends com.imageview.core.ImageViewOld {
+public abstract class ImageView extends com.imageview.core.ImageView {
 
     private Drawable mPlaceholderDrawable;
     private Drawable mErrorDrawable;
@@ -51,7 +51,7 @@ public abstract class ImageView extends com.imageview.core.ImageViewOld {
     public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ImageViewOld, defStyleAttr, 0);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ImageView, defStyleAttr, 0);
 
         Drawable placeholderDrawable = a.getDrawable(R.styleable.ImageView_placeholder);
         Drawable errorDrawable = a.getDrawable(R.styleable.ImageView_error);
