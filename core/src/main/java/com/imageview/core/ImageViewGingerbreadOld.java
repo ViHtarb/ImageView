@@ -37,7 +37,7 @@ import android.view.View;
 /**
  * Created by Viнt@rь on 18.12.2016
  */
-class ImageViewGingerbread extends ImageViewImpl {
+class ImageViewGingerbreadOld extends ImageViewImplOld {
 
 /*    static final int[] PRESSED_ENABLED_STATE_SET = {android.R.attr.state_pressed,
             android.R.attr.state_enabled};
@@ -46,7 +46,7 @@ class ImageViewGingerbread extends ImageViewImpl {
 
     //protected ShadowDrawableWrapper mShadowDrawable;
 
-    protected ImageViewGingerbread(ImageView view, ViewDelegate viewDelegate) {
+    protected ImageViewGingerbreadOld(ImageViewOld view, ViewDelegate viewDelegate) {
         super(view, viewDelegate);
     }
 

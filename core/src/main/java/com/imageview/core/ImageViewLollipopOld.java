@@ -25,18 +25,49 @@
 package com.imageview.core;
 
 import android.annotation.TargetApi;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.VectorDrawable;
 import android.support.annotation.RequiresApi;
 
-import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+import static android.os.Build.VERSION_CODES.LOLLIPOP;
 
 /**
  * Created by Viнt@rь on 18.12.2016
  */
-@RequiresApi(ICE_CREAM_SANDWICH)
-@TargetApi(ICE_CREAM_SANDWICH)
-class ImageViewIcs extends ImageViewGingerbread {
+@RequiresApi(LOLLIPOP)
+@TargetApi(LOLLIPOP)
+class ImageViewLollipopOld extends /*ImageViewIcs*/ ImageViewGingerbreadOld {
 
-    protected ImageViewIcs(ImageView view, ViewDelegate viewDelegate) {
+    protected ImageViewLollipopOld(ImageViewOld view, ViewDelegate viewDelegate) {
         super(view, viewDelegate);
+    }
+
+    @Override
+    protected BorderDrawable newBorderDrawable() {
+        return new BorderDrawableLollipop();
+    }
+
+    @Override
+    protected GradientDrawable newGradientDrawableForShape() {
+        return new AlwaysStatefulGradientDrawable();
+    }
+
+    @Override
+    protected boolean isVector(Drawable drawable) {
+        return drawable instanceof VectorDrawable || super.isVector(drawable);
+    }
+
+    /**
+     * LayerDrawable on L+ caches its isStateful() state and doesn't refresh it,
+     * meaning that if we apply a tint to one of its children, the parent doesn't become
+     * stateful and the tint doesn't work for state changes. We workaround it by saying that we
+     * are always stateful. If we don't have a stateful tint, the change is ignored anyway.
+     **/
+    protected static class AlwaysStatefulGradientDrawable extends GradientDrawable {
+        @Override
+        public boolean isStateful() {
+            return true;
+        }
     }
 }

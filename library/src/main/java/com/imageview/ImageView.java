@@ -28,9 +28,9 @@ import android.content.Context;
 import android.util.AttributeSet;
 
 /**
- * Simple implementation of {@link com.imageview.core.ImageView}
+ * Simple implementation of {@link com.imageview.core.ImageViewOld}
  */
-public class ImageView extends com.imageview.core.ImageView {
+public class ImageView extends com.imageview.core.ImageViewOld {
 
     public ImageView(Context context) {
         this(context, null);

@@ -2,15 +2,21 @@
 <resources>
     <declare-styleable name="ImageView">
         <attr name="circle" format="boolean"/>
+        <attr name="cornerRadius" format="dimension"/>
         <attr name="borderWidth" format="dimension"/>
         <attr name="borderColor" format="color"/>
-        <attr name="cornerRadius" format="dimension"/>
-<!--        <attr name="android:elevation"/>-->
+        <attr name="pressedTranslationZ" format="dimension"/>
+        <attr name="android:elevation"/>
 <!--        <attr name="android:backgroundTint"/>
         <attr name="android:backgroundTintMode"/>-->
     </declare-styleable>
 
-<!--    <color name="design_fab_shadow_end_color">@android:color/transparent</color>
+    <color name="design_fab_shadow_end_color">@android:color/transparent</color>
     <color name="design_fab_shadow_mid_color">#14000000</color>
-    <color name="design_fab_shadow_start_color">#44000000</color>-->
+    <color name="design_fab_shadow_start_color">#44000000</color>
+
+    <color name="design_fab_stroke_end_inner_color">#0A000000</color>
+    <color name="design_fab_stroke_end_outer_color">#0F000000</color>
+    <color name="design_fab_stroke_top_inner_color">#1AFFFFFF</color>
+    <color name="design_fab_stroke_top_outer_color">#2EFFFFFF</color>
 </resources>

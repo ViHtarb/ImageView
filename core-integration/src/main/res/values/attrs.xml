@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="ImageView">
+    <declare-styleable name="ImageViewOld">
         <attr name="placeholder" format="reference"/>
         <attr name="error" format="reference"/>
     </declare-styleable>
