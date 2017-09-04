@@ -39,8 +39,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        final ImageView imageViewTest = findViewById(R.id.image_view_2);
+        //imageViewTest.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
+        imageViewTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
         final ImageView imageView = findViewById(R.id.image_view);
-        imageView.setCompatElevation(20f);
+        //imageView.setCompatElevation(20f);
         imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
         //imageView.setImageURL("https://pp.vk.me/c604531/v604531553/1d0f6/9gae9OTT_xo.jpg");
         //imageView.setImageResource(R.drawable.ic_noavatar);
@@ -50,7 +59,8 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imageView.setCircle(!imageView.isCircle());
+                imageView.setCompatElevation(20f);
+                //imageView.setCircle(!imageView.isCircle());
                 //imageView.setBorderWidth(30f);
                 //imageView.setBorderColor(Color.GREEN);
                 //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");

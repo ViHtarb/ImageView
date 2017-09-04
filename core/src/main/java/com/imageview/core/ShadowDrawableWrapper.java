@@ -143,16 +143,13 @@ final class ShadowDrawableWrapper extends DrawableWrapper {
 
     @Override
     public boolean getPadding(Rect padding) {
-        int vOffset = (int) Math.ceil(calculateVerticalPadding(mRawMaxShadowSize, mCornerRadius,
-                mAddPaddingForCorners));
-        int hOffset = (int) Math.ceil(calculateHorizontalPadding(mRawMaxShadowSize, mCornerRadius,
-                mAddPaddingForCorners));
+        int vOffset = (int) Math.ceil(calculateVerticalPadding(mRawMaxShadowSize, mCornerRadius, mAddPaddingForCorners));
+        int hOffset = (int) Math.ceil(calculateHorizontalPadding(mRawMaxShadowSize, mCornerRadius, mAddPaddingForCorners));
         padding.set(hOffset, vOffset, hOffset, vOffset);
         return true;
     }
 
-    public static float calculateVerticalPadding(float maxShadowSize, float cornerRadius,
-                                                 boolean addPaddingForCorners) {
+    public static float calculateVerticalPadding(float maxShadowSize, float cornerRadius, boolean addPaddingForCorners) {
         if (addPaddingForCorners) {
             return (float) (maxShadowSize * SHADOW_MULTIPLIER + (1 - COS_45) * cornerRadius);
         } else {
@@ -160,8 +157,7 @@ final class ShadowDrawableWrapper extends DrawableWrapper {
         }
     }
 
-    public static float calculateHorizontalPadding(float maxShadowSize, float cornerRadius,
-                                                   boolean addPaddingForCorners) {
+    public static float calculateHorizontalPadding(float maxShadowSize, float cornerRadius, boolean addPaddingForCorners) {
         if (addPaddingForCorners) {
             return (float) (maxShadowSize + (1 - COS_45) * cornerRadius);
         } else {
@@ -319,11 +315,9 @@ final class ShadowDrawableWrapper extends DrawableWrapper {
         // We could have different top-bottom offsets to avoid extra gap above but in that case
         // center aligning Views inside the CardView would be problematic.
         final float verticalOffset = mRawMaxShadowSize * SHADOW_MULTIPLIER;
-        mContentBounds.set(bounds.left + mRawMaxShadowSize, bounds.top + verticalOffset,
-                bounds.right - mRawMaxShadowSize, bounds.bottom - verticalOffset);
+        mContentBounds.set(bounds.left + mRawMaxShadowSize, bounds.top + verticalOffset, bounds.right - mRawMaxShadowSize, bounds.bottom - verticalOffset);
 
-        getWrappedDrawable().setBounds((int) mContentBounds.left, (int) mContentBounds.top,
-                (int) mContentBounds.right, (int) mContentBounds.bottom);
+        getWrappedDrawable().setBounds((int) mContentBounds.left, (int) mContentBounds.top, (int) mContentBounds.right, (int) mContentBounds.bottom);
 
         buildShadowCorners();
     }
@@ -349,14 +343,12 @@ final class ShadowDrawableWrapper extends DrawableWrapper {
     }
 
     public float getMinWidth() {
-        final float content = 2 *
-                Math.max(mRawMaxShadowSize, mCornerRadius + mRawMaxShadowSize / 2);
+        final float content = 2 * Math.max(mRawMaxShadowSize, mCornerRadius + mRawMaxShadowSize / 2);
         return content + mRawMaxShadowSize * 2;
     }
 
     public float getMinHeight() {
-        final float content = 2 * Math.max(mRawMaxShadowSize, mCornerRadius
-                + mRawMaxShadowSize * SHADOW_MULTIPLIER / 2);
+        final float content = 2 * Math.max(mRawMaxShadowSize, mCornerRadius + mRawMaxShadowSize * SHADOW_MULTIPLIER / 2);
         return content + (mRawMaxShadowSize * SHADOW_MULTIPLIER) * 2;
     }
 }

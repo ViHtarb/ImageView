@@ -2,13 +2,14 @@
 <resources>
     <declare-styleable name="ImageView">
         <attr name="circle" format="boolean"/>
+        <attr name="useCompatPadding" format="boolean"/>
         <attr name="cornerRadius" format="dimension"/>
         <attr name="borderWidth" format="dimension"/>
         <attr name="borderColor" format="color"/>
+        <attr name="elevation" format="dimension"/>
         <attr name="pressedTranslationZ" format="dimension"/>
-        <attr name="android:elevation"/>
-<!--        <attr name="android:backgroundTint"/>
-        <attr name="android:backgroundTintMode"/>-->
+        <attr name="backgroundTint"/>
+        <attr name="backgroundTintMode"/>
     </declare-styleable>
 
     <declare-styleable name="ImageView_Behavior_Layout">

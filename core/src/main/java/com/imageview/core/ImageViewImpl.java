@@ -134,7 +134,7 @@ class ImageViewImpl {
         }
 
         mBorderDrawable = createBorderDrawable(isCircle, cornerRadius, borderWidth, borderColor);
-        mContentBackground = new LayerDrawable(new Drawable[] {mBorderDrawable, mShapeDrawable});
+        mContentBackground = new LayerDrawable(new Drawable[] {mShapeDrawable, mBorderDrawable});
 
         mShadowDrawable = new ShadowDrawableWrapper(
                 mView.getContext(),
@@ -190,21 +190,6 @@ class ImageViewImpl {
         shapeDrawable.setShape(isCircle ? GradientDrawable.OVAL : GradientDrawable.RECTANGLE);
     }
 
-    protected void setCornerRadius(float radius) {
-        mBorderDrawable.setCornerRadius(radius);
-
-        GradientDrawable gradientDrawable = DrawableCompat.unwrap(mShapeDrawable);
-        gradientDrawable.setCornerRadius(radius);
-    }
-
-    protected void setBorderWidth(float width) {
-        mBorderDrawable.setWidth(width);
-    }
-
-    protected void setBorderColor(ColorStateList color) {
-        mBorderDrawable.setColor(color);
-    }
-
     protected float getElevation() {
         return mElevation;
     }
@@ -221,6 +206,21 @@ class ImageViewImpl {
             mPressedTranslationZ = translationZ;
             onElevationsChanged(mElevation, translationZ);
         }
+    }
+
+    protected void setCornerRadius(float radius) {
+        mBorderDrawable.setCornerRadius(radius);
+
+        GradientDrawable gradientDrawable = DrawableCompat.unwrap(mShapeDrawable);
+        gradientDrawable.setCornerRadius(radius);
+    }
+
+    protected void setBorderWidth(float width) {
+        mBorderDrawable.setWidth(width);
+    }
+
+    protected void setBorderColor(ColorStateList color) {
+        mBorderDrawable.setColor(color);
     }
 
     protected void onElevationsChanged(float elevation, float pressedTranslationZ) {
@@ -411,7 +411,7 @@ class ImageViewImpl {
         GradientDrawable d = newGradientDrawableForShape();
         d.setShape(mView.isCircle() ? GradientDrawable.OVAL : GradientDrawable.RECTANGLE);
         d.setCornerRadius(mView.getCornerRadius());
-        d.setColor(Color.TRANSPARENT);
+        d.setColor(Color.WHITE);
         return d;
     }
 

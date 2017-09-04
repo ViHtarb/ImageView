@@ -40,7 +40,7 @@ class ImageViewLollipop extends ImageViewImpl {
         }
 
         mBorderDrawable = createBorderDrawable(isCircle, cornerRadius, borderWidth, borderColor);
-        mContentBackground = new LayerDrawable(new Drawable[] {mBorderDrawable, mShapeDrawable});
+        mContentBackground = new LayerDrawable(new Drawable[] {mShapeDrawable, mBorderDrawable});
         mViewDelegate.setBackgroundDrawable(mContentBackground);
     }
 
@@ -105,7 +105,7 @@ class ImageViewLollipop extends ImageViewImpl {
             mView.setStateListAnimator(stateListAnimator);
         }
 
-        if (mViewDelegate.isCompatPaddingEnabled()) {
+        if (mViewDelegate.isCompatPadding()) {
             updatePadding();
         }
     }
@@ -122,7 +122,7 @@ class ImageViewLollipop extends ImageViewImpl {
 
     @Override
     protected void onPaddingUpdated(Rect padding) {
-        if (mViewDelegate.isCompatPaddingEnabled()) {
+        if (mViewDelegate.isCompatPadding()) {
             mInsetDrawable = new InsetDrawable(mContentBackground, padding.left, padding.top, padding.right, padding.bottom);
             mViewDelegate.setBackgroundDrawable(mInsetDrawable);
         } else {
@@ -162,7 +162,7 @@ class ImageViewLollipop extends ImageViewImpl {
 
     @Override
     protected void getPadding(Rect rect) {
-        if (mViewDelegate.isCompatPaddingEnabled()) {
+        if (mViewDelegate.isCompatPadding()) {
             final float radius = mViewDelegate.getRadius();
             final float maxShadowSize = getElevation() + mPressedTranslationZ;
             final int hPadding = (int) Math.ceil(ShadowDrawableWrapper.calculateHorizontalPadding(maxShadowSize, radius, false));

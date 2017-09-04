@@ -12,12 +12,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.imageview.sample.MainActivity">
 
-<!--    <ImageView
-        android:id="@+id/image_view_test"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@drawable/ic_placeholder"/>-->
-
     <com.imageview.ImageView
         android:id="@+id/image_view"
         android:layout_width="48dp"
@@ -27,7 +21,32 @@
         android:src="@drawable/ic_placeholder"
         app:borderWidth="2dp"
         app:borderColor="@color/colorAccent"
-        app:circle="true"/>
+        app:circle="true"
+        app:elevation="8dp"/>
+
+    <com.imageview.ImageView
+        android:id="@+id/image_view_2"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="8dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_placeholder"
+        app:borderWidth="2dp"
+        app:borderColor="@color/colorAccent"
+        app:circle="true"
+        app:useCompatPadding="true"
+        app:backgroundTint="@android:color/holo_orange_light"
+        app:elevation="8dp"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:elevation="8dp"
+        app:fabSize="normal"
+        app:useCompatPadding="true"
+        app:borderWidth="2dp"
+        app:backgroundTint="@android:color/transparent"
+        android:clickable="true"/>
 
     <Button
         android:id="@+id/button_test"

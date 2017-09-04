@@ -294,7 +294,7 @@ public abstract class ImageViewOld extends VisibilityAwareImageView {
         }
 
         @Override
-        public boolean isCompatPaddingEnabled() {
+        public boolean isCompatPadding() {
             return false;
         }
 

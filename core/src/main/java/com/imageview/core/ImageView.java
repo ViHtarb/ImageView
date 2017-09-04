@@ -85,10 +85,8 @@ public abstract class ImageView extends VisibilityAwareImageView {
         public void onHidden(ImageView imageView) {}
     }
 
-    //private ColorStateList mBackgroundTint;
-    //private PorterDuff.Mode mBackgroundTintMode;
-
     private boolean isCircle;
+    private boolean isCompatPadding;
 
     private float mCornerRadius;
     private float mBorderWidth;
@@ -97,7 +95,9 @@ public abstract class ImageView extends VisibilityAwareImageView {
 
     private Drawable mStockDrawable;
 
-    private boolean mCompatPadding;
+    private ColorStateList mBackgroundTint;
+    private PorterDuff.Mode mBackgroundTintMode;
+
     private final Rect mShadowPadding = new Rect();
     private final Rect mTouchArea = new Rect();
 
@@ -115,21 +115,22 @@ public abstract class ImageView extends VisibilityAwareImageView {
         super(context, attrs, defStyleAttr);
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ImageView, defStyleAttr, 0);
-        //mBackgroundTint = a.getColorStateList(R.styleable.FloatingActionButton_backgroundTint); // this implementing from AppCompatImageHelper
-        //mBackgroundTintMode = ViewUtils.parseTintMode(a.getInt(R.styleable.FloatingActionButton_backgroundTintMode, -1), null); // this implementing from AppCompatImageHelper
 
         isCircle = a.getBoolean(R.styleable.ImageView_circle, false);
+        isCompatPadding = a.getBoolean(R.styleable.ImageView_useCompatPadding, false);
 
         mCornerRadius = a.getDimension(R.styleable.ImageView_cornerRadius, 0);
         mBorderWidth = a.getDimensionPixelSize(R.styleable.ImageView_borderWidth, 0);
         mBorderColor = a.getColorStateList(R.styleable.ImageView_borderColor);
 
-        final float elevation = a.getDimension(R.styleable.ImageView_android_elevation, 0f);
-        final float pressedTranslationZ = a.getDimension(R.styleable.ImageView_pressedTranslationZ, 0f); // TODO is need?
-        //mCompatPadding = a.getBoolean(R.styleable.FloatingActionButton_useCompatPadding, false); // TODO is need?
+        final float elevation = a.getDimension(R.styleable.ImageView_elevation, 0f);
+        final float pressedTranslationZ = a.getDimension(R.styleable.ImageView_pressedTranslationZ, 0); // TODO is need?
+
+        mBackgroundTint = a.getColorStateList(R.styleable.ImageView_backgroundTint);
+        mBackgroundTintMode = ViewUtils.parseTintMode(a.getInt(R.styleable.ImageView_backgroundTintMode, -1), null);
         a.recycle();
 
-        getImpl().setBackgroundDrawable(ViewCompat.getBackgroundTintList(this), ViewCompat.getBackgroundTintMode(this), isCircle, mCornerRadius, mBorderWidth, mBorderColor);
+        getImpl().setBackgroundDrawable(mBackgroundTint, mBackgroundTintMode, isCircle, mCornerRadius, mBorderWidth, mBorderColor);
         getImpl().setElevation(elevation);
         getImpl().setPressedTranslationZ(pressedTranslationZ);
     }
@@ -197,12 +198,11 @@ public abstract class ImageView extends VisibilityAwareImageView {
      * @return the tint applied to the background drawable
      * @see #setBackgroundTintList(ColorStateList)
      */
-/*    @Nullable
+    @Nullable
     @Override
     public ColorStateList getBackgroundTintList() {
-        return ViewCompat.getBackgroundTintList(this); // TODO
-        *//*return mBackgroundTint;*//*
-    }*/
+        return mBackgroundTint;
+    }
 
     /**
      * Applies a tint to the background drawable. Does not modify the current tint
@@ -210,14 +210,13 @@ public abstract class ImageView extends VisibilityAwareImageView {
      *
      * @param tint the tint to apply, may be {@code null} to clear tint
      */
-/*    @Override
+    @Override
     public void setBackgroundTintList(@Nullable ColorStateList tint) {
-        ViewCompat.setBackgroundTintList(this, tint); // TODO
-        *//*if (mBackgroundTint != tint) {
+        if (mBackgroundTint != tint) {
             mBackgroundTint = tint;
             getImpl().setBackgroundTintList(tint);
-        }*//*
-    }*/
+        }
+    }
 
     /**
      * Returns the blending mode used to apply the tint to the background
@@ -227,12 +226,11 @@ public abstract class ImageView extends VisibilityAwareImageView {
      *         drawable
      * @see #setBackgroundTintMode(PorterDuff.Mode)
      */
-/*    @Nullable
+    @Nullable
     @Override
     public PorterDuff.Mode getBackgroundTintMode() {
-        return ViewCompat.getBackgroundTintMode(this); // TODO
-        *//*return mBackgroundTintMode;*//*
-    }*/
+        return mBackgroundTintMode;
+    }
 
     /**
      * Specifies the blending mode used to apply the tint specified by
@@ -242,14 +240,35 @@ public abstract class ImageView extends VisibilityAwareImageView {
      * @param tintMode the blending mode used to apply the tint, may be
      *                 {@code null} to clear tint
      */
-/*    @Override
+    @Override
     public void setBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) {
-        ViewCompat.setBackgroundTintMode(this, tintMode); // TODO
-*//*        if (mBackgroundTintMode != tintMode) {
+        if (mBackgroundTintMode != tintMode) {
             mBackgroundTintMode = tintMode;
             getImpl().setBackgroundTintMode(tintMode);
-        }*//*
-    }*/
+        }
+    }
+
+    @Nullable
+    @Override
+    public ColorStateList getSupportBackgroundTintList() {
+        return getBackgroundTintList();
+    }
+
+    @Override
+    public void setSupportBackgroundTintList(@Nullable ColorStateList tint) {
+        setBackgroundTintList(tint);
+    }
+
+    @Nullable
+    @Override
+    public PorterDuff.Mode getSupportBackgroundTintMode() {
+        return getBackgroundTintMode();
+    }
+
+    @Override
+    public void setSupportBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) {
+        setBackgroundTintMode(tintMode);
+    }
 
     @Override
     public void setBackgroundDrawable(Drawable background) {
@@ -288,6 +307,59 @@ public abstract class ImageView extends VisibilityAwareImageView {
 
             //setImageDrawable(getDrawable()); // TODO fix it
         }
+    }
+
+    /**
+     * Returns whether ImageView will add inner padding on platforms Lollipop and after.
+     *
+     * @return true if ImageView is adding inner padding on platforms Lollipop and after,
+     * to ensure consistent dimensions on all platforms.
+     *
+     * @attr ref R.styleable#ImageView_useCompatPadding
+     * @see #setUseCompatPadding(boolean)
+     */
+    public boolean getUseCompatPadding() {
+        return isCompatPadding;
+    }
+
+    /**
+     * Set whether ImageView should add inner padding on platforms Lollipop and after,
+     * to ensure consistent dimensions on all platforms.
+     *
+     * @param useCompatPadding true if ImageView is adding inner padding on platforms
+     *                         Lollipop and after, to ensure consistent dimensions on all platforms.
+     *
+     * @attr ref R.styleable#ImageView_useCompatPadding
+     * @see #getUseCompatPadding()
+     */
+    public void setUseCompatPadding(boolean useCompatPadding) {
+        if (isCompatPadding != useCompatPadding) {
+            isCompatPadding = useCompatPadding;
+            getImpl().onCompatShadowChanged();
+        }
+    }
+
+    /**
+     * Returns the backward compatible elevation of the FloatingActionButton.
+     *
+     * @return the backward compatible elevation in pixels.
+     * @attr ref R.styleable#ImageView_elevation
+     * @see #setCompatElevation(float)
+     */
+    public float getCompatElevation() {
+        return getImpl().getElevation();
+    }
+
+    /**
+     * Updates the backward compatible elevation of the ImageView.
+     *
+     * @param elevation The backward compatible elevation in pixels.
+     * @attr ref R.styleable#ImageView_elevation
+     * @see #getCompatElevation()
+     * @see #setUseCompatPadding(boolean)
+     */
+    public void setCompatElevation(float elevation) {
+        getImpl().setElevation(elevation);
     }
 
     public float getCornerRadius() {
@@ -333,59 +405,6 @@ public abstract class ImageView extends VisibilityAwareImageView {
             mBorderColor = color;
             getImpl().setBorderColor(color);
         }
-    }
-
-    /**
-     * Returns whether ImageView will add inner padding on platforms Lollipop and after.
-     *
-     * @return true if ImageView is adding inner padding on platforms Lollipop and after,
-     * to ensure consistent dimensions on all platforms.
-     *
-     * @attr ref android.support.design.R.styleable#FloatingActionButton_useCompatPadding
-     * @see #setUseCompatPadding(boolean)
-     */
-    public boolean getUseCompatPadding() {
-        return mCompatPadding;
-    }
-
-    /**
-     * Set whether ImageView should add inner padding on platforms Lollipop and after,
-     * to ensure consistent dimensions on all platforms.
-     *
-     * @param useCompatPadding true if ImageView is adding inner padding on platforms
-     *                         Lollipop and after, to ensure consistent dimensions on all platforms.
-     *
-     * @attr ref android.support.design.R.styleable#FloatingActionButton_useCompatPadding
-     * @see #getUseCompatPadding()
-     */
-    public void setUseCompatPadding(boolean useCompatPadding) {
-        if (mCompatPadding != useCompatPadding) {
-            mCompatPadding = useCompatPadding;
-            getImpl().onCompatShadowChanged();
-        }
-    }
-
-    /**
-     * Returns the backward compatible elevation of the FloatingActionButton.
-     *
-     * @return the backward compatible elevation in pixels.
-     * @attr ref R.styleable#ImageView_android_elevation
-     * @see #setCompatElevation(float)
-     */
-    public float getCompatElevation() {
-        return getImpl().getElevation();
-    }
-
-    /**
-     * Updates the backward compatible elevation of the ImageView.
-     *
-     * @param elevation The backward compatible elevation in pixels.
-     * @attr ref R.styleable#ImageView_android_elevation
-     * @see #getCompatElevation()
-     * @see #setUseCompatPadding(boolean)
-     */
-    public void setCompatElevation(float elevation) {
-        getImpl().setElevation(elevation);
     }
 
     /**
@@ -532,8 +551,8 @@ public abstract class ImageView extends VisibilityAwareImageView {
         }
 
         @Override
-        public boolean isCompatPaddingEnabled() {
-            return mCompatPadding;
+        public boolean isCompatPadding() {
+            return isCompatPadding;
         }
     }
 
@@ -598,9 +617,9 @@ public abstract class ImageView extends VisibilityAwareImageView {
             if (dependency instanceof AppBarLayout) {
                 // If we're depending on an AppBarLayout we will show/hide it automatically
                 // if the FAB is anchored to the AppBarLayout
-                updateFabVisibilityForAppBarLayout(parent, (AppBarLayout) dependency, child);
+                updateViewVisibilityForAppBarLayout(parent, (AppBarLayout) dependency, child);
             } else if (isBottomSheet(dependency)) {
-                updateFabVisibilityForBottomSheet(dependency, child);
+                updateViewVisibilityForBottomSheet(dependency, child);
             }
             return false;
         }
@@ -636,7 +655,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
             return true;
         }
 
-        private boolean updateFabVisibilityForAppBarLayout(CoordinatorLayout parent, AppBarLayout appBarLayout, ImageView child) {
+        private boolean updateViewVisibilityForAppBarLayout(CoordinatorLayout parent, AppBarLayout appBarLayout, ImageView child) {
             if (!shouldUpdateVisibility(appBarLayout, child)) {
                 return false;
             }
@@ -659,7 +678,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
             return true;
         }
 
-        private boolean updateFabVisibilityForBottomSheet(View bottomSheet, ImageView child) {
+        private boolean updateViewVisibilityForBottomSheet(View bottomSheet, ImageView child) {
             if (!shouldUpdateVisibility(bottomSheet, child)) {
                 return false;
             }
@@ -679,12 +698,12 @@ public abstract class ImageView extends VisibilityAwareImageView {
             for (int i = 0, count = dependencies.size(); i < count; i++) {
                 final View dependency = dependencies.get(i);
                 if (dependency instanceof AppBarLayout) {
-                    if (updateFabVisibilityForAppBarLayout(
+                    if (updateViewVisibilityForAppBarLayout(
                             parent, (AppBarLayout) dependency, child)) {
                         break;
                     }
                 } else if (isBottomSheet(dependency)) {
-                    if (updateFabVisibilityForBottomSheet(dependency, child)) {
+                    if (updateViewVisibilityForBottomSheet(dependency, child)) {
                         break;
                     }
                 }
