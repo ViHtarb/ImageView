@@ -52,9 +52,9 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Interpolator;
 
+import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
-import static android.os.Build.VERSION.SDK_INT;
 
 /**
  * Created by Viнt@rь on 18.12.2016
@@ -82,7 +82,7 @@ class ImageViewImpl {
 
     protected int mAnimState = ANIM_STATE_NONE;
 
-    private float mRotation; // TODO
+    private float mRotation;
 
     protected float mElevation;
     protected float mPressedTranslationZ;
@@ -198,6 +198,12 @@ class ImageViewImpl {
         if (mElevation != elevation) {
             mElevation = elevation;
             onElevationsChanged(elevation, mPressedTranslationZ);
+        }
+    }
+
+    protected final void setRadius(float radius) {
+        if (mShadowDrawable != null) {
+            mShadowDrawable.setCornerRadius(radius);
         }
     }
 
@@ -374,6 +380,18 @@ class ImageViewImpl {
         return true;
     }
 
+    protected GradientDrawable createShapeDrawable() {
+        GradientDrawable d = newGradientDrawableForShape();
+        d.setShape(mView.isCircle() ? GradientDrawable.OVAL : GradientDrawable.RECTANGLE);
+        d.setCornerRadius(mView.getCornerRadius());
+        d.setColor(Color.WHITE);
+        return d;
+    }
+
+    protected GradientDrawable newGradientDrawableForShape() {
+        return new GradientDrawable();
+    }
+
     protected BorderDrawable createBorderDrawable(boolean isCircle, float cornerRadius, float width, ColorStateList color) {
         BorderDrawable borderDrawable = newBorderDrawable();
         borderDrawable.setCircle(isCircle);
@@ -387,11 +405,97 @@ class ImageViewImpl {
         return new BorderDrawable();
     }
 
+    protected Drawable createRoundedDrawable(Drawable drawable) {
+        RoundedBitmapDrawable roundedBitmapDrawable;
+
+        if (!(drawable instanceof RoundedBitmapDrawable)) {
+            roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, getBitmap(drawable));
+            roundedBitmapDrawable.setAntiAlias(true);
+        } else {
+            roundedBitmapDrawable = (RoundedBitmapDrawable) drawable;
+        }
+
+        if (mView.isCircle()) {
+            roundedBitmapDrawable.setCornerRadius(0);
+            roundedBitmapDrawable.setCircular(true);
+        } else {
+            roundedBitmapDrawable.setCircular(false);
+            roundedBitmapDrawable.setCornerRadius(mView.getCornerRadius() / 3);
+        }
+
+        return roundedBitmapDrawable;
+    }
+
+    private ValueAnimator createAnimator(@NonNull ShadowAnimatorImpl impl) {
+        final ValueAnimator animator = new ValueAnimator();
+        animator.setInterpolator(ANIM_INTERPOLATOR);
+        animator.setDuration(PRESSED_ANIM_DURATION);
+        animator.addListener(impl);
+        animator.addUpdateListener(impl);
+        animator.setFloatValues(0, 1);
+        return animator;
+    }
+
     protected void onPreDraw() {
         final float rotation = mView.getRotation();
         if (mRotation != rotation) {
             mRotation = rotation;
             updateFromViewRotation();
+        }
+    }
+
+    protected boolean isOrWillBeShown() {
+        if (mView.getVisibility() != View.VISIBLE) {
+            // If we not currently visible, return true if we're animating to be shown
+            return mAnimState == ANIM_STATE_SHOWING;
+        } else {
+            // Otherwise if we're visible, return true if we're not animating to be hidden
+            return mAnimState != ANIM_STATE_HIDING;
+        }
+    }
+
+    protected boolean isOrWillBeHidden() {
+        if (mView.getVisibility() == View.VISIBLE) {
+            // If we currently visible, return true if we're animating to be hidden
+            return mAnimState == ANIM_STATE_HIDING;
+        } else {
+            // Otherwise if we're not visible, return true if we're not animating to be shown
+            return mAnimState != ANIM_STATE_SHOWING;
+        }
+    }
+
+    protected boolean isVector(Drawable drawable) {
+        return drawable instanceof VectorDrawableCompat;
+    }
+
+    protected boolean isTransition(Drawable drawable) {
+        return drawable instanceof TransitionDrawable;
+    }
+
+    protected final Bitmap getBitmap(Drawable drawable) {
+        if (drawable == null) {
+            return null;
+        }
+
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+        }
+
+        try {
+            Bitmap bitmap;
+            if (drawable instanceof ColorDrawable) {
+                bitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888);
+            } else {
+                bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            }
+
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            drawable.draw(canvas);
+            return bitmap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -407,46 +511,32 @@ class ImageViewImpl {
         }
     }
 
-    protected GradientDrawable createShapeDrawable() {
-        GradientDrawable d = newGradientDrawableForShape();
-        d.setShape(mView.isCircle() ? GradientDrawable.OVAL : GradientDrawable.RECTANGLE);
-        d.setCornerRadius(mView.getCornerRadius());
-        d.setColor(Color.WHITE);
-        return d;
+    private boolean shouldAnimateVisibilityChange() {
+        return ViewCompat.isLaidOut(mView) && !mView.isInEditMode();
     }
 
-    protected GradientDrawable newGradientDrawableForShape() {
-        return new GradientDrawable();
-    }
-
-    protected boolean isOrWillBeShown() {
-        if (mView.getVisibility() != View.VISIBLE) {
-            // If we not currently visible, return true if we're animating to be shown
-            return mAnimState == ANIM_STATE_SHOWING;
-        } else {
-            // Otherwise if we're visible, return true if we're not animating to be hidden
-            return mAnimState != ANIM_STATE_HIDING;
+    private void updateFromViewRotation() {
+        if (SDK_INT == 19) {
+            // KitKat seems to have an issue with views which are rotated with angles which are
+            // not divisible by 90. Worked around by moving to software rendering in these cases.
+            if ((mRotation % 90) != 0) {
+                if (mView.getLayerType() != View.LAYER_TYPE_SOFTWARE) {
+                    mView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+                }
+            } else {
+                if (mView.getLayerType() != View.LAYER_TYPE_NONE) {
+                    mView.setLayerType(View.LAYER_TYPE_NONE, null);
+                }
+            }
         }
-    }
 
-    boolean isOrWillBeHidden() {
-        if (mView.getVisibility() == View.VISIBLE) {
-            // If we currently visible, return true if we're animating to be hidden
-            return mAnimState == ANIM_STATE_HIDING;
-        } else {
-            // Otherwise if we're not visible, return true if we're not animating to be shown
-            return mAnimState != ANIM_STATE_SHOWING;
+        // Offset any View rotation
+        if (mShadowDrawable != null) {
+            mShadowDrawable.setRotation(-mRotation);
         }
-    }
-
-    private ValueAnimator createAnimator(@NonNull ShadowAnimatorImpl impl) {
-        final ValueAnimator animator = new ValueAnimator();
-        animator.setInterpolator(ANIM_INTERPOLATOR);
-        animator.setDuration(PRESSED_ANIM_DURATION);
-        animator.addListener(impl);
-        animator.addUpdateListener(impl);
-        animator.setFloatValues(0, 1);
-        return animator;
+        if (mBorderDrawable != null) {
+            mBorderDrawable.setRotation(-mRotation);
+        }
     }
 
     private abstract class ShadowAnimatorImpl extends AnimatorListenerAdapter implements ValueAnimator.AnimatorUpdateListener {
@@ -498,111 +588,6 @@ class ImageViewImpl {
         @Override
         protected float getTargetShadowSize() {
             return 0f;
-        }
-    }
-
-/*    private static ColorStateList createColorStateList(int selectedColor) {
-        final int[][] states = new int[3][];
-        final int[] colors = new int[3];
-        int i = 0;
-
-        states[i] = FOCUSED_ENABLED_STATE_SET;
-        colors[i] = selectedColor;
-        i++;
-
-        states[i] = PRESSED_ENABLED_STATE_SET;
-        colors[i] = selectedColor;
-        i++;
-
-        // Default enabled state
-        states[i] = new int[0];
-        colors[i] = Color.TRANSPARENT;
-        //i++;
-
-        return new ColorStateList(states, colors);
-    }*/
-
-    private boolean shouldAnimateVisibilityChange() {
-        return ViewCompat.isLaidOut(mView) && !mView.isInEditMode();
-    }
-
-    private void updateFromViewRotation() {
-        if (SDK_INT == 19) {
-            // KitKat seems to have an issue with views which are rotated with angles which are
-            // not divisible by 90. Worked around by moving to software rendering in these cases.
-            if ((mRotation % 90) != 0) {
-                if (mView.getLayerType() != View.LAYER_TYPE_SOFTWARE) {
-                    mView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-                }
-            } else {
-                if (mView.getLayerType() != View.LAYER_TYPE_NONE) {
-                    mView.setLayerType(View.LAYER_TYPE_NONE, null);
-                }
-            }
-        }
-
-        // Offset any View rotation
-        if (mShadowDrawable != null) {
-            mShadowDrawable.setRotation(-mRotation);
-        }
-        if (mBorderDrawable != null) {
-            //mBorderDrawable.setRotation(-mRotation); // TODO
-        }
-    }
-
-    protected Drawable createRoundedDrawable(Drawable drawable) {
-        RoundedBitmapDrawable roundedBitmapDrawable;
-
-        if (!(drawable instanceof RoundedBitmapDrawable)) {
-            roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, getBitmap(drawable));
-            roundedBitmapDrawable.setAntiAlias(true);
-        } else {
-            roundedBitmapDrawable = (RoundedBitmapDrawable) drawable;
-        }
-
-        if (mView.isCircle()) {
-            roundedBitmapDrawable.setCornerRadius(0);
-            roundedBitmapDrawable.setCircular(true);
-        } else {
-            roundedBitmapDrawable.setCircular(false);
-            roundedBitmapDrawable.setCornerRadius(mView.getCornerRadius() / 3);
-        }
-
-        return roundedBitmapDrawable;
-    }
-
-    protected boolean isVector(Drawable drawable) {
-        return drawable instanceof VectorDrawableCompat;
-    }
-
-    protected boolean isTransition(Drawable drawable) {
-        return drawable instanceof TransitionDrawable;
-    }
-
-    protected final Bitmap getBitmap(Drawable drawable) {
-        if (drawable == null) {
-            return null;
-        }
-
-        if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable) drawable).getBitmap();
-        }
-
-        try {
-            Bitmap bitmap;
-            if (drawable instanceof ColorDrawable) {
-                bitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888);
-            } else {
-                bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-            }
-
-            Canvas canvas = new Canvas(bitmap);
-            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-            drawable.draw(canvas);
-            return bitmap;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
         }
     }
 }

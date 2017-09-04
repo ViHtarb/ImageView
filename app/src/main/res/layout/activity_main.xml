@@ -14,8 +14,8 @@
 
     <com.imageview.ImageView
         android:id="@+id/image_view"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_margin="8dp"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_placeholder"
@@ -26,16 +26,16 @@
 
     <com.imageview.ImageView
         android:id="@+id/image_view_2"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_margin="8dp"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_placeholder"
         app:borderWidth="2dp"
         app:borderColor="@color/colorAccent"
         app:circle="true"
+        android:clickable="true"
+        android:focusable="true"
         app:useCompatPadding="true"
-        app:backgroundTint="@android:color/holo_orange_light"
         app:elevation="8dp"/>
 
     <android.support.design.widget.FloatingActionButton
@@ -45,7 +45,6 @@
         app:fabSize="normal"
         app:useCompatPadding="true"
         app:borderWidth="2dp"
-        app:backgroundTint="@android:color/transparent"
         android:clickable="true"/>
 
     <Button

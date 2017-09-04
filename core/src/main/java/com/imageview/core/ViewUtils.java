@@ -16,6 +16,7 @@
 
 package com.imageview.core;
 
+import android.content.res.Resources;
 import android.graphics.PorterDuff;
 
 class ViewUtils {
@@ -34,5 +35,14 @@ class ViewUtils {
             default:
                 return defaultMode;
         }
+    }
+
+
+    public static float pxToDp(float px) {
+        return px / Resources.getSystem().getDisplayMetrics().density;
+    }
+
+    public static float dpToPx(float dp) {
+        return dp * Resources.getSystem().getDisplayMetrics().density;
     }
 }

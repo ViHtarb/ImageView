@@ -124,7 +124,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
         mBorderColor = a.getColorStateList(R.styleable.ImageView_borderColor);
 
         final float elevation = a.getDimension(R.styleable.ImageView_elevation, 0f);
-        final float pressedTranslationZ = a.getDimension(R.styleable.ImageView_pressedTranslationZ, 0); // TODO is need?
+        final float pressedTranslationZ = a.getDimension(R.styleable.ImageView_pressedTranslationZ, ViewUtils.dpToPx(6));
 
         mBackgroundTint = a.getColorStateList(R.styleable.ImageView_backgroundTint);
         mBackgroundTintMode = ViewUtils.parseTintMode(a.getInt(R.styleable.ImageView_backgroundTintMode, -1), null);
@@ -133,6 +133,13 @@ public abstract class ImageView extends VisibilityAwareImageView {
         getImpl().setBackgroundDrawable(mBackgroundTint, mBackgroundTintMode, isCircle, mCornerRadius, mBorderWidth, mBorderColor);
         getImpl().setElevation(elevation);
         getImpl().setPressedTranslationZ(pressedTranslationZ);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
+        getImpl().setRadius((getWidth() - (mShadowPadding.right + mShadowPadding.left)) / 2f);
     }
 
     @Override
@@ -531,6 +538,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
 
         @Override
         public float getRadius() {
+            Log.d("TEST", String.valueOf(getMeasuredWidth()));
             return getWidth() / 2f;
         }
 

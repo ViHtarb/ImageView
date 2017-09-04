@@ -34,7 +34,6 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.graphics.drawable.DrawableCompat;
 
 /**
  * A drawable which draws an 'border'.
@@ -53,8 +52,9 @@ class BorderDrawable extends Drawable {
     private int mCurrentColor;
     private ColorStateList mTint;
 
-    protected float mWidth;
+    protected float mRotation;
     protected float mCornerRadius;
+    protected float mWidth;
 
     protected final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     protected final Rect mRect = new Rect();
@@ -82,6 +82,7 @@ class BorderDrawable extends Drawable {
             rectF.bottom -= halfBorderWidth;
 
             canvas.save();
+            canvas.rotate(mRotation, rectF.centerX(), rectF.centerY());
 
             if (isCircle) {
                 canvas.drawOval(rectF, mPaint);
@@ -145,9 +146,20 @@ class BorderDrawable extends Drawable {
         }
     }
 
-    /**
-     * Set the border width
-     */
+    protected final void setRotation(float rotation) {
+        if (rotation != mRotation) {
+            mRotation = rotation;
+            invalidateSelf();
+        }
+    }
+
+    protected void setCornerRadius(float radius) {
+        if (mCornerRadius != radius) {
+            mCornerRadius = radius;
+            invalidateSelf();
+        }
+    }
+
     protected void setWidth(float width) {
         if (mWidth != width) {
             mWidth = width;
@@ -162,13 +174,6 @@ class BorderDrawable extends Drawable {
                 mCurrentColor = tint.getColorForState(getState(), mCurrentColor);
             }
             mTint = tint;
-            invalidateSelf();
-        }
-    }
-
-    protected void setCornerRadius(float radius) {
-        if (mCornerRadius != radius) {
-            mCornerRadius = radius;
             invalidateSelf();
         }
     }
