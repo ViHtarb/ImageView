@@ -339,10 +339,6 @@ class ImageViewImpl {
         }
     }
 
-    protected final Drawable getContentBackground() {
-        return mContentBackground;
-    }
-
     protected void onCompatShadowChanged() {
         // Ignore pre-v21
     }

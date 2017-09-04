@@ -95,6 +95,8 @@ public abstract class ImageView extends VisibilityAwareImageView {
 
     private ColorStateList mBorderColor;
 
+    private Drawable mStockDrawable;
+
     private boolean mCompatPadding;
     private final Rect mShadowPadding = new Rect();
     private final Rect mTouchArea = new Rect();
@@ -133,8 +135,46 @@ public abstract class ImageView extends VisibilityAwareImageView {
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        getImpl().onAttachedToWindow();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        getImpl().onDetachedFromWindow();
+    }
+
+    @Override
+    protected void drawableStateChanged() {
+        super.drawableStateChanged();
+        getImpl().onDrawableStateChanged(getDrawableState());
+    }
+
+    @Override
+    public void jumpDrawablesToCurrentState() {
+        super.jumpDrawablesToCurrentState();
+        getImpl().jumpDrawableToCurrentState();
+    }
+
+    // need for calculate touch area with out shadow
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                // Skipping the gesture if it doesn't start in in the FAB 'content' area
+                if (getContentRect(mTouchArea) && !mTouchArea.contains((int) ev.getX(), (int) ev.getY())) {
+                    return false;
+                }
+                break;
+        }
+        return super.onTouchEvent(ev);
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int preferredSize = /*getSizeDimension()*/getWidth();
+        final int preferredSize = getWidth();
 
         getImpl().updatePadding();
 
@@ -227,13 +267,13 @@ public abstract class ImageView extends VisibilityAwareImageView {
     }
 
     @Override
-    public void setImageBitmap(Bitmap bm) { // TODO
+    public void setImageBitmap(Bitmap bm) {
         super.setImageBitmap(bm);
         getImpl().setImageDrawable(getDrawable());
     }
 
     @Override
-    public void setImageDrawable(@Nullable Drawable drawable) { // TODO
+    public void setImageDrawable(@Nullable Drawable drawable) {
         getImpl().setImageDrawable(drawable);
     }
 
@@ -246,7 +286,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
             this.isCircle = isCircle;
             getImpl().setCircle(isCircle);
 
-            setImageDrawable(getDrawable()); // TODO fix it
+            //setImageDrawable(getDrawable()); // TODO fix it
         }
     }
 
@@ -296,54 +336,23 @@ public abstract class ImageView extends VisibilityAwareImageView {
     }
 
     /**
-     * Shows the button.
-     * <p>This method will animate the button show if the view has already been laid out.</p>
-     */
-    public void show() {
-        show(null);
-    }
-
-    /**
-     * Shows the button.
-     * <p>This method will animate the button show if the view has already been laid out.</p>
+     * Returns whether ImageView will add inner padding on platforms Lollipop and after.
      *
-     * @param listener the listener to notify when this view is shown
-     */
-    public void show(@Nullable final OnVisibilityChangedListener listener) {
-        show(listener, true);
-    }
-
-    void show(OnVisibilityChangedListener listener, boolean fromUser) {
-        getImpl().show(wrapOnVisibilityChangedListener(listener), fromUser);
-    }
-
-    /**
-     * Hides the button.
-     * <p>This method will animate the button hide if the view has already been laid out.</p>
-     */
-    public void hide() {
-        hide(null);
-    }
-
-    /**
-     * Hides the button.
-     * <p>This method will animate the button hide if the view has already been laid out.</p>
-     *
-     * @param listener the listener to notify when this view is hidden
-     */
-    public void hide(@Nullable OnVisibilityChangedListener listener) {
-        hide(listener, true);
-    }
-
-    void hide(@Nullable OnVisibilityChangedListener listener, boolean fromUser) {
-        getImpl().hide(wrapOnVisibilityChangedListener(listener), fromUser);
-    }
-
-    /**
-     * Set whether FloatingActionButton should add inner padding on platforms Lollipop and after,
+     * @return true if ImageView is adding inner padding on platforms Lollipop and after,
      * to ensure consistent dimensions on all platforms.
      *
-     * @param useCompatPadding true if FloatingActionButton is adding inner padding on platforms
+     * @attr ref android.support.design.R.styleable#FloatingActionButton_useCompatPadding
+     * @see #setUseCompatPadding(boolean)
+     */
+    public boolean getUseCompatPadding() {
+        return mCompatPadding;
+    }
+
+    /**
+     * Set whether ImageView should add inner padding on platforms Lollipop and after,
+     * to ensure consistent dimensions on all platforms.
+     *
+     * @param useCompatPadding true if ImageView is adding inner padding on platforms
      *                         Lollipop and after, to ensure consistent dimensions on all platforms.
      *
      * @attr ref android.support.design.R.styleable#FloatingActionButton_useCompatPadding
@@ -357,16 +366,89 @@ public abstract class ImageView extends VisibilityAwareImageView {
     }
 
     /**
-     * Returns whether FloatingActionButton will add inner padding on platforms Lollipop and after.
+     * Returns the backward compatible elevation of the FloatingActionButton.
      *
-     * @return true if FloatingActionButton is adding inner padding on platforms Lollipop and after,
-     * to ensure consistent dimensions on all platforms.
+     * @return the backward compatible elevation in pixels.
+     * @attr ref R.styleable#ImageView_android_elevation
+     * @see #setCompatElevation(float)
+     */
+    public float getCompatElevation() {
+        return getImpl().getElevation();
+    }
+
+    /**
+     * Updates the backward compatible elevation of the ImageView.
      *
-     * @attr ref android.support.design.R.styleable#FloatingActionButton_useCompatPadding
+     * @param elevation The backward compatible elevation in pixels.
+     * @attr ref R.styleable#ImageView_android_elevation
+     * @see #getCompatElevation()
      * @see #setUseCompatPadding(boolean)
      */
-    public boolean getUseCompatPadding() {
-        return mCompatPadding;
+    public void setCompatElevation(float elevation) {
+        getImpl().setElevation(elevation);
+    }
+
+    /**
+     * Return in {@code rect} the bounds of the actual image view content in view-local
+     * coordinates. This is defined as anything within any visible shadow.
+     *
+     * @return true if this view actually has been laid out and has a content rect, else false.
+     */
+    public boolean getContentRect(@NonNull Rect rect) {
+        if (ViewCompat.isLaidOut(this)) {
+            rect.set(0, 0, getWidth(), getHeight());
+            rect.left += mShadowPadding.left;
+            rect.top += mShadowPadding.top;
+            rect.right -= mShadowPadding.right;
+            rect.bottom -= mShadowPadding.bottom;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Shows the image view.
+     * <p>This method will animate the image view show if the view has already been laid out.</p>
+     */
+    public void show() {
+        show(null);
+    }
+
+    /**
+     * Shows the image view.
+     * <p>This method will animate the image view show if the view has already been laid out.</p>
+     *
+     * @param listener the listener to notify when this view is shown
+     */
+    public void show(@Nullable final OnVisibilityChangedListener listener) {
+        show(listener, true);
+    }
+
+    private void show(OnVisibilityChangedListener listener, boolean fromUser) {
+        getImpl().show(wrapOnVisibilityChangedListener(listener), fromUser);
+    }
+
+    /**
+     * Hides the image view.
+     * <p>This method will animate the image view hide if the view has already been laid out.</p>
+     */
+    public void hide() {
+        hide(null);
+    }
+
+    /**
+     * Hides the image view.
+     * <p>This method will animate the image view hide if the view has already been laid out.</p>
+     *
+     * @param listener the listener to notify when this view is hidden
+     */
+    public void hide(@Nullable OnVisibilityChangedListener listener) {
+        hide(listener, true);
+    }
+
+    private void hide(@Nullable OnVisibilityChangedListener listener, boolean fromUser) {
+        getImpl().hide(wrapOnVisibilityChangedListener(listener), fromUser);
     }
 
     @Nullable
@@ -386,57 +468,6 @@ public abstract class ImageView extends VisibilityAwareImageView {
                 listener.onHidden(ImageView.this);
             }
         };
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        getImpl().onAttachedToWindow();
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        getImpl().onDetachedFromWindow();
-    }
-
-    @Override
-    protected void drawableStateChanged() {
-        super.drawableStateChanged();
-        getImpl().onDrawableStateChanged(getDrawableState());
-    }
-
-    @Override
-    public void jumpDrawablesToCurrentState() {
-        super.jumpDrawablesToCurrentState();
-        getImpl().jumpDrawableToCurrentState();
-    }
-
-    /**
-     * Return in {@code rect} the bounds of the actual floating action button content in view-local
-     * coordinates. This is defined as anything within any visible shadow.
-     *
-     * @return true if this view actually has been laid out and has a content rect, else false.
-     */
-    public boolean getContentRect(@NonNull Rect rect) {
-        if (ViewCompat.isLaidOut(this)) {
-            rect.set(0, 0, getWidth(), getHeight());
-            rect.left += mShadowPadding.left;
-            rect.top += mShadowPadding.top;
-            rect.right -= mShadowPadding.right;
-            rect.bottom -= mShadowPadding.bottom;
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Returns the FloatingActionButton's background, minus any compatible shadow implementation.
-     */
-    @NonNull
-    public Drawable getContentBackground() {
-        return getImpl().getContentBackground(); // TODO is need?
     }
 
     private static int resolveAdjustedSize(int desiredSize, int measureSpec) {
@@ -463,18 +494,47 @@ public abstract class ImageView extends VisibilityAwareImageView {
         return result;
     }
 
-    // need for calculate touch area with out shadow
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                // Skipping the gesture if it doesn't start in in the FAB 'content' area
-                if (getContentRect(mTouchArea) && !mTouchArea.contains((int) ev.getX(), (int) ev.getY())) {
-                    return false;
-                }
-                break;
+    private ImageViewImpl getImpl() {
+        if (mImpl == null) {
+            mImpl = createImpl();
         }
-        return super.onTouchEvent(ev);
+        return mImpl;
+    }
+
+    private ImageViewImpl createImpl() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return new ImageViewLollipop(this, new ViewDelegateImpl());
+        }
+        return new ImageViewImpl(this, new ViewDelegateImpl());
+    }
+
+    private class ViewDelegateImpl implements ViewDelegate {
+
+        @Override
+        public float getRadius() {
+            return getWidth() / 2f;
+        }
+
+        @Override
+        public void setShadowPadding(int left, int top, int right, int bottom) {
+            mShadowPadding.set(left, top, right, bottom);
+            setPadding(left + (int) getBorderWidth(), top + (int) getBorderWidth(), right + (int) getBorderWidth(), bottom + (int) getBorderWidth());
+        }
+
+        @Override
+        public void setBackgroundDrawable(Drawable background) {
+            ImageView.super.setBackgroundDrawable(background);
+        }
+
+        @Override
+        public void setImageDrawable(Drawable drawable) {
+            ImageView.super.setImageDrawable(drawable);
+        }
+
+        @Override
+        public boolean isCompatPaddingEnabled() {
+            return mCompatPadding;
+        }
     }
 
     /**
@@ -496,8 +556,8 @@ public abstract class ImageView extends VisibilityAwareImageView {
 
         public Behavior(Context context, AttributeSet attrs) {
             super(context, attrs);
-            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.FloatingActionButton_Behavior_Layout);
-            mAutoHideEnabled = a.getBoolean(R.styleable.FloatingActionButton_Behavior_Layout_behavior_autoHide, AUTO_HIDE_DEFAULT);
+            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ImageView_Behavior_Layout);
+            mAutoHideEnabled = a.getBoolean(R.styleable.ImageView_Behavior_Layout_behavior_autoHide, AUTO_HIDE_DEFAULT);
             a.recycle();
         }
 
@@ -506,7 +566,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
          * not enough space to be displayed. This works with {@link AppBarLayout}
          * and {@link BottomSheetBehavior}.
          *
-         * @attr ref android.support.design.R.styleable#FloatingActionButton_Behavior_Layout_behavior_autoHide
+         * @attr ref android.support.design.R.styleable#ImageView_Behavior_Layout_behavior_autoHide
          * @param autoHide true to enable automatic hiding
          */
         public void setAutoHideEnabled(boolean autoHide) {
@@ -517,7 +577,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
          * Returns whether the associated FloatingActionButton automatically hides when there is
          * not enough space to be displayed.
          *
-         * @attr ref android.support.design.R.styleable#FloatingActionButton_Behavior_Layout_behavior_autoHide
+         * @attr ref android.support.design.R.styleable#ImageView_Behavior_Layout_behavior_autoHide
          * @return true if enabled
          */
         public boolean isAutoHideEnabled() {
@@ -683,72 +743,6 @@ public abstract class ImageView extends VisibilityAwareImageView {
                     ViewCompat.offsetLeftAndRight(fab, offsetLR);
                 }
             }
-        }
-    }
-
-    /**
-     * Returns the backward compatible elevation of the FloatingActionButton.
-     *
-     * @return the backward compatible elevation in pixels.
-     * @attr ref android.support.design.R.styleable#FloatingActionButton_elevation
-     * @see #setCompatElevation(float)
-     */
-    public float getCompatElevation() {
-        return getImpl().getElevation();
-    }
-
-    /**
-     * Updates the backward compatible elevation of the FloatingActionButton.
-     *
-     * @param elevation The backward compatible elevation in pixels.
-     * @attr ref android.support.design.R.styleable#FloatingActionButton_elevation
-     * @see #getCompatElevation()
-     * @see #setUseCompatPadding(boolean)
-     */
-    public void setCompatElevation(float elevation) {
-        getImpl().setElevation(elevation);
-    }
-
-    private ImageViewImpl getImpl() {
-        if (mImpl == null) {
-            mImpl = createImpl();
-        }
-        return mImpl;
-    }
-
-    private ImageViewImpl createImpl() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return new ImageViewLollipop(this, new ViewDelegateImpl());
-        }
-        return new ImageViewImpl(this, new ViewDelegateImpl());
-    }
-
-    private class ViewDelegateImpl implements ViewDelegate {
-
-        @Override
-        public float getRadius() {
-            return /*getSizeDimension() / 2f*/ getWidth() / 2f;
-        }
-
-        @Override
-        public void setShadowPadding(int left, int top, int right, int bottom) {
-            mShadowPadding.set(left, top, right, bottom);
-            setPadding(left, top, right, bottom);
-        }
-
-        @Override
-        public void setBackgroundDrawable(Drawable background) {
-            ImageView.super.setBackgroundDrawable(background);
-        }
-
-        @Override
-        public void setImageDrawable(Drawable drawable) {
-            ImageView.super.setImageDrawable(drawable);
-        }
-
-        @Override
-        public boolean isCompatPaddingEnabled() {
-            return mCompatPadding;
         }
     }
 }

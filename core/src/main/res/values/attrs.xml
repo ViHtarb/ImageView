@@ -11,6 +11,10 @@
         <attr name="android:backgroundTintMode"/>-->
     </declare-styleable>
 
+    <declare-styleable name="ImageView_Behavior_Layout">
+        <attr format="boolean" name="behavior_autoHide"/>
+    </declare-styleable>
+
     <color name="design_fab_shadow_end_color">@android:color/transparent</color>
     <color name="design_fab_shadow_mid_color">#14000000</color>
     <color name="design_fab_shadow_start_color">#44000000</color>
