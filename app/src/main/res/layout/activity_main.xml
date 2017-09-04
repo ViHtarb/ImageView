@@ -12,6 +12,12 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.imageview.sample.MainActivity">
 
+<!--    <ImageView
+        android:id="@+id/image_view_test"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_placeholder"/>-->
+
     <com.imageview.ImageView
         android:id="@+id/image_view"
         android:layout_width="48dp"

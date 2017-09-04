@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.VectorDrawable;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -39,34 +40,9 @@ class ImageViewLollipop extends ImageViewImpl {
         }
 
         mBorderDrawable = createBorderDrawable(isCircle, cornerRadius, borderWidth, borderColor);
-        mContentBackground = new LayerDrawable(new Drawable[] {mBorderDrawable, mShapeDrawable/*, mRippleDrawable*/});
+        mContentBackground = new LayerDrawable(new Drawable[] {mBorderDrawable, mShapeDrawable});
         mViewDelegate.setBackgroundDrawable(mContentBackground);
     }
-/*
-    @Override
-    protected void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, int rippleColor, float borderWidth) {
-        // Now we need to tint the shape background with the tint
-        mShapeDrawable = DrawableCompat.wrap(createShapeDrawable());
-        DrawableCompat.setTintList(mShapeDrawable, backgroundTint);
-        if (backgroundTintMode != null) {
-            DrawableCompat.setTintMode(mShapeDrawable, backgroundTintMode);
-        }
-
-        final Drawable rippleContent;
-        if (borderWidth > 0) {
-            mBorderDrawable = createBorderDrawable(borderWidth, backgroundTint);
-            rippleContent = new LayerDrawable(new Drawable[]{mBorderDrawable, mShapeDrawable});
-        } else {
-            mBorderDrawable = null;
-            rippleContent = mShapeDrawable;
-        }
-
-        //mRippleDrawable = new RippleDrawable(ColorStateList.valueOf(rippleColor), rippleContent, null);
-
-        mContentBackground = rippleContent;
-
-        mViewDelegate.setBackgroundDrawable(mContentBackground);
-    }*/
 
     @Override
     protected void onElevationsChanged(final float elevation, final float pressedTranslationZ) {
@@ -115,7 +91,7 @@ class ImageViewLollipop extends ImageViewImpl {
                 animators.add(ObjectAnimator.ofFloat(mView, View.TRANSLATION_Z, mView.getTranslationZ()).setDuration(PRESSED_ANIM_DELAY));
             }
             animators.add(ObjectAnimator.ofFloat(mView, View.TRANSLATION_Z, 0f).setDuration(PRESSED_ANIM_DURATION));
-            set.playSequentially(animators.toArray(new ObjectAnimator[0]));
+            set.playSequentially(animators);
             set.setInterpolator(ANIM_INTERPOLATOR);
             stateListAnimator.addState(ENABLED_STATE_SET, set);
 
@@ -180,6 +156,11 @@ class ImageViewLollipop extends ImageViewImpl {
     }
 
     @Override
+    protected boolean isVector(Drawable drawable) {
+        return drawable instanceof VectorDrawable || super.isVector(drawable);
+    }
+
+    @Override
     protected void getPadding(Rect rect) {
         if (mViewDelegate.isCompatPaddingEnabled()) {
             final float radius = mViewDelegate.getRadius();
@@ -198,7 +179,7 @@ class ImageViewLollipop extends ImageViewImpl {
      * stateful and the tint doesn't work for state changes. We workaround it by saying that we
      * are always stateful. If we don't have a stateful tint, the change is ignored anyway.
      */
-    static class AlwaysStatefulGradientDrawable extends GradientDrawable {
+    protected static class AlwaysStatefulGradientDrawable extends GradientDrawable {
         @Override
         public boolean isStateful() {
             return true;

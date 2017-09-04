@@ -40,7 +40,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -54,6 +53,8 @@ import android.view.ViewTreeObserver;
 import android.view.animation.Interpolator;
 
 import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+import static android.os.Build.VERSION_CODES.LOLLIPOP;
+import static android.os.Build.VERSION.SDK_INT;
 
 /**
  * Created by Viнt@rь on 18.12.2016
@@ -61,6 +62,8 @@ import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 @RequiresApi(ICE_CREAM_SANDWICH)
 @TargetApi(ICE_CREAM_SANDWICH)
 class ImageViewImpl {
+
+    protected static final int NO_ID = SDK_INT >= LOLLIPOP ? -1 : 0;
 
     protected static final Interpolator ANIM_INTERPOLATOR = AnimationUtils.FAST_OUT_LINEAR_IN_INTERPOLATOR;
     protected static final long PRESSED_ANIM_DURATION = 100;
@@ -147,9 +150,6 @@ class ImageViewImpl {
         if (mShapeDrawable != null) {
             DrawableCompat.setTintList(mShapeDrawable, tint);
         }
-        if (mBorderDrawable != null) {
-            //mBorderDrawable.setBorderTint(tint); // TODO
-        }
     }
 
     protected void setBackgroundTintMode(PorterDuff.Mode tintMode) {
@@ -170,8 +170,8 @@ class ImageViewImpl {
                     Drawable childDrawable = transitionDrawable.getDrawable(i);
                     if (!isVector(childDrawable)) {
                         int id = transitionDrawable.getId(i);
-                        if (id == View.NO_ID) {
-                            id = i;
+                        if (id == NO_ID) {
+                            id = NO_ID + i + 1;
                             transitionDrawable.setId(i, id);
                         }
                         transitionDrawable.setDrawableByLayerId(id, createRoundedDrawable(childDrawable));
@@ -531,7 +531,7 @@ class ImageViewImpl {
     }
 
     private void updateFromViewRotation() {
-        if (Build.VERSION.SDK_INT == 19) {
+        if (SDK_INT == 19) {
             // KitKat seems to have an issue with views which are rotated with angles which are
             // not divisible by 90. Worked around by moving to software rendering in these cases.
             if ((mRotation % 90) != 0) {
