@@ -137,9 +137,7 @@ class ImageViewImpl {
         mContentBackground = new LayerDrawable(new Drawable[] {mShapeDrawable, mBorderDrawable});
 
         mShadowDrawable = new ShadowDrawableWrapper(
-                mView.getContext(),
                 mContentBackground,
-                mViewDelegate.getRadius(),
                 mElevation,
                 mElevation + mPressedTranslationZ);
         mShadowDrawable.setAddPaddingForCorners(false);
@@ -190,6 +188,12 @@ class ImageViewImpl {
         shapeDrawable.setShape(isCircle ? GradientDrawable.OVAL : GradientDrawable.RECTANGLE);
     }
 
+    protected final void setShadowRadius(float radius) {
+        if (mShadowDrawable != null) {
+            mShadowDrawable.setCornerRadius(radius);
+        }
+    }
+
     protected float getElevation() {
         return mElevation;
     }
@@ -198,12 +202,6 @@ class ImageViewImpl {
         if (mElevation != elevation) {
             mElevation = elevation;
             onElevationsChanged(elevation, mPressedTranslationZ);
-        }
-    }
-
-    protected final void setRadius(float radius) {
-        if (mShadowDrawable != null) {
-            mShadowDrawable.setCornerRadius(radius);
         }
     }
 

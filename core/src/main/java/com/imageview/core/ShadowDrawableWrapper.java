@@ -16,8 +16,8 @@
 
 package com.imageview.core;
 
-import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -27,7 +27,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
 
 /**
  * A {@link android.graphics.drawable.Drawable} which wraps another drawable and
@@ -35,58 +34,55 @@ import android.support.v4.content.ContextCompat;
  */
 final class ShadowDrawableWrapper extends DrawableWrapper {
     // used to calculate content padding
-    static final double COS_45 = Math.cos(Math.toRadians(45));
+    private static final double COS_45 = Math.cos(Math.toRadians(45));
 
-    static final float SHADOW_MULTIPLIER = 1.5f;
+    private static final float SHADOW_MULTIPLIER = 1.5f;
 
-    static final float SHADOW_TOP_SCALE = 0.25f;
-    static final float SHADOW_HORIZ_SCALE = 0.5f;
-    static final float SHADOW_BOTTOM_SCALE = 1f;
-
-    final Paint mCornerShadowPaint;
-    final Paint mEdgeShadowPaint;
-
-    final RectF mContentBounds;
-
-    float mCornerRadius;
-
-    Path mCornerShadowPath;
-
-    // updated value with inset
-    float mMaxShadowSize;
-    // actual value set by developer
-    float mRawMaxShadowSize;
-
-    // multiplied value to account for shadow offset
-    float mShadowSize;
-    // actual value set by developer
-    float mRawShadowSize;
-
-    private boolean mDirty = true;
-
-    private final int mShadowStartColor;
-    private final int mShadowMiddleColor;
-    private final int mShadowEndColor;
+    private static final float SHADOW_TOP_SCALE = 0.25f;
+    private static final float SHADOW_HORIZ_SCALE = 0.5f;
+    private static final float SHADOW_BOTTOM_SCALE = 1f;
 
     private boolean mAddPaddingForCorners = true;
-
-    private float mRotation;
 
     /**
      * If shadow size is set to a value above max shadow, we print a warning
      */
     private boolean mPrintedShadowClipWarning = false;
+    private boolean mDirty = true;
 
-    public ShadowDrawableWrapper(Context context, Drawable content, float radius, float shadowSize, float maxShadowSize) {
+    private float mCornerRadius;
+
+    // actual value set by developer
+    private float mRawMaxShadowSize;
+
+    // multiplied value to account for shadow offset
+    private float mShadowSize;
+    // actual value set by developer
+    private float mRawShadowSize;
+
+    private final int mShadowStartColor;
+    private final int mShadowMiddleColor;
+    private final int mShadowEndColor;
+
+    private float mRotation;
+
+    private final Paint mCornerShadowPaint;
+    private final Paint mEdgeShadowPaint;
+
+    private final RectF mContentBounds;
+
+    private Path mCornerShadowPath;
+
+    public ShadowDrawableWrapper(Drawable content, float shadowSize, float maxShadowSize) {
         super(content);
 
-        mShadowStartColor = ContextCompat.getColor(context, R.color.design_fab_shadow_start_color);
-        mShadowMiddleColor = ContextCompat.getColor(context, R.color.design_fab_shadow_mid_color);
-        mShadowEndColor = ContextCompat.getColor(context, R.color.design_fab_shadow_end_color);
+        mShadowStartColor = Color.parseColor("#44000000");
+        mShadowMiddleColor = Color.parseColor("#14000000");
+        mShadowEndColor = Color.TRANSPARENT;
 
         mCornerShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
         mCornerShadowPaint.setStyle(Paint.Style.FILL);
-        mCornerRadius = Math.round(radius);
+        //mCornerRadius = Math.round(radius);
         mContentBounds = new RectF();
         mEdgeShadowPaint = new Paint(mCornerShadowPaint);
         mEdgeShadowPaint.setAntiAlias(false);
@@ -136,7 +132,6 @@ final class ShadowDrawableWrapper extends DrawableWrapper {
         mRawShadowSize = shadowSize;
         mRawMaxShadowSize = maxShadowSize;
         mShadowSize = Math.round(shadowSize * SHADOW_MULTIPLIER);
-        mMaxShadowSize = maxShadowSize;
         mDirty = true;
         invalidateSelf();
     }
@@ -326,29 +321,11 @@ final class ShadowDrawableWrapper extends DrawableWrapper {
         return mCornerRadius;
     }
 
-    public void setShadowSize(float size) {
-        setShadowSize(size, mRawMaxShadowSize);
-    }
-
-    public void setMaxShadowSize(float size) {
-        setShadowSize(mRawShadowSize, size);
-    }
-
     public float getShadowSize() {
         return mRawShadowSize;
     }
 
-    public float getMaxShadowSize() {
-        return mRawMaxShadowSize;
-    }
-
-    public float getMinWidth() {
-        final float content = 2 * Math.max(mRawMaxShadowSize, mCornerRadius + mRawMaxShadowSize / 2);
-        return content + mRawMaxShadowSize * 2;
-    }
-
-    public float getMinHeight() {
-        final float content = 2 * Math.max(mRawMaxShadowSize, mCornerRadius + mRawMaxShadowSize * SHADOW_MULTIPLIER / 2);
-        return content + (mRawMaxShadowSize * SHADOW_MULTIPLIER) * 2;
+    public void setShadowSize(float size) {
+        setShadowSize(size, mRawMaxShadowSize);
     }
 }
