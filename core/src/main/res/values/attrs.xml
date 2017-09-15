@@ -10,9 +10,10 @@
         <attr name="pressedTranslationZ" format="dimension"/>
         <attr name="backgroundTint"/>
         <attr name="backgroundTintMode"/>
+        <attr name="android:elevation"/>
     </declare-styleable>
 
     <declare-styleable name="ImageView_Behavior_Layout">
-        <attr format="boolean" name="behavior_autoHide"/>
+        <attr name="behavior_autoHide" format="boolean"/>
     </declare-styleable>
 </resources>

@@ -1,6 +1,8 @@
 package com.imageview.core;
 
-import android.animation.*;
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
@@ -24,8 +26,6 @@ import static android.os.Build.VERSION_CODES.LOLLIPOP;
 @TargetApi(LOLLIPOP)
 class ImageViewLollipop extends ImageViewImpl {
 
-    private InsetDrawable mInsetDrawable;
-
     protected ImageViewLollipop(ImageView view, ViewDelegate viewDelegate) {
         super(view, viewDelegate);
     }
@@ -33,7 +33,7 @@ class ImageViewLollipop extends ImageViewImpl {
     @Override
     protected void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, boolean isCircle, float cornerRadius, float borderWidth, ColorStateList borderColor) {
         // Now we need to tint the shape background with the tint
-        mShapeDrawable = DrawableCompat.wrap(createShapeDrawable());
+        mShapeDrawable = DrawableCompat.wrap(createShapeDrawable(isCircle, cornerRadius));
         DrawableCompat.setTintList(mShapeDrawable, backgroundTint);
         if (backgroundTintMode != null) {
             DrawableCompat.setTintMode(mShapeDrawable, backgroundTintMode);
@@ -123,8 +123,7 @@ class ImageViewLollipop extends ImageViewImpl {
     @Override
     protected void onPaddingUpdated(Rect padding) {
         if (mViewDelegate.isCompatPadding()) {
-            mInsetDrawable = new InsetDrawable(mContentBackground, padding.left, padding.top, padding.right, padding.bottom);
-            mViewDelegate.setBackgroundDrawable(mInsetDrawable);
+            mViewDelegate.setBackgroundDrawable(new InsetDrawable(mContentBackground, padding.left, padding.top, padding.right, padding.bottom));
         } else {
             mViewDelegate.setBackgroundDrawable(mContentBackground);
         }

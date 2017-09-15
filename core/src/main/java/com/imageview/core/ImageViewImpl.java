@@ -127,7 +127,7 @@ class ImageViewImpl {
     protected void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, boolean isCircle, float cornerRadius, float borderWidth, ColorStateList borderColor) {
         // Now we need to tint the original background with the tint, using
         // an InsetDrawable if we have a border width
-        mShapeDrawable = DrawableCompat.wrap(createShapeDrawable());
+        mShapeDrawable = DrawableCompat.wrap(createShapeDrawable(isCircle, cornerRadius));
         DrawableCompat.setTintList(mShapeDrawable, backgroundTint);
         if (backgroundTintMode != null) {
             DrawableCompat.setTintMode(mShapeDrawable, backgroundTintMode);
@@ -215,8 +215,8 @@ class ImageViewImpl {
     protected void setCornerRadius(float radius) {
         mBorderDrawable.setCornerRadius(radius);
 
-        GradientDrawable gradientDrawable = DrawableCompat.unwrap(mShapeDrawable);
-        gradientDrawable.setCornerRadius(radius);
+        GradientDrawable shapeDrawable = DrawableCompat.unwrap(mShapeDrawable);
+        shapeDrawable.setCornerRadius(radius);
     }
 
     protected void setBorderWidth(float width) {
@@ -378,10 +378,10 @@ class ImageViewImpl {
         return true;
     }
 
-    protected GradientDrawable createShapeDrawable() {
+    protected GradientDrawable createShapeDrawable(boolean isCircle, float cornerRadius) {
         GradientDrawable d = newGradientDrawableForShape();
-        d.setShape(mView.isCircle() ? GradientDrawable.OVAL : GradientDrawable.RECTANGLE);
-        d.setCornerRadius(mView.getCornerRadius());
+        d.setShape(isCircle ? GradientDrawable.OVAL : GradientDrawable.RECTANGLE);
+        d.setCornerRadius(cornerRadius);
         d.setColor(Color.WHITE);
         return d;
     }

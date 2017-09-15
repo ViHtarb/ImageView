@@ -28,6 +28,7 @@ dependencies {
     testImplementation 'junit:junit:' + rootProject.ext.junitVersion
     implementation 'com.android.support:design:' + rootProject.ext.supportLibraryVersion
     implementation 'com.android.support:appcompat-v7:' + rootProject.ext.supportLibraryVersion
+    implementation 'com.android.support:cardview-v7:' + rootProject.ext.supportLibraryVersion
     //implementation 'com.github.vihtarb:imageview-glide:0.0.23-SNAPSHOT'
     implementation project(':library-glide')
 }

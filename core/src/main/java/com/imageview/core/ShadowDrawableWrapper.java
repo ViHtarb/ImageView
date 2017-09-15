@@ -328,4 +328,14 @@ final class ShadowDrawableWrapper extends DrawableWrapper {
     public void setShadowSize(float size) {
         setShadowSize(size, mRawMaxShadowSize);
     }
+
+    public float getMinWidth() {
+        final float content = 2 * Math.max(mRawMaxShadowSize, mCornerRadius + mRawMaxShadowSize / 2);
+        return content + mRawMaxShadowSize * 2;
+    }
+
+    public float getMinHeight() {
+        final float content = 2 * Math.max(mRawMaxShadowSize, mCornerRadius + mRawMaxShadowSize * SHADOW_MULTIPLIER / 2);
+        return content + (mRawMaxShadowSize * SHADOW_MULTIPLIER) * 2;
+    }
 }

@@ -24,7 +24,10 @@
 
 package com.imageview.sample;
 
+import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -39,6 +42,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        final ImageView imageViewTest1 = findViewById(R.id.image_view_3);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                imageViewTest1.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
+                //imageViewTest1.setClipToOutline(true);
+                //imageViewTest1.setBorderColor(ColorUtils.setAlphaComponent(imageViewTest1.getBorderColor().getDefaultColor(), 15));
+            }
+        }, 1000);
+        //imageViewTest1.setImageURL("https://i.ytimg.com/vi/6lt2JfJdGSY/maxresdefault.jpg");
+
         final ImageView imageViewTest = findViewById(R.id.image_view_2);
         //imageViewTest.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
         imageViewTest.setOnClickListener(new View.OnClickListener() {
@@ -50,7 +64,13 @@ public class MainActivity extends AppCompatActivity {
 
         final ImageView imageView = findViewById(R.id.image_view);
         //imageView.setCompatElevation(20f);
-        imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
+            }
+        }, 1000);
+        //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
         //imageView.setImageURL("https://pp.vk.me/c604531/v604531553/1d0f6/9gae9OTT_xo.jpg");
         //imageView.setImageResource(R.drawable.ic_noavatar);
         //imageView.setClipToOutline(true);
@@ -59,7 +79,8 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imageView.setCompatElevation(20f);
+                imageViewTest.setBackgroundTintList(ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorAccent, null)));
+                //imageView.setCompatElevation(20f);
                 //imageView.setCircle(!imageView.isCircle());
                 //imageView.setBorderWidth(30f);
                 //imageView.setBorderColor(Color.GREEN);

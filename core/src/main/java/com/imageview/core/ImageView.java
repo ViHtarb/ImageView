@@ -46,7 +46,6 @@ import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -66,6 +65,11 @@ import java.util.List;
  * <p>The background color of this view defaults to the your theme's {@code colorAccent}. If you
  * wish to change this at runtime then you can do so via
  * {@link #setBackgroundTintList(ColorStateList)}.</p>
+ *
+ * TODO fix measuring view
+ * TODO changing view form with changing src drawable form
+ * TODO for pre-lollipop need fix shadow drawing for square form and for square form with corners
+ * TODO reformat project
  */
 @CoordinatorLayout.DefaultBehavior(ImageView.Behavior.class)
 public abstract class ImageView extends VisibilityAwareImageView {
@@ -101,7 +105,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
 
     private ColorStateList mBorderColor;
 
-    private Drawable mStockDrawable;
+    //private Drawable mStockDrawable;
 
     private ColorStateList mBackgroundTint;
     private PorterDuff.Mode mBackgroundTintMode;
@@ -131,7 +135,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
         mBorderWidth = a.getDimensionPixelSize(R.styleable.ImageView_borderWidth, 0);
         mBorderColor = a.getColorStateList(R.styleable.ImageView_borderColor);
 
-        final float elevation = a.getDimension(R.styleable.ImageView_elevation, 0f);
+        final float elevation = a.getDimension(R.styleable.ImageView_elevation, a.getDimension(R.styleable.ImageView_android_elevation, 0f));
         final float pressedTranslationZ = a.getDimension(R.styleable.ImageView_pressedTranslationZ, ViewUtils.dpToPx(6));
 
         mBackgroundTint = a.getColorStateList(R.styleable.ImageView_backgroundTint);
@@ -143,11 +147,19 @@ public abstract class ImageView extends VisibilityAwareImageView {
         getImpl().setPressedTranslationZ(pressedTranslationZ);
     }
 
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        getImpl().setShadowRadius((getWidth() - (mShadowPadding.right + mShadowPadding.left)) / 2f);
-    }
+    // need for calculate touch area with out shadow
+/*    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                // Skipping the gesture if it doesn't start in in the FAB 'content' area
+                if (getContentRect(mTouchArea) && !mTouchArea.contains((int) ev.getX(), (int) ev.getY())) {
+                    return false;
+                }
+                break;
+        }
+        return super.onTouchEvent(ev);
+    }*/
 
     @Override
     protected void onAttachedToWindow() {
@@ -161,6 +173,12 @@ public abstract class ImageView extends VisibilityAwareImageView {
         getImpl().onDetachedFromWindow();
     }
 
+    /*    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        getImpl().setShadowRadius((getWidth() - (mShadowPadding.right + mShadowPadding.left)) / 2f);
+    }*/
+
     @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
@@ -173,37 +191,19 @@ public abstract class ImageView extends VisibilityAwareImageView {
         getImpl().jumpDrawableToCurrentState();
     }
 
-    // need for calculate touch area with out shadow
     @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                // Skipping the gesture if it doesn't start in in the FAB 'content' area
-                if (getContentRect(mTouchArea) && !mTouchArea.contains((int) ev.getX(), (int) ev.getY())) {
-                    return false;
-                }
-                break;
-        }
-        return super.onTouchEvent(ev);
+    public void setBackgroundColor(@ColorInt int color) {
+        Log.i(LOG_TAG, "Setting a custom background is not supported.");
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int preferredSize = getWidth();
+    public void setBackgroundResource(@DrawableRes int resId) {
+        Log.i(LOG_TAG, "Setting a custom background is not supported.");
+    }
 
-        getImpl().updatePadding();
-
-        final int w = resolveAdjustedSize(preferredSize, widthMeasureSpec);
-        final int h = resolveAdjustedSize(preferredSize, heightMeasureSpec);
-
-        // As we want to stay circular, we set both dimensions to be the
-        // smallest resolved dimension
-        final int d = Math.min(w, h);
-
-        // We add the shadow's padding to the measured dimension
-        setMeasuredDimension(
-                d + mShadowPadding.left + mShadowPadding.right,
-                d + mShadowPadding.top + mShadowPadding.bottom);
+    @Override
+    public void setBackgroundDrawable(Drawable background) {
+        Log.i(LOG_TAG, "Setting a custom background is not supported.");
     }
 
     /**
@@ -285,29 +285,37 @@ public abstract class ImageView extends VisibilityAwareImageView {
     }
 
     @Override
-    public void setBackgroundDrawable(Drawable background) {
-        Log.i(LOG_TAG, "Setting a custom background is not supported.");
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        //super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        //getImpl().onMeasure(widthMeasureSpec, heightMeasureSpec);
+        //super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        //getImpl().updatePadding();
+
+/*        getImpl().updatePadding();
+        final int w = resolveAdjustedSize(getWidth(), widthMeasureSpec);
+        final int h = resolveAdjustedSize(getWidth(), heightMeasureSpec);
+
+        // As we want to stay circular, we set both dimensions to be the
+        // smallest resolved dimension
+        final int d = Math.min(w, h);
+
+        // We add the shadow's padding to the measured dimension
+        setMeasuredDimension(
+                d + mShadowPadding.left + mShadowPadding.right,
+                d + mShadowPadding.top + mShadowPadding.bottom);*/
     }
 
     @Override
-    public void setBackgroundResource(@DrawableRes int resId) {
-        Log.i(LOG_TAG, "Setting a custom background is not supported.");
-    }
-
-    @Override
-    public void setBackgroundColor(@ColorInt int color) {
-        Log.i(LOG_TAG, "Setting a custom background is not supported.");
+    public void setImageDrawable(@Nullable Drawable drawable) {
+        getImpl().setImageDrawable(drawable);
     }
 
     @Override
     public void setImageBitmap(Bitmap bm) {
         super.setImageBitmap(bm);
         getImpl().setImageDrawable(getDrawable());
-    }
-
-    @Override
-    public void setImageDrawable(@Nullable Drawable drawable) {
-        getImpl().setImageDrawable(drawable);
     }
 
     public boolean isCircle() {
@@ -427,6 +435,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
      *
      * @return true if this view actually has been laid out and has a content rect, else false.
      */
+/*
     public boolean getContentRect(@NonNull Rect rect) {
         if (ViewCompat.isLaidOut(this)) {
             rect.set(0, 0, getWidth(), getHeight());
@@ -439,6 +448,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
             return false;
         }
     }
+*/
 
     /**
      * Shows the image view.
@@ -503,7 +513,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
         };
     }
 
-    private static int resolveAdjustedSize(int desiredSize, int measureSpec) {
+/*    private static int resolveAdjustedSize(int desiredSize, int measureSpec) {
         int result = desiredSize;
         int specMode = View.MeasureSpec.getMode(measureSpec);
         int specSize = View.MeasureSpec.getSize(measureSpec);
@@ -525,7 +535,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
                 break;
         }
         return result;
-    }
+    }*/
 
     private ImageViewImpl getImpl() {
         if (mImpl == null) {
@@ -550,8 +560,8 @@ public abstract class ImageView extends VisibilityAwareImageView {
 
         @Override
         public void setShadowPadding(int left, int top, int right, int bottom) {
-            mShadowPadding.set(left, top, right, bottom);
-            setPadding(left + (int) getBorderWidth(), top + (int) getBorderWidth(), right + (int) getBorderWidth(), bottom + (int) getBorderWidth());
+            //mShadowPadding.set(left, top, right, bottom);
+            //setPadding(left + (int) getBorderWidth(), top + (int) getBorderWidth(), right + (int) getBorderWidth(), bottom + (int) getBorderWidth());
         }
 
         @Override
@@ -712,8 +722,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
             for (int i = 0, count = dependencies.size(); i < count; i++) {
                 final View dependency = dependencies.get(i);
                 if (dependency instanceof AppBarLayout) {
-                    if (updateViewVisibilityForAppBarLayout(
-                            parent, (AppBarLayout) dependency, child)) {
+                    if (updateViewVisibilityForAppBarLayout(parent, (AppBarLayout) dependency, child)) {
                         break;
                     }
                 } else if (isBottomSheet(dependency)) {
