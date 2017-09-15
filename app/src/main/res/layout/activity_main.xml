@@ -23,10 +23,11 @@
             android:layout_height="56dp"
             android:layout_margin="8dp"
             android:elevation="8dp"
-            android:src="@drawable/ic_placeholder"
+            android:src="@drawable/avatar"
             app:borderColor="@color/colorAccent"
             app:borderWidth="2dp"
             app:circle="true"/>
+<!--
 
         <com.imageview.ImageView
             android:id="@+id/image_view_2"
@@ -60,6 +61,7 @@
             app:elevation="8dp"
             app:fabSize="normal"
             app:useCompatPadding="true"/>
+-->
 
         <Button
             android:id="@+id/button_test"

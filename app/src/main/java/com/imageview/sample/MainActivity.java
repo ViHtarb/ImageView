@@ -24,10 +24,8 @@
 
 package com.imageview.sample;
 
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -41,12 +39,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+/*
         final ImageView imageViewTest1 = findViewById(R.id.image_view_3);
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                imageViewTest1.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
+                //imageViewTest1.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
                 //imageViewTest1.setClipToOutline(true);
                 //imageViewTest1.setBorderColor(ColorUtils.setAlphaComponent(imageViewTest1.getBorderColor().getDefaultColor(), 15));
             }
@@ -60,14 +58,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
             }
-        });
+        });*/
 
         final ImageView imageView = findViewById(R.id.image_view);
         //imageView.setCompatElevation(20f);
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
+                //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
             }
         }, 1000);
         //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
@@ -79,9 +77,9 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imageViewTest.setBackgroundTintList(ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorAccent, null)));
+                //imageViewTest.setBackgroundTintList(ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorAccent, null)));
                 //imageView.setCompatElevation(20f);
-                //imageView.setCircle(!imageView.isCircle());
+                imageView.setCircle(!imageView.isCircle());
                 //imageView.setBorderWidth(30f);
                 //imageView.setBorderColor(Color.GREEN);
                 //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");

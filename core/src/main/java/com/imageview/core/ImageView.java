@@ -66,8 +66,9 @@ import java.util.List;
  * wish to change this at runtime then you can do so via
  * {@link #setBackgroundTintList(ColorStateList)}.</p>
  *
- * TODO fix measuring view
- * TODO changing view form with changing src drawable form
+ * TODO fix measuring view - fixed for android L and biggest
+ * TODO changing view form with changing src drawable form - works with local drawables and don`t works with
+ * transition drawables from Glide may be need initiate reload drawable on changing view form?
  * TODO for pre-lollipop need fix shadow drawing for square form and for square form with corners
  * TODO reformat project
  */
@@ -105,10 +106,10 @@ public abstract class ImageView extends VisibilityAwareImageView {
 
     private ColorStateList mBorderColor;
 
-    //private Drawable mStockDrawable;
-
     private ColorStateList mBackgroundTint;
     private PorterDuff.Mode mBackgroundTintMode;
+
+    private Drawable mDefaultDrawable;
 
     private final Rect mShadowPadding = new Rect();
     private final Rect mTouchArea = new Rect();
@@ -145,6 +146,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
         getImpl().setBackgroundDrawable(mBackgroundTint, mBackgroundTintMode, isCircle, mCornerRadius, mBorderWidth, mBorderColor);
         getImpl().setElevation(elevation);
         getImpl().setPressedTranslationZ(pressedTranslationZ);
+        getImpl().setImageDrawable(mDefaultDrawable);
     }
 
     // need for calculate touch area with out shadow
@@ -173,10 +175,10 @@ public abstract class ImageView extends VisibilityAwareImageView {
         getImpl().onDetachedFromWindow();
     }
 
-    /*    @Override
+/*    @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        getImpl().setShadowRadius((getWidth() - (mShadowPadding.right + mShadowPadding.left)) / 2f);
+        //getImpl().setShadowRadius((getWidth() - (mShadowPadding.right + mShadowPadding.left)) / 2f);
     }*/
 
     @Override
@@ -309,13 +311,21 @@ public abstract class ImageView extends VisibilityAwareImageView {
 
     @Override
     public void setImageDrawable(@Nullable Drawable drawable) {
+        if (mDefaultDrawable != drawable && drawable != null && drawable.getConstantState() != null) {
+            mDefaultDrawable = drawable.getConstantState().newDrawable();
+        }
         getImpl().setImageDrawable(drawable);
     }
 
     @Override
     public void setImageBitmap(Bitmap bm) {
         super.setImageBitmap(bm);
-        getImpl().setImageDrawable(getDrawable());
+
+        Drawable drawable = getDrawable();
+        if (mDefaultDrawable != drawable && drawable != null && drawable.getConstantState() != null) {
+            mDefaultDrawable = drawable.getConstantState().newDrawable();
+        }
+        getImpl().setImageDrawable(drawable);
     }
 
     public boolean isCircle() {
@@ -326,8 +336,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
         if (this.isCircle != isCircle) {
             this.isCircle = isCircle;
             getImpl().setCircle(isCircle);
-
-            //setImageDrawable(getDrawable()); // TODO fix it
+            getImpl().setImageDrawable(mDefaultDrawable);
         }
     }
 
