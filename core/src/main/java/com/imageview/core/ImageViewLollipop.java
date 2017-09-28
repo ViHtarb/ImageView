@@ -33,7 +33,7 @@ class ImageViewLollipop extends ImageViewImpl {
     @Override
     protected void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, boolean isCircle, float cornerRadius, float borderWidth, ColorStateList borderColor) {
         // Now we need to tint the shape background with the tint
-        mShapeDrawable = DrawableCompat.wrap(createShapeDrawable(isCircle, cornerRadius));
+        mShapeDrawable = DrawableCompat.wrap(createShapeDrawable(isCircle, cornerRadius, backgroundTint));
         DrawableCompat.setTintList(mShapeDrawable, backgroundTint);
         if (backgroundTintMode != null) {
             DrawableCompat.setTintMode(mShapeDrawable, backgroundTintMode);
