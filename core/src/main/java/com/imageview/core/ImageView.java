@@ -66,11 +66,14 @@ import java.util.List;
  * wish to change this at runtime then you can do so via
  * {@link #setBackgroundTintList(ColorStateList)}.</p>
  *
- * TODO fix measuring view - fixed for android L and biggest
- * TODO changing view form with changing src drawable form - works with local drawables and don`t works with
+ * Changing view form with changing src drawable form - works with local drawables and don`t works with
  * transition drawables from Glide may be need initiate reload drawable on changing view form? // disabled 15.10.2017
+ *
+ * TODO try to implement rounding vector drawables(i mean its real with layer drawable https://stackoverflow.com/questions/36070223/how-to-put-a-vector-in-a-shape-in-android)
+ * TODO fix measuring view - fixed for android L and biggest
  * TODO for pre-lollipop need fix shadow drawing for square form and for square form with corners
  * TODO reformat project
+ * TODO think about current tinting
  */
 @CoordinatorLayout.DefaultBehavior(ImageView.Behavior.class)
 public abstract class ImageView extends VisibilityAwareImageView {
@@ -110,7 +113,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
     private PorterDuff.Mode mBackgroundTintMode;
 
     private final Rect mShadowPadding = new Rect();
-    private final Rect mTouchArea = new Rect();
+    //private final Rect mTouchArea = new Rect();
 
     private ImageViewImpl mImpl;
 
@@ -135,12 +138,13 @@ public abstract class ImageView extends VisibilityAwareImageView {
         mBorderColor = a.getColorStateList(R.styleable.ImageView_borderColor);
 
         final float elevation = a.getDimension(R.styleable.ImageView_elevation, a.getDimension(R.styleable.ImageView_android_elevation, 0f));
-        final float pressedTranslationZ = a.getDimension(R.styleable.ImageView_pressedTranslationZ, ViewUtils.dpToPx(6));
+        final float pressedTranslationZ = a.getDimension(R.styleable.ImageView_pressedTranslationZ, 0f);
 
         mBackgroundTint = a.getColorStateList(R.styleable.ImageView_backgroundTint);
         mBackgroundTintMode = ViewUtils.parseTintMode(a.getInt(R.styleable.ImageView_backgroundTintMode, -1), null);
         a.recycle();
 
+        getImpl().setImageDrawable(getDrawable());
         getImpl().setBackgroundDrawable(mBackgroundTint, mBackgroundTintMode, isCircle, mCornerRadius, mBorderWidth, mBorderColor);
         getImpl().setElevation(elevation);
         getImpl().setPressedTranslationZ(pressedTranslationZ);

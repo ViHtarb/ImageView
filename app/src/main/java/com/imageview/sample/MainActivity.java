@@ -24,11 +24,14 @@
 
 package com.imageview.sample;
 
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import com.imageview.ImageView;
 
@@ -73,13 +76,22 @@ public class MainActivity extends AppCompatActivity {
         //imageView.setImageResource(R.drawable.ic_noavatar);
         //imageView.setClipToOutline(true);
 
+        LinearLayout linearLayout = findViewById(R.id.test_view);
+        linearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
         Button button = findViewById(R.id.button_test);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                imageView.setBackgroundTintList(null);
                 //imageViewTest.setBackgroundTintList(ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorAccent, null)));
                 //imageView.setCompatElevation(20f);
-                imageView.setCircle(!imageView.isCircle());
+                //imageView.setCircle(!imageView.isCircle());
                 //imageView.setBorderWidth(30f);
                 //imageView.setBorderColor(Color.GREEN);
                 //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");

@@ -5,6 +5,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -20,6 +21,7 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 
 @RequiresApi(LOLLIPOP)
@@ -33,8 +35,8 @@ class ImageViewLollipop extends ImageViewImpl {
     @Override
     protected void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, boolean isCircle, float cornerRadius, float borderWidth, ColorStateList borderColor) {
         // Now we need to tint the shape background with the tint
-        mShapeDrawable = DrawableCompat.wrap(createShapeDrawable(isCircle, cornerRadius, backgroundTint));
-        DrawableCompat.setTintList(mShapeDrawable, backgroundTint);
+        mShapeDrawable = DrawableCompat.wrap(createShapeDrawable(isCircle, cornerRadius));
+        DrawableCompat.setTintList(mShapeDrawable, backgroundTint == null ? mTransparentTint : backgroundTint);
         if (backgroundTintMode != null) {
             DrawableCompat.setTintMode(mShapeDrawable, backgroundTintMode);
         }
@@ -145,13 +147,13 @@ class ImageViewLollipop extends ImageViewImpl {
     }
 
     @Override
-    protected BorderDrawable newBorderDrawable() {
-        return new BorderDrawableLollipop();
+    protected GradientDrawable newGradientDrawableForShape() {
+        return new AlwaysStatefulGradientDrawable();
     }
 
     @Override
-    protected GradientDrawable newGradientDrawableForShape() {
-        return new AlwaysStatefulGradientDrawable();
+    protected BorderDrawable newBorderDrawable() {
+        return new BorderDrawableLollipop();
     }
 
     @Override

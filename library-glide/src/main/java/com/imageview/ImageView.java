@@ -46,7 +46,7 @@ public class ImageView extends com.imageview.core.integration.ImageView {
         super(context, attrs, defStyleAttr);
 
         if (!isInEditMode()) {
-            mManager = Glide.with(context);
+            mManager = Glide.with(context.getApplicationContext());
         }
     }
 

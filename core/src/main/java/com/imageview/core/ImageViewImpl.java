@@ -65,9 +65,8 @@ class ImageViewImpl {
 
     protected static final int NO_ID = SDK_INT >= LOLLIPOP ? -1 : 0;
 
-    protected static final Interpolator ANIM_INTERPOLATOR = AnimationUtils.FAST_OUT_LINEAR_IN_INTERPOLATOR;
-    protected static final long PRESSED_ANIM_DURATION = 100;
     protected static final long PRESSED_ANIM_DELAY = 100;
+    protected static final long PRESSED_ANIM_DURATION = 100;
 
     protected static final int ANIM_STATE_NONE = 0;
     protected static final int ANIM_STATE_HIDING = 1;
@@ -75,19 +74,18 @@ class ImageViewImpl {
 
     protected static final int SHOW_HIDE_ANIM_DURATION = 200;
 
+    protected static final int[] EMPTY_STATE_SET = new int[0];
+    protected static final int[] ENABLED_STATE_SET = {android.R.attr.state_enabled};
     protected static final int[] PRESSED_ENABLED_STATE_SET = {android.R.attr.state_pressed, android.R.attr.state_enabled};
     protected static final int[] FOCUSED_ENABLED_STATE_SET = {android.R.attr.state_focused, android.R.attr.state_enabled};
-    protected static final int[] ENABLED_STATE_SET = {android.R.attr.state_enabled};
-    protected static final int[] EMPTY_STATE_SET = new int[0];
+
+    protected static final Interpolator ANIM_INTERPOLATOR = AnimationUtils.FAST_OUT_LINEAR_IN_INTERPOLATOR;
 
     protected int mAnimState = ANIM_STATE_NONE;
 
-    private float mRotation;
-
+    protected float mRotation;
     protected float mElevation;
     protected float mPressedTranslationZ;
-
-    private final Rect mTmpRect = new Rect();
 
     protected Drawable mShapeDrawable;
     protected BorderDrawable mBorderDrawable;
@@ -95,12 +93,15 @@ class ImageViewImpl {
 
     protected ShadowDrawableWrapper mShadowDrawable;
 
-    private final StateListAnimator mStateListAnimator;
+    protected ViewTreeObserver.OnPreDrawListener mPreDrawListener;
+
+    protected final Rect mTmpRect = new Rect();
+    protected final ColorStateList mTransparentTint = ColorStateList.valueOf(Color.TRANSPARENT);
+
+    protected final StateListAnimator mStateListAnimator;
 
     protected final ImageView mView;
     protected final ViewDelegate mViewDelegate;
-
-    private ViewTreeObserver.OnPreDrawListener mPreDrawListener;
 
     interface InternalVisibilityChangedListener {
         void onShown();
@@ -127,8 +128,8 @@ class ImageViewImpl {
     protected void setBackgroundDrawable(ColorStateList backgroundTint, PorterDuff.Mode backgroundTintMode, boolean isCircle, float cornerRadius, float borderWidth, ColorStateList borderColor) {
         // Now we need to tint the original background with the tint, using
         // an InsetDrawable if we have a border width
-        mShapeDrawable = DrawableCompat.wrap(createShapeDrawable(isCircle, cornerRadius, backgroundTint));
-        DrawableCompat.setTintList(mShapeDrawable, backgroundTint);
+        mShapeDrawable = DrawableCompat.wrap(createShapeDrawable(isCircle, cornerRadius));
+        DrawableCompat.setTintList(mShapeDrawable, backgroundTint == null ? mTransparentTint : backgroundTint);
         if (backgroundTintMode != null) {
             DrawableCompat.setTintMode(mShapeDrawable, backgroundTintMode);
         }
@@ -146,10 +147,7 @@ class ImageViewImpl {
 
     protected void setBackgroundTintList(ColorStateList tint) {
         if (mShapeDrawable != null) {
-            GradientDrawable shapeDrawable = DrawableCompat.unwrap(mShadowDrawable);
-            shapeDrawable.setColor(tint != null ? Color.WHITE : Color.TRANSPARENT);
-
-            DrawableCompat.setTintList(mShapeDrawable, tint);
+            DrawableCompat.setTintList(mShapeDrawable, tint == null ? mTransparentTint : tint);
         }
     }
 
@@ -381,10 +379,10 @@ class ImageViewImpl {
         return true;
     }
 
-    protected GradientDrawable createShapeDrawable(boolean isCircle, float cornerRadius, ColorStateList backgroundTint) {
+    protected GradientDrawable createShapeDrawable(boolean isCircle, float cornerRadius) {
         GradientDrawable d = newGradientDrawableForShape();
         d.setShape(isCircle ? GradientDrawable.OVAL : GradientDrawable.RECTANGLE);
-        d.setColor(backgroundTint != null ? Color.WHITE : Color.TRANSPARENT);
+        d.setColor(Color.WHITE);
         d.setCornerRadius(cornerRadius);
         return d;
     }
