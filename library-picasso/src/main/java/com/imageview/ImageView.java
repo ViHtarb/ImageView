@@ -47,7 +47,7 @@ public class ImageView extends com.imageview.core.integration.ImageView {
         super(context, attrs, defStyleAttr);
 
         if (!isInEditMode()) {
-            mManager = Picasso.with(context.getApplicationContext());
+            mManager = Picasso.get();
         }
     }
 
