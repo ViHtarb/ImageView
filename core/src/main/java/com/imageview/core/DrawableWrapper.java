@@ -25,6 +25,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.annotation.RestrictTo;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.view.View;
@@ -47,7 +48,7 @@ class DrawableWrapper extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    public void draw(@NonNull Canvas canvas) {
         mDrawable.draw(canvas);
     }
 
@@ -92,10 +93,11 @@ class DrawableWrapper extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public boolean setState(final int[] stateSet) {
+    public boolean setState(@NonNull final int[] stateSet) {
         return mDrawable.setState(stateSet);
     }
 
+    @NonNull
     @Override
     public int[] getState() {
         return mDrawable.getState();
@@ -103,9 +105,10 @@ class DrawableWrapper extends Drawable implements Drawable.Callback {
 
     @Override
     public void jumpToCurrentState() {
-        DrawableCompat.jumpToCurrentState(mDrawable);
+        mDrawable.jumpToCurrentState();
     }
 
+    @NonNull
     @Override
     public Drawable getCurrent() {
         return mDrawable.getCurrent();
@@ -147,7 +150,7 @@ class DrawableWrapper extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public boolean getPadding(Rect padding) {
+    public boolean getPadding(@NonNull Rect padding) {
         return mDrawable.getPadding(padding);
     }
 
@@ -155,7 +158,7 @@ class DrawableWrapper extends Drawable implements Drawable.Callback {
      * {@inheritDoc}
      */
     @Override
-    public void invalidateDrawable(Drawable who) {
+    public void invalidateDrawable(@NonNull Drawable who) {
         invalidateSelf();
     }
 
@@ -163,7 +166,7 @@ class DrawableWrapper extends Drawable implements Drawable.Callback {
      * {@inheritDoc}
      */
     @Override
-    public void scheduleDrawable(Drawable who, Runnable what, long when) {
+    public void scheduleDrawable(@NonNull Drawable who, @NonNull Runnable what, long when) {
         scheduleSelf(what, when);
     }
 
@@ -171,7 +174,7 @@ class DrawableWrapper extends Drawable implements Drawable.Callback {
      * {@inheritDoc}
      */
     @Override
-    public void unscheduleDrawable(Drawable who, Runnable what) {
+    public void unscheduleDrawable(@NonNull Drawable who, @NonNull Runnable what) {
         unscheduleSelf(what);
     }
 
@@ -201,7 +204,7 @@ class DrawableWrapper extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void setTintMode(PorterDuff.Mode tintMode) {
+    public void setTintMode(@NonNull PorterDuff.Mode tintMode) {
         DrawableCompat.setTintMode(mDrawable, tintMode);
     }
 

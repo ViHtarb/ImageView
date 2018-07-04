@@ -408,7 +408,7 @@ class ImageViewImpl {
         RoundedBitmapDrawable roundedBitmapDrawable;
 
         if (!(drawable instanceof RoundedBitmapDrawable)) {
-            roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(null, getBitmap(drawable));
+            roundedBitmapDrawable = RoundedBitmapDrawableFactory.create(mView.getResources(), getBitmap(drawable));
             roundedBitmapDrawable.setAntiAlias(true);
         } else {
             roundedBitmapDrawable = (RoundedBitmapDrawable) drawable;

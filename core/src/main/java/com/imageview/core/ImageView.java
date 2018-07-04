@@ -84,8 +84,9 @@ public abstract class ImageView extends VisibilityAwareImageView {
      * Callback to be invoked when the visibility of a ImageView changes.
      */
     public abstract static class OnVisibilityChangedListener {
+
         /**
-         * Called when a FloatingActionButton has been
+         * Called when a {@code ImageView} has been
          * {@link #show(OnVisibilityChangedListener) shown}.
          *
          * @param imageView the ImageView that was shown.
@@ -93,7 +94,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
         public void onShown(ImageView imageView) {}
 
         /**
-         * Called when a FloatingActionButton has been
+         * Called when a {@code ImageView} has been
          * {@link #hide(OnVisibilityChangedListener) hidden}.
          *
          * @param imageView the ImageView that was hidden.
@@ -287,13 +288,13 @@ public abstract class ImageView extends VisibilityAwareImageView {
         setBackgroundTintMode(tintMode);
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    /*@Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {*/
         //super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         //getImpl().onMeasure(widthMeasureSpec, heightMeasureSpec);
         //super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        //super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         //getImpl().updatePadding();
 
 /*        getImpl().updatePadding();
@@ -308,7 +309,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
         setMeasuredDimension(
                 d + mShadowPadding.left + mShadowPadding.right,
                 d + mShadowPadding.top + mShadowPadding.bottom);*/
-    }
+    //}
 
     @Override
     public void setImageDrawable(@Nullable Drawable drawable) {

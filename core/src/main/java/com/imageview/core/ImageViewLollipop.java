@@ -5,7 +5,6 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -21,7 +20,6 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 
 @RequiresApi(LOLLIPOP)

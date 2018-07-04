@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 
 /**
  * A {@link android.graphics.drawable.Drawable} which wraps another drawable and
@@ -176,7 +177,7 @@ final class ShadowDrawableWrapper extends DrawableWrapper {
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    public void draw(@NonNull Canvas canvas) {
         if (mDirty) {
             buildComponents(getBounds());
             mDirty = false;

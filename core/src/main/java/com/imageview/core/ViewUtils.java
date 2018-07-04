@@ -16,10 +16,10 @@
 
 package com.imageview.core;
 
-import android.content.res.Resources;
 import android.graphics.PorterDuff;
 
 class ViewUtils {
+
     static PorterDuff.Mode parseTintMode(int value, PorterDuff.Mode defaultMode) {
         switch (value) {
             case 3:
@@ -37,7 +37,7 @@ class ViewUtils {
         }
     }
 
-    public static float dpToPx(float dp) {
+/*    public static float dpToPx(float dp) {
         return dp * Resources.getSystem().getDisplayMetrics().density;
-    }
+    }*/
 }
