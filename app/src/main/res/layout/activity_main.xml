@@ -24,7 +24,7 @@
             android:layout_height="56dp"
             android:layout_margin="8dp"
             android:src="@drawable/ic_error"
-            app:backgroundTint="@color/colorAccent"
+            app:backgroundTint="@color/color"
             app:circle="false"/>
 <!--
 
