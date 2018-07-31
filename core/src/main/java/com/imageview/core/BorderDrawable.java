@@ -32,6 +32,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -47,6 +48,10 @@ class BorderDrawable extends Drawable {
      */
     private static final float DRAW_STROKE_WIDTH_MULTIPLE = 1.3333f;
 
+    protected final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    protected final Rect mRect = new Rect();
+    protected final RectF mRectF = new RectF();
+
     protected boolean isCircle;
 
     private int mCurrentColor;
@@ -55,10 +60,6 @@ class BorderDrawable extends Drawable {
     protected float mRotation;
     protected float mCornerRadius;
     protected float mWidth;
-
-    protected final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    protected final Rect mRect = new Rect();
-    protected final RectF mRectF = new RectF();
 
     public BorderDrawable() {
         mPaint.setStyle(Paint.Style.STROKE);
@@ -105,7 +106,7 @@ class BorderDrawable extends Drawable {
     }
 
     @Override
-    public void setAlpha(int alpha) {
+    public void setAlpha(@IntRange(from = 0, to = 255) int alpha) {
         mPaint.setAlpha(alpha);
         invalidateSelf();
     }

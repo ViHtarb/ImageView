@@ -42,7 +42,10 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.AppBarLayoutUtils;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.view.TintableBackgroundView;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.DrawableUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -151,7 +154,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
         getImpl().setPressedTranslationZ(pressedTranslationZ);
     }
 
-    // need for calculate touch area with out shadow
+    // need for calculate touch area without shadow
 /*    @Override
     public boolean onTouchEvent(MotionEvent ev) {
         switch (ev.getAction()) {
@@ -210,24 +213,12 @@ public abstract class ImageView extends VisibilityAwareImageView {
         Log.i(LOG_TAG, "Setting a custom background is not supported.");
     }
 
-    /**
-     * Returns the tint applied to the background drawable, if specified.
-     *
-     * @return the tint applied to the background drawable
-     * @see #setBackgroundTintList(ColorStateList)
-     */
     @Nullable
     @Override
     public ColorStateList getBackgroundTintList() {
         return mBackgroundTint;
     }
 
-    /**
-     * Applies a tint to the background drawable. Does not modify the current tint
-     * mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
-     *
-     * @param tint the tint to apply, may be {@code null} to clear tint
-     */
     @Override
     public void setBackgroundTintList(@Nullable ColorStateList tint) {
         if (mBackgroundTint != tint) {
@@ -236,56 +227,18 @@ public abstract class ImageView extends VisibilityAwareImageView {
         }
     }
 
-    /**
-     * Returns the blending mode used to apply the tint to the background
-     * drawable, if specified.
-     *
-     * @return the blending mode used to apply the tint to the background
-     *         drawable
-     * @see #setBackgroundTintMode(PorterDuff.Mode)
-     */
     @Nullable
     @Override
     public PorterDuff.Mode getBackgroundTintMode() {
         return mBackgroundTintMode;
     }
 
-    /**
-     * Specifies the blending mode used to apply the tint specified by
-     * {@link #setBackgroundTintList(ColorStateList)}} to the background
-     * drawable. The default mode is {@link PorterDuff.Mode#SRC_IN}.
-     *
-     * @param tintMode the blending mode used to apply the tint, may be
-     *                 {@code null} to clear tint
-     */
     @Override
     public void setBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) {
         if (mBackgroundTintMode != tintMode) {
             mBackgroundTintMode = tintMode;
             getImpl().setBackgroundTintMode(tintMode);
         }
-    }
-
-    @Nullable
-    @Override
-    public ColorStateList getSupportBackgroundTintList() {
-        return getBackgroundTintList();
-    }
-
-    @Override
-    public void setSupportBackgroundTintList(@Nullable ColorStateList tint) {
-        setBackgroundTintList(tint);
-    }
-
-    @Nullable
-    @Override
-    public PorterDuff.Mode getSupportBackgroundTintMode() {
-        return getBackgroundTintMode();
-    }
-
-    @Override
-    public void setSupportBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) {
-        setBackgroundTintMode(tintMode);
     }
 
     /*@Override
