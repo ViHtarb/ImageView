@@ -23,7 +23,13 @@ import android.util.StateSet;
 
 import java.util.ArrayList;
 
-final class StateListAnimator {
+/**
+ * Lets you define a number of Animators that will run on the attached View depending on the View's
+ * drawable state.
+ *
+ * @hide
+ */
+public final class StateListAnimator {
 
     private final ArrayList<Tuple> mTuples = new ArrayList<>();
 
@@ -56,7 +62,7 @@ final class StateListAnimator {
     /**
      * Called by View
      */
-    void setState(int[] state) {
+    public void setState(int[] state) {
         Tuple match = null;
         final int count = mTuples.size();
         for (int i = 0; i < count; i++) {
@@ -95,7 +101,7 @@ final class StateListAnimator {
     /**
      * If there is an animation running for a recent state change, ends it.
      *
-     * <p>This causes the animation to assign the end value(s) to the View.</p>
+     * <p>This causes the animation to assign the end value(s) to the View.
      */
     public void jumpToCurrentState() {
         if (mRunningAnimator != null) {

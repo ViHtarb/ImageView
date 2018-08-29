@@ -22,7 +22,7 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 
 /**
- * Created by Viнt@rь on 01.09.2017
+ * An {@link ImageView} that keeps track of visibility changes.
  */
 @SuppressLint("AppCompatCustomView")
 class VisibilityAwareImageView extends ImageView {

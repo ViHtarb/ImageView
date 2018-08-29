@@ -22,6 +22,5 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation 'com.android.support:exifinterface:' + rootProject.ext.supportLibraryVersion // for update exifinterface in picasso library
     api project(':core-integration')
 }

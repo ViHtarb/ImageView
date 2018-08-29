@@ -26,7 +26,11 @@ package com.imageview.core;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
@@ -40,17 +44,25 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.graphics.drawable.VectorDrawableCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
-import android.support.v4.view.ViewCompat;
+import android.os.Build;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.animation.Interpolator;
+
+import com.google.android.material.animation.AnimationUtils;
+import com.google.android.material.animation.AnimatorSetCompat;
+import com.google.android.material.animation.MotionSpec;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.core.graphics.drawable.RoundedBitmapDrawable;
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
+import androidx.core.view.ViewCompat;
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
@@ -63,50 +75,58 @@ import static android.os.Build.VERSION_CODES.LOLLIPOP;
 @TargetApi(ICE_CREAM_SANDWICH)
 class ImageViewImpl {
 
+    private static final float HIDE_OPACITY = 0f;
+    private static final float HIDE_SCALE = 0f;
+    private static final float SHOW_OPACITY = 1f;
+    private static final float SHOW_SCALE = 1f;
+
     protected static final int NO_ID = SDK_INT >= LOLLIPOP ? -1 : 0;
 
-    protected static final long PRESSED_ANIM_DELAY = 100;
-    protected static final long PRESSED_ANIM_DURATION = 100;
+    protected static final long ELEVATION_ANIM_DELAY = 100;
+    protected static final long ELEVATION_ANIM_DURATION = 100;
 
     protected static final int ANIM_STATE_NONE = 0;
     protected static final int ANIM_STATE_HIDING = 1;
     protected static final int ANIM_STATE_SHOWING = 2;
 
-    protected static final int SHOW_HIDE_ANIM_DURATION = 200;
-
     protected static final int[] EMPTY_STATE_SET = new int[0];
     protected static final int[] ENABLED_STATE_SET = {android.R.attr.state_enabled};
     protected static final int[] PRESSED_ENABLED_STATE_SET = {android.R.attr.state_pressed, android.R.attr.state_enabled};
     protected static final int[] FOCUSED_ENABLED_STATE_SET = {android.R.attr.state_focused, android.R.attr.state_enabled};
+    protected static final int[] HOVERED_ENABLED_STATE_SET = {android.R.attr.state_hovered, android.R.attr.state_enabled};
+    protected static final int[] HOVERED_FOCUSED_ENABLED_STATE_SET = {android.R.attr.state_hovered, android.R.attr.state_focused, android.R.attr.state_enabled};
 
-    protected static final Interpolator ANIM_INTERPOLATOR = AnimationUtils.FAST_OUT_LINEAR_IN_INTERPOLATOR;
+    protected static final TimeInterpolator ELEVATION_ANIM_INTERPOLATOR = AnimationUtils.FAST_OUT_LINEAR_IN_INTERPOLATOR;
 
-    protected int mAnimState = ANIM_STATE_NONE;
+    private final Rect mTmpRect = new Rect();
 
-    protected float mRotation;
-    protected float mElevation;
-    protected float mPressedTranslationZ;
+    private int mAnimState = ANIM_STATE_NONE;
+
+    private float mRotation;
+    private float mElevation;
+    private float mPressedTranslationZ;
+    private float mHoveredFocusedTranslationZ;
+
+    private StateListAnimator mStateListAnimator;
+
+    private Animator mCurrentAnimator;
+
+    private MotionSpec mDefaultShowMotionSpec;
+    private MotionSpec mDefaultHideMotionSpec;
+
+    private MotionSpec mShowMotionSpec;
+    private MotionSpec mHideMotionSpec;
+
+    protected final ColorStateList mTransparentTint = ColorStateList.valueOf(Color.TRANSPARENT);
+    protected final ImageView mView;
+    protected final ViewDelegate mViewDelegate;
 
     protected Drawable mShapeDrawable;
     protected BorderDrawable mBorderDrawable;
     protected Drawable mContentBackground;
-
     protected ShadowDrawableWrapper mShadowDrawable;
 
-    protected ViewTreeObserver.OnPreDrawListener mPreDrawListener;
-
-    protected final Rect mTmpRect = new Rect();
-    protected final ColorStateList mTransparentTint = ColorStateList.valueOf(Color.TRANSPARENT);
-
-    protected final StateListAnimator mStateListAnimator;
-
-    protected final ImageView mView;
-    protected final ViewDelegate mViewDelegate;
-
-    interface InternalVisibilityChangedListener {
-        void onShown();
-        void onHidden();
-    }
+    protected ViewTreeObserver.OnPreDrawListener mOnPreDrawListener;
 
     protected ImageViewImpl(ImageView view, ViewDelegate viewDelegate) {
         mView = view;
@@ -114,13 +134,15 @@ class ImageViewImpl {
 
         mStateListAnimator = new StateListAnimator();
 
-        // Elevate with translationZ when pressed or focused
-        mStateListAnimator.addState(PRESSED_ENABLED_STATE_SET, createAnimator(new ElevateToTranslationZAnimation()));
-        mStateListAnimator.addState(FOCUSED_ENABLED_STATE_SET, createAnimator(new ElevateToTranslationZAnimation()));
+        // Elevate with translationZ when pressed, focused, or hovered
+        mStateListAnimator.addState(PRESSED_ENABLED_STATE_SET, createElevationAnimator(new ElevateToPressedTranslationZAnimation()));
+        mStateListAnimator.addState(FOCUSED_ENABLED_STATE_SET, createElevationAnimator(new ElevateToHoveredFocusedTranslationZAnimation()));
+        mStateListAnimator.addState(HOVERED_ENABLED_STATE_SET, createElevationAnimator(new ElevateToHoveredFocusedTranslationZAnimation()));
+        mStateListAnimator.addState(HOVERED_FOCUSED_ENABLED_STATE_SET, createElevationAnimator(new ElevateToHoveredFocusedTranslationZAnimation()));
         // Reset back to elevation by default
-        mStateListAnimator.addState(ENABLED_STATE_SET, createAnimator(new ResetElevationAnimation()));
+        mStateListAnimator.addState(ENABLED_STATE_SET, createElevationAnimator(new ResetElevationAnimation()));
         // Set to 0 when disabled
-        mStateListAnimator.addState(EMPTY_STATE_SET, createAnimator(new DisabledElevationAnimation()));
+        mStateListAnimator.addState(EMPTY_STATE_SET, createElevationAnimator(new DisabledElevationAnimation()));
 
         mRotation = mView.getRotation();
     }
@@ -135,13 +157,11 @@ class ImageViewImpl {
         }
 
         mBorderDrawable = createBorderDrawable(isCircle, cornerRadius, borderWidth, borderColor);
-        mContentBackground = new LayerDrawable(new Drawable[] {mShapeDrawable, mBorderDrawable});
+        mContentBackground = new LayerDrawable(new Drawable[]{mShapeDrawable, mBorderDrawable});
 
-        mShadowDrawable = new ShadowDrawableWrapper(
-                mContentBackground,
-                mElevation,
-                mElevation + mPressedTranslationZ);
+        mShadowDrawable = new ShadowDrawableWrapper(mContentBackground, mElevation, mElevation + mPressedTranslationZ);
         mShadowDrawable.setAddPaddingForCorners(false);
+
         mViewDelegate.setBackgroundDrawable(mShadowDrawable);
     }
 
@@ -202,14 +222,29 @@ class ImageViewImpl {
     protected final void setElevation(float elevation) {
         if (mElevation != elevation) {
             mElevation = elevation;
-            onElevationsChanged(elevation, mPressedTranslationZ);
+            onElevationsChanged(elevation, mPressedTranslationZ, mHoveredFocusedTranslationZ);
         }
+    }
+
+    protected float getPressedTranslationZ() {
+        return mPressedTranslationZ;
     }
 
     protected final void setPressedTranslationZ(float translationZ) {
         if (mPressedTranslationZ != translationZ) {
             mPressedTranslationZ = translationZ;
-            onElevationsChanged(mElevation, translationZ);
+            onElevationsChanged(mElevation, translationZ, mHoveredFocusedTranslationZ);
+        }
+    }
+
+    protected float getHoveredFocusedTranslationZ() {
+        return mHoveredFocusedTranslationZ;
+    }
+
+    protected final void setHoveredFocusedTranslationZ(float translationZ) {
+        if (mHoveredFocusedTranslationZ != translationZ) {
+            mHoveredFocusedTranslationZ = translationZ;
+            onElevationsChanged(mElevation, mPressedTranslationZ, translationZ);
         }
     }
 
@@ -228,7 +263,57 @@ class ImageViewImpl {
         mBorderDrawable.setColor(color);
     }
 
-    protected void onElevationsChanged(float elevation, float pressedTranslationZ) {
+    @Nullable
+    protected final MotionSpec getShowMotionSpec() {
+        return mShowMotionSpec;
+    }
+
+    protected final void setShowMotionSpec(@Nullable MotionSpec spec) {
+        mShowMotionSpec = spec;
+    }
+
+    @Nullable
+    protected final MotionSpec getHideMotionSpec() {
+        return mHideMotionSpec;
+    }
+
+    protected final void setHideMotionSpec(@Nullable MotionSpec spec) {
+        mHideMotionSpec = spec;
+    }
+
+    protected void getPadding(Rect rect) {
+        mShadowDrawable.getPadding(rect);
+    }
+
+    private MotionSpec getDefaultShowMotionSpec() {
+        if (mDefaultShowMotionSpec == null) {
+            mDefaultShowMotionSpec = MotionSpec.createFromResource(mView.getContext(), R.animator.design_image_view_show_motion_spec);
+        }
+        return mDefaultShowMotionSpec;
+    }
+
+    private MotionSpec getDefaultHideMotionSpec() {
+        if (mDefaultHideMotionSpec == null) {
+            mDefaultHideMotionSpec = MotionSpec.createFromResource(mView.getContext(), R.animator.design_image_view_hide_motion_spec);
+        }
+        return mDefaultHideMotionSpec;
+    }
+
+    protected void onAttachedToWindow() {
+        if (requirePreDrawListener()) {
+            ensurePreDrawListener();
+            mView.getViewTreeObserver().addOnPreDrawListener(mOnPreDrawListener);
+        }
+    }
+
+    protected void onDetachedFromWindow() {
+        if (mOnPreDrawListener != null) {
+            mView.getViewTreeObserver().removeOnPreDrawListener(mOnPreDrawListener);
+            mOnPreDrawListener = null;
+        }
+    }
+
+    protected void onElevationsChanged(float elevation, float pressedTranslationZ, float hoveredFocusedTranslationZ) {
         if (mShadowDrawable != null) {
             mShadowDrawable.setShadowSize(elevation, elevation + mPressedTranslationZ);
             updatePadding();
@@ -237,6 +322,13 @@ class ImageViewImpl {
 
     protected void onDrawableStateChanged(int[] state) {
         mStateListAnimator.setState(state);
+    }
+
+    protected void onCompatShadowChanged() {
+        // Ignore pre-v21
+    }
+
+    protected void onPaddingUpdated(Rect padding) {
     }
 
     protected void jumpDrawableToCurrentState() {
@@ -249,12 +341,55 @@ class ImageViewImpl {
             return;
         }
 
-        mView.animate().cancel();
+        if (mCurrentAnimator != null) {
+            mCurrentAnimator.cancel();
+        }
+
+        //mView.animate().cancel();
 
         if (shouldAnimateVisibilityChange()) {
-            mAnimState = ANIM_STATE_HIDING;
+            AnimatorSet set = createAnimator(mHideMotionSpec != null ? mHideMotionSpec : getDefaultHideMotionSpec(), HIDE_OPACITY, HIDE_SCALE);
+            set.addListener(new AnimatorListenerAdapter() {
+                private boolean mCancelled;
 
-            mView.animate()
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mView.internalSetVisibility(View.VISIBLE, fromUser);
+
+                    mAnimState = ANIM_STATE_HIDING;
+                    mCurrentAnimator = animation;
+                    mCancelled = false;
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    mCancelled = true;
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mAnimState = ANIM_STATE_NONE;
+                    mCurrentAnimator = null;
+
+                    if (!mCancelled) {
+                        mView.internalSetVisibility(fromUser ? View.GONE : View.INVISIBLE, fromUser);
+                        if (listener != null) {
+                            listener.onHidden();
+                        }
+                    }
+                }
+            });
+
+            /*if (hideListeners != null) {
+                for (Animator.AnimatorListener l : hideListeners) {
+                    set.addListener(l);
+                }
+            }*/
+            set.start();
+
+            //mAnimState = ANIM_STATE_HIDING;
+
+            /*mView.animate()
                     .scaleX(0f)
                     .scaleY(0f)
                     .alpha(0f)
@@ -285,7 +420,7 @@ class ImageViewImpl {
                                 }
                             }
                         }
-                    });
+                    });*/
         } else {
             // If the view isn't laid out, or we're in the editor, don't run the animation
             mView.internalSetVisibility(fromUser ? View.GONE : View.INVISIBLE, fromUser);
@@ -301,19 +436,52 @@ class ImageViewImpl {
             return;
         }
 
-        mView.animate().cancel();
+        if (mCurrentAnimator != null) {
+            mCurrentAnimator.cancel();
+        }
+
+        //mView.animate().cancel();
 
         if (shouldAnimateVisibilityChange()) {
-            mAnimState = ANIM_STATE_SHOWING;
+            //mAnimState = ANIM_STATE_SHOWING;
 
             if (mView.getVisibility() != View.VISIBLE) {
                 // If the view isn't visible currently, we'll animate it from a single pixel
                 mView.setAlpha(0f);
                 mView.setScaleY(0f);
                 mView.setScaleX(0f);
+
+                //setImageMatrixScale(0f);
             }
 
-            mView.animate()
+            AnimatorSet set = createAnimator(mShowMotionSpec != null ? mShowMotionSpec : getDefaultShowMotionSpec(), SHOW_OPACITY, SHOW_SCALE);
+            set.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mView.internalSetVisibility(View.VISIBLE, fromUser);
+
+                    mAnimState = ANIM_STATE_SHOWING;
+                    mCurrentAnimator = animation;
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mAnimState = ANIM_STATE_NONE;
+                    mCurrentAnimator = null;
+
+                    if (listener != null) {
+                        listener.onShown();
+                    }
+                }
+            });
+            /*if (showListeners != null) {
+                for (Animator.AnimatorListener l : showListeners) {
+                    set.addListener(l);
+                }
+            }*/
+            set.start();
+
+            /*mView.animate()
                     .scaleX(1f)
                     .scaleY(1f)
                     .alpha(1f)
@@ -332,20 +500,19 @@ class ImageViewImpl {
                                 listener.onShown();
                             }
                         }
-                    });
+                    });*/
         } else {
             mView.internalSetVisibility(View.VISIBLE, fromUser);
             mView.setAlpha(1f);
             mView.setScaleY(1f);
             mView.setScaleX(1f);
+
+            //setImageMatrixScale(1f);
+
             if (listener != null) {
                 listener.onShown();
             }
         }
-    }
-
-    protected void onCompatShadowChanged() {
-        // Ignore pre-v21
     }
 
     protected final void updatePadding() {
@@ -353,26 +520,6 @@ class ImageViewImpl {
         getPadding(rect);
         onPaddingUpdated(rect);
         mViewDelegate.setShadowPadding(rect.left, rect.top, rect.right, rect.bottom);
-    }
-
-    protected void getPadding(Rect rect) {
-        mShadowDrawable.getPadding(rect);
-    }
-
-    protected void onPaddingUpdated(Rect padding) {}
-
-    protected void onAttachedToWindow() {
-        if (requirePreDrawListener()) {
-            ensurePreDrawListener();
-            mView.getViewTreeObserver().addOnPreDrawListener(mPreDrawListener);
-        }
-    }
-
-    protected void onDetachedFromWindow() {
-        if (mPreDrawListener != null) {
-            mView.getViewTreeObserver().removeOnPreDrawListener(mPreDrawListener);
-            mPreDrawListener = null;
-        }
     }
 
     protected boolean requirePreDrawListener() {
@@ -425,14 +572,40 @@ class ImageViewImpl {
         return roundedBitmapDrawable;
     }
 
-    private ValueAnimator createAnimator(@NonNull ShadowAnimatorImpl impl) {
+    private ValueAnimator createElevationAnimator(@NonNull ShadowAnimatorImpl impl) {
         final ValueAnimator animator = new ValueAnimator();
-        animator.setInterpolator(ANIM_INTERPOLATOR);
-        animator.setDuration(PRESSED_ANIM_DURATION);
+        animator.setInterpolator(ELEVATION_ANIM_INTERPOLATOR);
+        animator.setDuration(ELEVATION_ANIM_DURATION);
         animator.addListener(impl);
         animator.addUpdateListener(impl);
         animator.setFloatValues(0, 1);
         return animator;
+    }
+
+    @SuppressLint("RestrictedApi")
+    private AnimatorSet createAnimator(@NonNull MotionSpec spec, float opacity, float scale) {
+        List<Animator> animators = new ArrayList<>();
+
+        Animator animator = ObjectAnimator.ofFloat(mView, View.ALPHA, opacity);
+        spec.getTiming("opacity").apply(animator);
+        animators.add(animator);
+
+        animator = ObjectAnimator.ofFloat(mView, View.SCALE_X, scale);
+        spec.getTiming("scale").apply(animator);
+        animators.add(animator);
+
+        animator = ObjectAnimator.ofFloat(mView, View.SCALE_Y, scale);
+        spec.getTiming("scale").apply(animator);
+        animators.add(animator);
+
+        //calculateImageMatrixFromScale(iconScale, tmpMatrix);
+        //animator = ObjectAnimator.ofObject(mView, new ImageMatrixProperty(), new MatrixEvaluator(), new Matrix(tmpMatrix));
+        //spec.getTiming("iconScale").apply(animator);
+        //animators.add(animator);
+
+        AnimatorSet set = new AnimatorSet();
+        AnimatorSetCompat.playTogether(set, animators);
+        return set;
     }
 
     protected void onPreDraw() {
@@ -499,8 +672,8 @@ class ImageViewImpl {
     }
 
     private void ensurePreDrawListener() {
-        if (mPreDrawListener == null) {
-            mPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
+        if (mOnPreDrawListener == null) {
+            mOnPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
                     ImageViewImpl.this.onPreDraw();
@@ -515,7 +688,7 @@ class ImageViewImpl {
     }
 
     private void updateFromViewRotation() {
-        if (SDK_INT == 19) {
+        if (SDK_INT == Build.VERSION_CODES.KITKAT) {
             // KitKat seems to have an issue with views which are rotated with angles which are
             // not divisible by 90. Worked around by moving to software rendering in these cases.
             if ((mRotation % 90) != 0) {
@@ -536,6 +709,12 @@ class ImageViewImpl {
         if (mBorderDrawable != null) {
             mBorderDrawable.setRotation(-mRotation);
         }
+    }
+
+    interface InternalVisibilityChangedListener {
+        void onShown();
+
+        void onHidden();
     }
 
     private abstract class ShadowAnimatorImpl extends AnimatorListenerAdapter implements ValueAnimator.AnimatorUpdateListener {
@@ -574,11 +753,19 @@ class ImageViewImpl {
         }
     }
 
-    private class ElevateToTranslationZAnimation extends ShadowAnimatorImpl {
+    private class ElevateToPressedTranslationZAnimation extends ShadowAnimatorImpl {
 
         @Override
         protected float getTargetShadowSize() {
             return mElevation + mPressedTranslationZ;
+        }
+    }
+
+    private class ElevateToHoveredFocusedTranslationZAnimation extends ShadowAnimatorImpl {
+
+        @Override
+        protected float getTargetShadowSize() {
+            return mElevation + mHoveredFocusedTranslationZ;
         }
     }
 

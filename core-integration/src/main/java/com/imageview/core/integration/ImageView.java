@@ -27,10 +27,11 @@ package com.imageview.core.integration;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.Nullable;
-import android.support.v7.content.res.AppCompatResources;
 import android.util.AttributeSet;
+
+import androidx.annotation.DrawableRes;
+import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 
 /**
  * Created by Viнt@rь on 09.11.2016

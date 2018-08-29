@@ -8,8 +8,14 @@
         <attr name="borderColor" format="color"/>
         <attr name="elevation" format="dimension"/>
         <attr name="pressedTranslationZ" format="dimension"/>
+        <!-- TranslationZ value for the FAB when hovered, focused, or hovered and focused. -->
+        <attr name="hoveredFocusedTranslationZ" format="dimension"/>
         <attr name="backgroundTint"/>
         <attr name="backgroundTintMode"/>
+        <!-- Motion spec for show animation. This should be a MotionSpec resource. -->
+        <attr name="showMotionSpec"/>
+        <!-- Motion spec for hide animation. This should be a MotionSpec resource. -->
+        <attr name="hideMotionSpec"/>
         <attr name="android:elevation"/>
     </declare-styleable>
 

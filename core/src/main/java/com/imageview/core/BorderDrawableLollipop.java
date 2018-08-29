@@ -27,8 +27,9 @@ package com.imageview.core;
 import android.annotation.TargetApi;
 import android.graphics.Outline;
 import android.graphics.Rect;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 

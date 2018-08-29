@@ -1,10 +1,14 @@
 package android.support.design.widget;
 
+import com.google.android.material.appbar.AppBarLayout;
+
 /**
- * Created by Viнt@rь on 01.09.2017
+ * @deprecated Use {@link AppBarLayout#getMinimumHeightForVisibleOverlappingContent()} instead.
  */
+@Deprecated
 public final class AppBarLayoutUtils {
 
+    @Deprecated
     public static int getMinimumHeightForVisibleOverlappingContent(AppBarLayout appBarLayout) {
         return appBarLayout.getMinimumHeightForVisibleOverlappingContent();
     }

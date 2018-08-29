@@ -24,6 +24,7 @@
 
 package com.imageview.core;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -32,24 +33,32 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.support.annotation.ColorInt;
-import android.support.annotation.DimenRes;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.AppBarLayoutUtils;
-import android.support.design.widget.BottomSheetBehavior;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.material.animation.MotionSpec;
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.internal.DescendantOffsetUtils;
+import com.google.android.material.internal.ViewUtils;
+
 import java.util.List;
+
+import androidx.annotation.AnimatorRes;
+import androidx.annotation.ColorInt;
+import androidx.annotation.ColorRes;
+import androidx.annotation.DimenRes;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.core.view.TintableBackgroundView;
+import androidx.core.view.ViewCompat;
 
 /**
  * Floating action buttons are used for a special type of promoted action. They are distinguished
@@ -65,10 +74,10 @@ import java.util.List;
  * <p>The background color of this view defaults to the your theme's {@code colorAccent}. If you
  * wish to change this at runtime then you can do so via
  * {@link #setBackgroundTintList(ColorStateList)}.</p>
- *
+ * <p>
  * Changing view form with changing src drawable form - works with local drawables and don`t works with
  * transition drawables from Glide may be need initiate reload drawable on changing view form? // disabled 15.10.2017
- *
+ * <p>
  * TODO try to implement rounding vector drawables(i mean its real with layer drawable https://stackoverflow.com/questions/36070223/how-to-put-a-vector-in-a-shape-in-android)
  * TODO fix measuring view - fixed for android L and biggest
  * TODO for pre-lollipop need fix shadow drawing for square form and for square form with corners
@@ -76,7 +85,7 @@ import java.util.List;
  * TODO think about current tinting
  */
 @CoordinatorLayout.DefaultBehavior(ImageView.Behavior.class)
-public abstract class ImageView extends VisibilityAwareImageView {
+public abstract class ImageView extends VisibilityAwareImageView implements TintableBackgroundView/*, TintableImageSourceView*/ {
 
     private static final String LOG_TAG = ImageView.class.getSimpleName();
 
@@ -91,7 +100,8 @@ public abstract class ImageView extends VisibilityAwareImageView {
          *
          * @param imageView the ImageView that was shown.
          */
-        public void onShown(ImageView imageView) {}
+        public void onShown(ImageView imageView) {
+        }
 
         /**
          * Called when a {@code ImageView} has been
@@ -99,7 +109,8 @@ public abstract class ImageView extends VisibilityAwareImageView {
          *
          * @param imageView the ImageView that was hidden.
          */
-        public void onHidden(ImageView imageView) {}
+        public void onHidden(ImageView imageView) {
+        }
     }
 
     private boolean isCircle;
@@ -112,6 +123,9 @@ public abstract class ImageView extends VisibilityAwareImageView {
 
     private ColorStateList mBackgroundTint;
     private PorterDuff.Mode mBackgroundTintMode;
+
+    //private ColorStateList mImageTint;
+    //private PorterDuff.Mode mImageTintMode;
 
     private final Rect mShadowPadding = new Rect();
     //private final Rect mTouchArea = new Rect();
@@ -126,6 +140,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
         this(context, attrs, 0);
     }
 
+    @SuppressLint("RestrictedApi")
     public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
@@ -140,30 +155,24 @@ public abstract class ImageView extends VisibilityAwareImageView {
 
         final float elevation = a.getDimension(R.styleable.ImageView_elevation, a.getDimension(R.styleable.ImageView_android_elevation, 0f));
         final float pressedTranslationZ = a.getDimension(R.styleable.ImageView_pressedTranslationZ, 0f);
+        final float hoveredFocusedTranslationZ = a.getDimension(R.styleable.ImageView_hoveredFocusedTranslationZ, 0f);
 
         mBackgroundTint = a.getColorStateList(R.styleable.ImageView_backgroundTint);
         mBackgroundTintMode = ViewUtils.parseTintMode(a.getInt(R.styleable.ImageView_backgroundTintMode, -1), null);
+
+        MotionSpec showMotionSpec = MotionSpec.createFromAttribute(context, a, R.styleable.ImageView_showMotionSpec);
+        MotionSpec hideMotionSpec = MotionSpec.createFromAttribute(context, a, R.styleable.ImageView_hideMotionSpec);
+
         a.recycle();
 
         getImpl().setImageDrawable(getDrawable());
         getImpl().setBackgroundDrawable(mBackgroundTint, mBackgroundTintMode, isCircle, mCornerRadius, mBorderWidth, mBorderColor);
         getImpl().setElevation(elevation);
         getImpl().setPressedTranslationZ(pressedTranslationZ);
+        getImpl().setHoveredFocusedTranslationZ(hoveredFocusedTranslationZ);
+        getImpl().setShowMotionSpec(showMotionSpec);
+        getImpl().setHideMotionSpec(hideMotionSpec);
     }
-
-    // need for calculate touch area without shadow
-/*    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                // Skipping the gesture if it doesn't start in in the FAB 'content' area
-                if (getContentRect(mTouchArea) && !mTouchArea.contains((int) ev.getX(), (int) ev.getY())) {
-                    return false;
-                }
-                break;
-        }
-        return super.onTouchEvent(ev);
-    }*/
 
     @Override
     protected void onAttachedToWindow() {
@@ -176,12 +185,6 @@ public abstract class ImageView extends VisibilityAwareImageView {
         super.onDetachedFromWindow();
         getImpl().onDetachedFromWindow();
     }
-
-/*    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        //getImpl().setShadowRadius((getWidth() - (mShadowPadding.right + mShadowPadding.left)) / 2f);
-    }*/
 
     @Override
     protected void drawableStateChanged() {
@@ -238,28 +241,27 @@ public abstract class ImageView extends VisibilityAwareImageView {
         }
     }
 
-    /*@Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {*/
-        //super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        //getImpl().onMeasure(widthMeasureSpec, heightMeasureSpec);
-        //super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    @Nullable
+    @Override
+    public ColorStateList getSupportBackgroundTintList() {
+        return getBackgroundTintList();
+    }
 
-        //super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        //getImpl().updatePadding();
+    @Override
+    public void setSupportBackgroundTintList(@Nullable ColorStateList tint) {
+        setBackgroundTintList(tint);
+    }
 
-/*        getImpl().updatePadding();
-        final int w = resolveAdjustedSize(getWidth(), widthMeasureSpec);
-        final int h = resolveAdjustedSize(getWidth(), heightMeasureSpec);
+    @Nullable
+    @Override
+    public PorterDuff.Mode getSupportBackgroundTintMode() {
+        return getBackgroundTintMode();
+    }
 
-        // As we want to stay circular, we set both dimensions to be the
-        // smallest resolved dimension
-        final int d = Math.min(w, h);
-
-        // We add the shadow's padding to the measured dimension
-        setMeasuredDimension(
-                d + mShadowPadding.left + mShadowPadding.right,
-                d + mShadowPadding.top + mShadowPadding.bottom);*/
-    //}
+    @Override
+    public void setSupportBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) {
+        setBackgroundTintMode(tintMode);
+    }
 
     @Override
     public void setImageDrawable(@Nullable Drawable drawable) {
@@ -272,10 +274,16 @@ public abstract class ImageView extends VisibilityAwareImageView {
         getImpl().setImageDrawable(getDrawable());
     }
 
+    /**
+     * @return
+     */
     public boolean isCircle() {
         return isCircle;
     }
 
+    /**
+     * @param isCircle
+     */
     public void setCircle(boolean isCircle) {
         if (this.isCircle != isCircle) {
             this.isCircle = isCircle;
@@ -288,7 +296,6 @@ public abstract class ImageView extends VisibilityAwareImageView {
      *
      * @return true if ImageView is adding inner padding on platforms Lollipop and after,
      * to ensure consistent dimensions on all platforms.
-     *
      * @attr ref R.styleable#ImageView_useCompatPadding
      * @see #setUseCompatPadding(boolean)
      */
@@ -302,7 +309,6 @@ public abstract class ImageView extends VisibilityAwareImageView {
      *
      * @param useCompatPadding true if ImageView is adding inner padding on platforms
      *                         Lollipop and after, to ensure consistent dimensions on all platforms.
-     *
      * @attr ref R.styleable#ImageView_useCompatPadding
      * @see #getUseCompatPadding()
      */
@@ -314,10 +320,11 @@ public abstract class ImageView extends VisibilityAwareImageView {
     }
 
     /**
-     * Returns the backward compatible elevation of the FloatingActionButton.
+     * Returns the backward compatible elevation of the ImageView.
      *
      * @return the backward compatible elevation in pixels.
      * @attr ref R.styleable#ImageView_elevation
+     * @attr ref R.styleable#ImageView_android_elevation
      * @see #setCompatElevation(float)
      */
     public float getCompatElevation() {
@@ -329,6 +336,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
      *
      * @param elevation The backward compatible elevation in pixels.
      * @attr ref R.styleable#ImageView_elevation
+     * @attr ref R.styleable#ImageView_android_elevation
      * @see #getCompatElevation()
      * @see #setUseCompatPadding(boolean)
      */
@@ -336,14 +344,99 @@ public abstract class ImageView extends VisibilityAwareImageView {
         getImpl().setElevation(elevation);
     }
 
+    /**
+     * Updates the backward compatible elevation of the ImageView.
+     *
+     * @param resId The resource id of the backward compatible elevation.
+     * @attr ref R.styleable#ImageView_elevation
+     * @attr ref R.styleable#ImageView_android_elevation
+     * @see #getCompatElevation()
+     * @see #setUseCompatPadding(boolean)
+     */
+    public void setCompatElevationResource(@DimenRes int resId) {
+        setCompatElevation(getResources().getDimension(resId));
+    }
+
+    /**
+     * Returns the backward compatible pressed translationZ of the ImageView.
+     *
+     * @return the backward compatible pressed translationZ in pixels.
+     * @attr ref com.google.android.material.R.styleable#FloatingActionButton_pressedTranslationZ
+     * @see #setCompatPressedTranslationZ(float)
+     */
+    public float getCompatPressedTranslationZ() {
+        return getImpl().getPressedTranslationZ();
+    }
+
+    /**
+     * Updates the backward compatible pressed translationZ of the ImageView.
+     *
+     * @param translationZ The backward compatible pressed translationZ in pixels.
+     * @attr R.styleable#ImageView_pressedTranslationZ
+     * @see #getCompatPressedTranslationZ()
+     * @see #setUseCompatPadding(boolean)
+     */
+    public void setCompatPressedTranslationZ(float translationZ) {
+        getImpl().setPressedTranslationZ(translationZ);
+    }
+
+    /**
+     * Updates the backward compatible pressed translationZ of the ImageView.
+     *
+     * @param resId The resource id of the backward compatible pressed translationZ.
+     * @attr ref R.styleable#ImageView_pressedTranslationZ
+     * @see #getCompatPressedTranslationZ()
+     * @see #setUseCompatPadding(boolean)
+     */
+    public void setCompatPressedTranslationZ(@DimenRes int resId) {
+        setCompatPressedTranslationZ(getResources().getDimension(resId));
+    }
+
+    /**
+     * Returns the backward compatible hovered/focused translationZ of the ImageView.
+     *
+     * @return the backward compatible hovered/focused translationZ in pixels.
+     * @attr ref R.styleable#ImageView_hoveredFocusedTranslationZ
+     * @see #setCompatHoveredFocusedTranslationZ(float)
+     */
+    public float getCompatHoveredFocusedTranslationZ() {
+        return getImpl().getHoveredFocusedTranslationZ();
+    }
+
+    /**
+     * Updates the backward compatible hovered/focused translationZ of the ImageView.
+     *
+     * @param translationZ The backward compatible hovered/focused translationZ in pixels.
+     * @attr ref R.styleable#ImageView_hoveredFocusedTranslationZ
+     * @see #getCompatHoveredFocusedTranslationZ()
+     * @see #setUseCompatPadding(boolean)
+     */
+    public void setCompatHoveredFocusedTranslationZ(float translationZ) {
+        getImpl().setHoveredFocusedTranslationZ(translationZ);
+    }
+
+    /**
+     * Updates the backward compatible hovered/focused translationZ of the ImageView.
+     *
+     * @param resId The resource id of the backward compatible hovered/focused translationZ.
+     * @attr ref R.styleable#ImageView_hoveredFocusedTranslationZ
+     * @see #getCompatHoveredFocusedTranslationZ()
+     * @see #setUseCompatPadding(boolean)
+     */
+    public void setCompatHoveredFocusedTranslationZ(@DimenRes int resId) {
+        setCompatHoveredFocusedTranslationZ(getResources().getDimension(resId));
+    }
+
+    /**
+     * @return
+     */
     public float getCornerRadius() {
         return mCornerRadius;
     }
 
-    public void setCornerRadius(@DimenRes int resId) {
-        setCornerRadius(getResources().getDimension(resId));
-    }
-
+    /**
+     * @param radius
+     */
     public void setCornerRadius(float radius) {
         if (mCornerRadius != radius) {
             mCornerRadius = radius;
@@ -351,14 +444,23 @@ public abstract class ImageView extends VisibilityAwareImageView {
         }
     }
 
+    /**
+     * @param resId
+     */
+    public void setCornerRadius(@DimenRes int resId) {
+        setCornerRadius(getResources().getDimension(resId));
+    }
+
+    /**
+     * @return
+     */
     public float getBorderWidth() {
         return mBorderWidth;
     }
 
-    public void setBorderWidth(@DimenRes int resId) {
-        setBorderWidth(getResources().getDimension(resId));
-    }
-
+    /**
+     * @param width
+     */
     public void setBorderWidth(float width) {
         if (mBorderWidth != width) {
             mBorderWidth = width;
@@ -366,14 +468,30 @@ public abstract class ImageView extends VisibilityAwareImageView {
         }
     }
 
+    /**
+     * @param resId
+     */
+    public void setBorderWidth(@DimenRes int resId) {
+        setBorderWidth(getResources().getDimension(resId));
+    }
+
+    /**
+     * @return
+     */
     public ColorStateList getBorderColor() {
         return mBorderColor;
     }
 
+    /**
+     * @param color
+     */
     public void setBorderColor(@ColorInt int color) {
         setBorderColor(ColorStateList.valueOf(color));
     }
 
+    /**
+     * @param color
+     */
     public void setBorderColor(ColorStateList color) {
         if (mBorderColor != color) {
             mBorderColor = color;
@@ -382,25 +500,61 @@ public abstract class ImageView extends VisibilityAwareImageView {
     }
 
     /**
-     * Return in {@code rect} the bounds of the actual image view content in view-local
-     * coordinates. This is defined as anything within any visible shadow.
-     *
-     * @return true if this view actually has been laid out and has a content rect, else false.
+     * @param resId
      */
-/*
-    public boolean getContentRect(@NonNull Rect rect) {
-        if (ViewCompat.isLaidOut(this)) {
-            rect.set(0, 0, getWidth(), getHeight());
-            rect.left += mShadowPadding.left;
-            rect.top += mShadowPadding.top;
-            rect.right -= mShadowPadding.right;
-            rect.bottom -= mShadowPadding.bottom;
-            return true;
-        } else {
-            return false;
-        }
+    public void setBorderColorResource(@ColorRes int resId) {
+        setBorderColor(ResourcesCompat.getColor(getResources(), resId, null));
     }
-*/
+
+    /**
+     * Returns the motion spec for the show animation.
+     */
+    public MotionSpec getShowMotionSpec() {
+        return getImpl().getShowMotionSpec();
+    }
+
+    /**
+     * Updates the motion spec for the show animation.
+     *
+     * @attr ref R.styleable#ImageView_showMotionSpec
+     */
+    public void setShowMotionSpec(MotionSpec spec) {
+        getImpl().setShowMotionSpec(spec);
+    }
+
+    /**
+     * Updates the motion spec for the show animation.
+     *
+     * @attr ref R.styleable#ImageView_showMotionSpec
+     */
+    public void setShowMotionSpec(@AnimatorRes int id) {
+        setShowMotionSpec(MotionSpec.createFromResource(getContext(), id));
+    }
+
+    /**
+     * Returns the motion spec for the hide animation.
+     */
+    public MotionSpec getHideMotionSpec() {
+        return getImpl().getHideMotionSpec();
+    }
+
+    /**
+     * Updates the motion spec for the hide animation.
+     *
+     * @attr ref R.styleable#ImageView_hideMotionSpec
+     */
+    public void setHideMotionSpec(MotionSpec spec) {
+        getImpl().setHideMotionSpec(spec);
+    }
+
+    /**
+     * Updates the motion spec for the hide animation.
+     *
+     * @attr ref R.styleable#ImageView_hideMotionSpec
+     */
+    public void setHideMotionSpec(@AnimatorRes int id) {
+        setHideMotionSpec(MotionSpec.createFromResource(getContext(), id));
+    }
 
     /**
      * Shows the image view.
@@ -465,30 +619,6 @@ public abstract class ImageView extends VisibilityAwareImageView {
         };
     }
 
-/*    private static int resolveAdjustedSize(int desiredSize, int measureSpec) {
-        int result = desiredSize;
-        int specMode = View.MeasureSpec.getMode(measureSpec);
-        int specSize = View.MeasureSpec.getSize(measureSpec);
-        switch (specMode) {
-            case View.MeasureSpec.UNSPECIFIED:
-                // Parent says we can be as big as we want. Just don't be larger
-                // than max size imposed on ourselves.
-                result = desiredSize;
-                break;
-            case View.MeasureSpec.AT_MOST:
-                // Parent says we can be as big as we want, up to specSize.
-                // Don't be larger than specSize, and don't be larger than
-                // the max size imposed on ourselves.
-                result = Math.min(desiredSize, specSize);
-                break;
-            case View.MeasureSpec.EXACTLY:
-                // No choice. Do what we are told.
-                result = specSize;
-                break;
-        }
-        return result;
-    }*/
-
     private ImageViewImpl getImpl() {
         if (mImpl == null) {
             mImpl = createImpl();
@@ -534,8 +664,10 @@ public abstract class ImageView extends VisibilityAwareImageView {
 
     /**
      * Behavior designed for use with {@link ImageView} instances. Its main function
-     * is to move {@link ImageView} views so that any displayed {@link android.support.design.widget.Snackbar}s do
+     * is to move {@link ImageView} views so that any displayed {@link com.google.android.material.snackbar.Snackbar}s do
      * not cover them.
+     * <p>
+     * TODO reimplement this after Google reimplement same behavior in FloatingActionButton
      */
     public static class Behavior extends CoordinatorLayout.Behavior<ImageView> {
         private static final boolean AUTO_HIDE_DEFAULT = true;
@@ -561,8 +693,8 @@ public abstract class ImageView extends VisibilityAwareImageView {
          * not enough space to be displayed. This works with {@link AppBarLayout}
          * and {@link BottomSheetBehavior}.
          *
-         * @attr ref android.support.design.R.styleable#ImageView_Behavior_Layout_behavior_autoHide
          * @param autoHide true to enable automatic hiding
+         * @attr ref android.support.design.R.styleable#ImageView_Behavior_Layout_behavior_autoHide
          */
         public void setAutoHideEnabled(boolean autoHide) {
             mAutoHideEnabled = autoHide;
@@ -572,8 +704,8 @@ public abstract class ImageView extends VisibilityAwareImageView {
          * Returns whether the associated FloatingActionButton automatically hides when there is
          * not enough space to be displayed.
          *
-         * @attr ref android.support.design.R.styleable#ImageView_Behavior_Layout_behavior_autoHide
          * @return true if enabled
+         * @attr ref android.support.design.R.styleable#ImageView_Behavior_Layout_behavior_autoHide
          */
         public boolean isAutoHideEnabled() {
             return mAutoHideEnabled;
@@ -589,7 +721,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
         }
 
         @Override
-        public boolean onDependentViewChanged(CoordinatorLayout parent, ImageView child, View dependency) {
+        public boolean onDependentViewChanged(@NonNull CoordinatorLayout parent, @NonNull ImageView child, @NonNull View dependency) {
             if (dependency instanceof AppBarLayout) {
                 // If we're depending on an AppBarLayout we will show/hide it automatically
                 // if the FAB is anchored to the AppBarLayout
@@ -631,6 +763,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
             return true;
         }
 
+        @SuppressLint("RestrictedApi")
         private boolean updateViewVisibilityForAppBarLayout(CoordinatorLayout parent, AppBarLayout appBarLayout, ImageView child) {
             if (!shouldUpdateVisibility(appBarLayout, child)) {
                 return false;
@@ -642,9 +775,9 @@ public abstract class ImageView extends VisibilityAwareImageView {
 
             // First, let's get the visible rect of the dependency
             final Rect rect = mTmpRect;
-            ViewGroupUtils.getDescendantRect(parent, appBarLayout, rect);
+            DescendantOffsetUtils.getDescendantRect(parent, appBarLayout, rect);
 
-            if (rect.bottom <= AppBarLayoutUtils.getMinimumHeightForVisibleOverlappingContent(appBarLayout)) {
+            if (rect.bottom <= appBarLayout.getMinimumHeightForVisibleOverlappingContent()) {
                 // If the anchor's bottom is below the seam, we'll animate our FAB out
                 child.hide(mInternalAutoHideListener, false);
             } else {
@@ -668,7 +801,7 @@ public abstract class ImageView extends VisibilityAwareImageView {
         }
 
         @Override
-        public boolean onLayoutChild(CoordinatorLayout parent, ImageView child, int layoutDirection) {
+        public boolean onLayoutChild(@NonNull CoordinatorLayout parent, @NonNull ImageView child, int layoutDirection) {
             // First, let's make sure that the visibility of the FAB is consistent
             final List<View> dependencies = parent.getDependencies(child);
             for (int i = 0, count = dependencies.size(); i < count; i++) {
