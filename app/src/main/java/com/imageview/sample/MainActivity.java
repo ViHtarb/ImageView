@@ -30,9 +30,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.imageview.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -63,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
         });*/
 
         final ImageView imageView = findViewById(R.id.image_view);
+        final FloatingActionButton fab = findViewById(R.id.fab);
         //imageView.setCompatElevation(20f);
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -87,7 +90,8 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imageView.setBackgroundTintList(null);
+                //fab.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_image, null));
+                //imageView.setBackgroundTintList(null);
                 //imageViewTest.setBackgroundTintList(ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorAccent, null)));
                 //imageView.setCompatElevation(20f);
                 //imageView.setCircle(!imageView.isCircle());

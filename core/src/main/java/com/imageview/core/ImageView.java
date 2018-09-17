@@ -29,9 +29,11 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -42,6 +44,7 @@ import android.view.ViewGroup;
 import com.google.android.material.animation.MotionSpec;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.internal.DescendantOffsetUtils;
 import com.google.android.material.internal.ViewUtils;
 
@@ -55,25 +58,23 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.appcompat.widget.AppCompatImageHelper;
+import androidx.appcompat.widget.AppCompatImageHelperUtils;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.TintableBackgroundView;
 import androidx.core.view.ViewCompat;
+import androidx.core.widget.TintableImageSourceView;
 
 /**
- * Floating action buttons are used for a special type of promoted action. They are distinguished
- * by a circled icon floating above the UI and have special motion behaviors related to morphing,
- * launching, and the transferring anchor point.
- *
- * <p>Floating action buttons come in two sizes: the default and the mini. The size can be
- * controlled with the {@code fabSize} attribute.</p>
+ * That {@code ImageView} is copied some {@link FloatingActionButton} features and
+ * implements circling and corner rounding supports for icon and background.
  *
  * <p>As this class descends from {@link ImageView}, you can control the icon which is displayed
- * via {@link #setImageDrawable(Drawable)}.</p>
+ * via {@link #setImageDrawable(Drawable)}.
  *
- * <p>The background color of this view defaults to the your theme's {@code colorAccent}. If you
- * wish to change this at runtime then you can do so via
- * {@link #setBackgroundTintList(ColorStateList)}.</p>
+ * <p>The background color of this view defaults is {@link Color#TRANSPARENT}. If you
+ * wish to change this at runtime then you can do so via {@link #setBackgroundTintList(ColorStateList)}.
  * <p>
  * Changing view form with changing src drawable form - works with local drawables and don`t works with
  * transition drawables from Glide may be need initiate reload drawable on changing view form? // disabled 15.10.2017
@@ -85,7 +86,7 @@ import androidx.core.view.ViewCompat;
  * TODO think about current tinting
  */
 @CoordinatorLayout.DefaultBehavior(ImageView.Behavior.class)
-public abstract class ImageView extends VisibilityAwareImageView implements TintableBackgroundView/*, TintableImageSourceView*/ {
+public abstract class ImageView extends VisibilityAwareImageView implements TintableBackgroundView, TintableImageSourceView {
 
     private static final String LOG_TAG = ImageView.class.getSimpleName();
 
@@ -124,13 +125,12 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     private ColorStateList mBackgroundTint;
     private PorterDuff.Mode mBackgroundTintMode;
 
-    //private ColorStateList mImageTint;
-    //private PorterDuff.Mode mImageTintMode;
-
     private final Rect mShadowPadding = new Rect();
     //private final Rect mTouchArea = new Rect();
 
-    private ImageViewImpl mImpl;
+    private final AppCompatImageHelper mImageHelper;
+
+    private final ImageViewImpl mImpl;
 
     public ImageView(Context context) {
         this(context, null);
@@ -146,7 +146,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ImageView, defStyleAttr, 0);
 
-        isCircle = a.getBoolean(R.styleable.ImageView_circle, false);
+        /*isCircle = a.getBoolean(R.styleable.ImageView_circle, false);
         isCompatPadding = a.getBoolean(R.styleable.ImageView_useCompatPadding, false);
 
         mCornerRadius = a.getDimension(R.styleable.ImageView_cornerRadius, 0);
@@ -161,17 +161,23 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
         mBackgroundTintMode = ViewUtils.parseTintMode(a.getInt(R.styleable.ImageView_backgroundTintMode, -1), null);
 
         MotionSpec showMotionSpec = MotionSpec.createFromAttribute(context, a, R.styleable.ImageView_showMotionSpec);
-        MotionSpec hideMotionSpec = MotionSpec.createFromAttribute(context, a, R.styleable.ImageView_hideMotionSpec);
+        MotionSpec hideMotionSpec = MotionSpec.createFromAttribute(context, a, R.styleable.ImageView_hideMotionSpec);*/
+
+        mImpl = createImpl(); // TODO
+        mImpl.loadFromAttributes(a);
 
         a.recycle();
 
-        getImpl().setImageDrawable(getDrawable());
+        mImageHelper = new AppCompatImageHelper(this);
+        mImageHelper.loadFromAttributes(attrs, defStyleAttr);
+
+/*        getImpl().setImageDrawable(getDrawable());
         getImpl().setBackgroundDrawable(mBackgroundTint, mBackgroundTintMode, isCircle, mCornerRadius, mBorderWidth, mBorderColor);
         getImpl().setElevation(elevation);
         getImpl().setPressedTranslationZ(pressedTranslationZ);
         getImpl().setHoveredFocusedTranslationZ(hoveredFocusedTranslationZ);
         getImpl().setShowMotionSpec(showMotionSpec);
-        getImpl().setHideMotionSpec(hideMotionSpec);
+        getImpl().setHideMotionSpec(hideMotionSpec);*/
     }
 
     @Override
@@ -187,9 +193,18 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     }
 
     @Override
+    public boolean hasOverlappingRendering() {
+        return AppCompatImageHelperUtils.hasOverlappingRendering(mImageHelper) && super.hasOverlappingRendering();
+    }
+
+    @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
         getImpl().onDrawableStateChanged(getDrawableState());
+
+        if (mImageHelper != null) {
+            AppCompatImageHelperUtils.applySupportImageTint(mImageHelper);
+        }
     }
 
     @Override
@@ -263,15 +278,62 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
         setBackgroundTintMode(tintMode);
     }
 
+    @SuppressLint("RestrictedApi")
+    @Override
+    public void setImageResource(int resId) {
+        mImageHelper.setImageResource(resId);
+    }
+
+    @Override
+    public void setImageURI(@Nullable Uri uri) {
+        super.setImageURI(uri);
+        getImpl().setImageDrawable(getDrawable()); // TODO check if setImageURI not call setImageDrawable method
+        if (mImageHelper != null) {
+            AppCompatImageHelperUtils.applySupportImageTint(mImageHelper);
+        }
+    }
+
     @Override
     public void setImageDrawable(@Nullable Drawable drawable) {
         getImpl().setImageDrawable(drawable);
+        if (mImageHelper != null) {
+            AppCompatImageHelperUtils.applySupportImageTint(mImageHelper);
+        }
     }
 
     @Override
     public void setImageBitmap(Bitmap bm) {
         super.setImageBitmap(bm);
         getImpl().setImageDrawable(getDrawable());
+        if (mImageHelper != null) {
+            AppCompatImageHelperUtils.applySupportImageTint(mImageHelper);
+        }
+    }
+
+    @Override
+    public void setSupportImageTintList(@Nullable ColorStateList tint) {
+        if (mImageHelper != null) {
+            AppCompatImageHelperUtils.setSupportImageTintList(mImageHelper, tint);
+        }
+    }
+
+    @Nullable
+    @Override
+    public ColorStateList getSupportImageTintList() {
+        return mImageHelper != null ? AppCompatImageHelperUtils.getSupportImageTintList(mImageHelper) : null;
+    }
+
+    @Override
+    public void setSupportImageTintMode(@Nullable PorterDuff.Mode tintMode) {
+        if (mImageHelper != null) {
+            AppCompatImageHelperUtils.setSupportImageTintMode(mImageHelper, tintMode);
+        }
+    }
+
+    @Nullable
+    @Override
+    public PorterDuff.Mode getSupportImageTintMode() {
+        return mImageHelper != null ? AppCompatImageHelperUtils.getSupportImageTintMode(mImageHelper) : null;
     }
 
     /**
@@ -620,9 +682,9 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     }
 
     private ImageViewImpl getImpl() {
-        if (mImpl == null) {
-            mImpl = createImpl();
-        }
+       //if (mImpl == null) {
+            //mImpl = createImpl();
+        //}
         return mImpl;
     }
 
