@@ -10,7 +10,6 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Build;
@@ -29,7 +28,7 @@ import static android.os.Build.VERSION_CODES.LOLLIPOP;
 @TargetApi(LOLLIPOP)
 class ImageViewLollipop extends ImageViewImpl {
 
-    protected ImageViewLollipop(ImageView view, ViewDelegate viewDelegate) {
+    protected ImageViewLollipop(ImageView view, ImageViewDelegate viewDelegate) {
         super(view, viewDelegate);
     }
 
@@ -84,14 +83,14 @@ class ImageViewLollipop extends ImageViewImpl {
             mView.setStateListAnimator(stateListAnimator);
         }
 
-        if (mViewDelegate.isCompatPadding()) {
+        /*if (mViewDelegate.isCompatPadding()) {
             updatePadding();
-        }
+        }*/
     }
 
     @Override
     protected void getPadding(Rect rect) {
-        if (mViewDelegate.isCompatPadding()) {
+        /*if (mViewDelegate.isCompatPadding()) {
             final float radius = mViewDelegate.getRadius();
             final float maxShadowSize = getElevation() + getPressedTranslationZ();
             final int hPadding = (int) Math.ceil(ShadowDrawableWrapper.calculateHorizontalPadding(maxShadowSize, radius, false));
@@ -99,7 +98,7 @@ class ImageViewLollipop extends ImageViewImpl {
             rect.set(hPadding, vPadding, hPadding, vPadding);
         } else {
             rect.set(0, 0, 0, 0);
-        }
+        }*/
     }
 
     @Override
@@ -114,11 +113,11 @@ class ImageViewLollipop extends ImageViewImpl {
 
     @Override
     protected void onPaddingUpdated(Rect padding) {
-        if (mViewDelegate.isCompatPadding()) {
+        /*if (mViewDelegate.isCompatPadding()) {
             mViewDelegate.setBackgroundDrawable(new InsetDrawable(mContentBackground, padding.left, padding.top, padding.right, padding.bottom));
         } else {
             mViewDelegate.setBackgroundDrawable(mContentBackground);
-        }
+        }*/
     }
 
     @Override

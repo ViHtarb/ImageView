@@ -17,10 +17,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.github.bumptech.glide:glide:3.8.0' // TODO migrate to Glide 4.0.0
+    implementation 'com.github.bumptech.glide:glide:4.10.0'
     api project(':core-integration')
 }

@@ -1,7 +1,6 @@
 package com.imageview.core;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -13,8 +12,8 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.util.AttributeSet;
+import android.view.View;
 
 import com.google.android.material.animation.MotionSpec;
 import com.google.android.material.internal.ThemeEnforcement;
@@ -28,24 +27,20 @@ import com.google.android.material.shape.ShapeAppearanceModel;
 import androidx.annotation.AttrRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.Px;
-import androidx.annotation.RequiresApi;
+import androidx.annotation.RestrictTo;
 import androidx.annotation.StyleRes;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.core.view.ViewCompat;
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
-import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+import static android.view.View.VISIBLE;
+import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 
 /**
- * Created by Viнt@rь on 25.10.2019
+ * Created by Viнt@rь on 09.09.2018
  */
-@RequiresApi(ICE_CREAM_SANDWICH)
-@TargetApi(ICE_CREAM_SANDWICH)
-class ImageViewImplX {
-    private static final int NO_ID = 0;
-
+@RestrictTo(LIBRARY_GROUP)
+class ImageViewHelper {
     private static final int[] EMPTY_STATE_SET = new int[0];
     private static final int[] ENABLED_STATE_SET = {android.R.attr.state_enabled};
     private static final int[] PRESSED_ENABLED_STATE_SET = {android.R.attr.state_pressed, android.R.attr.state_enabled};
@@ -53,45 +48,51 @@ class ImageViewImplX {
     private static final int[] HOVERED_ENABLED_STATE_SET = {android.R.attr.state_hovered, android.R.attr.state_enabled};
     private static final int[] HOVERED_FOCUSED_ENABLED_STATE_SET = {android.R.attr.state_hovered, android.R.attr.state_focused, android.R.attr.state_enabled};
 
-    private final Rect mUserPadding = new Rect();
+    private static final ColorStateList TRANSPARENT_TINT = ColorStateList.valueOf(Color.TRANSPARENT);
 
-    protected final Context mContext;
-    protected final ImageView mView;
-    protected final MaterialShapeDrawable mBackgroundDrawable;
+    private final Context mContext;
+    private final View mView;
+    private final ImageViewDelegate mDelegate;
 
-    protected boolean isCircle;
-    protected boolean isImageOverlap;
-    //protected boolean isCompatPadding;
+    private boolean isCircle;
+    private boolean isCompatPadding;
 
-    protected float mCornerRadius;
-    protected float mStrokeWidth;
-    //protected float mRotation;
-    protected float mElevation;
-    //protected float mPressedTranslationZ;
-    //protected float mHoveredFocusedTranslationZ;
+    private float mCornerRadius;
+    private float mStrokeWidth;
+    private float mRotation;
+    private float mElevation;
+    private float mPressedTranslationZ;
+    private float mHoveredFocusedTranslationZ;
 
-    protected ColorStateList mStrokeColor;
+    private ColorStateList mStrokeColor;
 
-    protected ColorStateList mBackgroundTint;
-    protected PorterDuff.Mode mBackgroundTintMode;
+    private ColorStateList mBackgroundTint;
+    private PorterDuff.Mode mBackgroundTintMode;
 
-    protected MotionSpec mShowMotionSpec;
-    protected MotionSpec mHideMotionSpec;
+    private MotionSpec mShowMotionSpec;
+    private MotionSpec mHideMotionSpec;
 
-    @SuppressLint("RestrictedApi")
-    protected ImageViewImplX(@NonNull ImageView view, @Nullable AttributeSet attrs, @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
+    //private ShapeAppearanceModel mShapeAppearanceModel;
+
+    private MaterialShapeDrawable mBackgroundDrawable;
+    private MaterialShapeDrawable mForegroundDrawable;
+    //private Drawable mRippleDrawable;
+
+    protected ImageViewHelper(@NonNull View view, @NonNull ImageViewDelegate delegate) {
         mContext = view.getContext();
         mView = view;
-        mUserPadding.set(view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(), view.getPaddingBottom());
+        mDelegate = delegate;
+    }
 
+    @SuppressLint("RestrictedApi")
+    protected void loadFromAttributes(@Nullable AttributeSet attrs, @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
         TypedArray a = ThemeEnforcement.obtainStyledAttributes(mContext, attrs, R.styleable.ImageView, defStyleAttr, defStyleRes);
 
         isCircle = a.getBoolean(R.styleable.ImageView_circle, false);
-        isImageOverlap = a.getBoolean(R.styleable.ImageView_imageOverlap, false);
         //isCompatPadding = a.getBoolean(R.styleable.ImageView_useCompatPadding, false);
 
         mCornerRadius = a.getDimension(R.styleable.ImageView_cornerRadius, 0);
-        mStrokeWidth = a.getDimension(R.styleable.ImageView_borderWidth, 0);
+        mStrokeWidth = a.getDimensionPixelSize(R.styleable.ImageView_borderWidth, 0);
         mStrokeColor = MaterialResources.getColorStateList(mContext, a, R.styleable.ImageView_borderColor);
 
         mElevation = a.getDimension(R.styleable.ImageView_elevation, ViewCompat.getElevation(mView));
@@ -110,87 +111,90 @@ class ImageViewImplX {
         mBackgroundDrawable.setShadowColor(Color.DKGRAY);
         mBackgroundDrawable.initializeElevationOverlay(mContext);
         mBackgroundDrawable.setCornerSize(isCircle ? ShapeAppearanceModel.PILL : new AbsoluteCornerSize(mCornerRadius));
+        //mBackgroundDrawable.setStroke(mStrokeWidth, mStrokeColor);
         mBackgroundDrawable.setTintList(mBackgroundTint);
         mBackgroundDrawable.setTintMode(mBackgroundTintMode);
         mBackgroundDrawable.setElevation(mElevation);
 
-        mView.setBackgroundInternal(mBackgroundDrawable);
+        int strokeWidth = (int) mStrokeWidth;
+        mBackgroundDrawable.setPadding(strokeWidth, strokeWidth, strokeWidth, strokeWidth);
 
-        updateStroke();
-        updateDrawable();
-        updatePadding((int) mStrokeWidth);
-    }
+        mForegroundDrawable = new MaterialShapeDrawable(getShapeAppearanceModel());
+        mForegroundDrawable.setFillColor(TRANSPARENT_TINT);
+        mForegroundDrawable.setStroke(mStrokeWidth, mStrokeColor);
 
-    protected void updateStroke() {
-        mBackgroundDrawable.setStroke(mStrokeWidth, mStrokeColor);
-    }
+        //mRippleDrawable = new RippleDrawable(RippleUtils.sanitizeRippleDrawableColor(ColorStateList.valueOf(Color.WHITE)), mForegroundDrawable, new MaterialShapeDrawable(getShapeAppearanceModel()));
 
-    protected void updateDrawable() {
-        if (mView.getDrawable() != null) {
-            setImageDrawable(mView.getDrawable());
-        }
-    }
+        mDelegate.setBackgroundDrawable(mBackgroundDrawable);
 
-    protected void updatePadding(@Px int padding) {
-        mView.setPaddingInternal(mUserPadding.left + padding, mUserPadding.top + padding, mUserPadding.right + padding, mUserPadding.bottom + padding);
-    }
+        //mView.setForeground(mForegroundDrawable);
 
-    protected void setPadding(@Px int left, @Px int top, @Px int right, @Px int bottom) {
-        mUserPadding.set(left, top, right, bottom);
-        updatePadding((int) mStrokeWidth);
+        // setForeground analog for API 18 - 22
+        mView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            if (v.getVisibility() == VISIBLE) {
+                Rect badgeBounds = new Rect();
+                v.getDrawingRect(badgeBounds);
+                mForegroundDrawable.setBounds(badgeBounds);
+            }
+        });
+        mView.getOverlay().add(mForegroundDrawable);
+
+        //ViewCompat.setElevation(mView, mElevation);
+
+        /*ImageView imageView = (ImageView) mView;
+        if (imageView.getDrawable() != null) {
+            setImageDrawable(imageView.getDrawable());
+        }*/
     }
 
     protected final boolean isCircle() {
         return isCircle;
     }
 
-    protected void setCircle(boolean isCircle) {
+    protected final void setCircle(boolean isCircle) {
         if (this.isCircle != isCircle) {
             this.isCircle = isCircle;
 
             CornerSize cornerSize = isCircle ? ShapeAppearanceModel.PILL : new AbsoluteCornerSize(mCornerRadius);
             mBackgroundDrawable.setCornerSize(cornerSize);
+            mForegroundDrawable.setCornerSize(cornerSize);
 
-            // update the image view drawable with round rect drawable, needs only on pre-lollipop to provide something similar to outline provider
-            if (mView.getDrawable() != null) {
-                setImageDrawable(mView.getDrawable());
-            }
+            ImageView imageView = (ImageView) mView;
+
+            //if (isCircle) {
+                //((RoundedBitmapDrawable) imageView.getDrawable()).setCircular(isCircle);
+            //} else {
+                //((RoundedBitmapDrawable) imageView.getDrawable()).setCornerRadius(mCornerRadius * 2.5f);
+            //}
+            /*if (imageView.getDrawable() != null) {
+                setImageDrawable(imageView.getDrawable());
+            }*/
         }
-    }
-
-    public boolean isImageOverlap() {
-        return false;
-    }
-
-    public void setImageOverlap(boolean isImageOverlap) {
     }
 
     protected final float getCornerRadius() {
         return mCornerRadius;
     }
 
-    protected void setCornerRadius(float cornerRadius) { // not checks
+    protected final void setCornerRadius(float cornerRadius) {
         if (mCornerRadius != cornerRadius) {
             mCornerRadius = cornerRadius;
-
-            mBackgroundDrawable.setCornerSize(cornerRadius);
-
-            // update the image view drawable with round rect drawable, needs only on pre-lollipop to provide something similar to outline provider
-            if (mView.getDrawable() != null) {
-                setImageDrawable(mView.getDrawable());
+            if (mBackgroundDrawable != null) {
+                mBackgroundDrawable.setCornerSize(cornerRadius);
             }
         }
     }
 
-    protected float getElevation() {
+    protected final float getElevation() {
         return mElevation;
     }
 
-    protected void setElevation(float elevation) { // checks
+    protected final void setElevation(float elevation) {
         if (mElevation != elevation) {
             mElevation = elevation;
-
-            mBackgroundDrawable.setElevation(elevation);
+            if (mBackgroundDrawable != null) {
+                mBackgroundDrawable.setElevation(elevation);
+            }
         }
     }
 
@@ -198,12 +202,12 @@ class ImageViewImplX {
         return mStrokeWidth;
     }
 
-    protected void setStrokeWidth(float strokeWidth) { // not checks
+    protected final void setStrokeWidth(float strokeWidth) {
         if (mStrokeWidth != strokeWidth) {
             mStrokeWidth = strokeWidth;
-
-            mBackgroundDrawable.setStrokeWidth(mStrokeWidth);
-            updatePadding((int) mStrokeWidth);
+            if (mBackgroundDrawable != null) {
+                mBackgroundDrawable.setStrokeWidth(mStrokeWidth);
+            }
         }
     }
 
@@ -211,11 +215,12 @@ class ImageViewImplX {
         return mStrokeColor;
     }
 
-    protected void setStrokeColor(@Nullable ColorStateList strokeColor) { // checks
+    protected final void setStrokeColor(@Nullable ColorStateList strokeColor) {
         if (mStrokeColor != strokeColor) {
             mStrokeColor = strokeColor;
-
-            mBackgroundDrawable.setStrokeColor(mStrokeColor);
+            if (mBackgroundDrawable != null) {
+                mBackgroundDrawable.setStrokeColor(mStrokeColor);
+            }
         }
     }
 
@@ -223,11 +228,12 @@ class ImageViewImplX {
         return mBackgroundTint;
     }
 
-    protected final void setBackgroundTintList(@Nullable ColorStateList tint) { // not checks
+    protected final void setBackgroundTintList(@Nullable ColorStateList tint) {
         if (mBackgroundTint != tint) {
             mBackgroundTint = tint;
-
-            mBackgroundDrawable.setTintList(mBackgroundTint);
+            if (mBackgroundDrawable != null) {
+                mBackgroundDrawable.setTintList(mBackgroundTint);
+            }
         }
     }
 
@@ -235,11 +241,12 @@ class ImageViewImplX {
         return mBackgroundTintMode;
     }
 
-    protected final void setBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) { // checks
+    protected final void setBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) {
         if (mBackgroundTintMode != tintMode) {
             mBackgroundTintMode = tintMode;
-
-            mBackgroundDrawable.setTintMode(mBackgroundTintMode);
+            if (mBackgroundDrawable != null) {
+                mBackgroundDrawable.setTintMode(mBackgroundTintMode);
+            }
         }
     }
 
@@ -255,30 +262,15 @@ class ImageViewImplX {
         mBackgroundDrawable.setShapeAppearanceModel(shapeAppearanceModel);
     }
 
-    protected void setImageDrawable(Drawable drawable) { // TODO mb need to check is vector drawable out of view bounds
-        if ((getCornerRadius() > 0 || isCircle())) {
-            boolean isTransition = isTransition(drawable);
+    protected final void setImageDrawable(@Nullable Drawable drawable) {
+        //LayerDrawable drawable1 = new LayerDrawable(new Drawable[] {drawable, mForegroundDrawable});
+        //mDelegate.setImageDrawable(drawable1);
 
-            if (!isTransition) {
-                drawable = createRoundedDrawable(drawable);
-            } else {
-                final TransitionDrawable transitionDrawable = (TransitionDrawable) drawable;
-                for (int i = 0; i < transitionDrawable.getNumberOfLayers(); i++) {
-                    Drawable childDrawable = transitionDrawable.getDrawable(i);
-                    int id = transitionDrawable.getId(i);
-                    if (id == NO_ID) {
-                        id = i + 1;
-                        transitionDrawable.setId(i, id);
-                    }
-                    transitionDrawable.setDrawableByLayerId(id, createRoundedDrawable(childDrawable));
-                }
-            }
-        }
-
-        mView.setImageDrawableInternal(drawable);
+        mDelegate.setImageDrawable(drawable);
+        //mDelegate.setImageDrawable(createRoundedDrawable(drawable));
     }
 
-    private Drawable createRoundedDrawable(Drawable drawable) {
+    protected Drawable createRoundedDrawable(Drawable drawable) {
         RoundedBitmapDrawable roundedBitmapDrawable;
 
         if (!(drawable instanceof RoundedBitmapDrawable)) {
@@ -288,16 +280,16 @@ class ImageViewImplX {
             roundedBitmapDrawable = (RoundedBitmapDrawable) drawable;
         }
 
-        if (isCircle()) {
-            roundedBitmapDrawable.setCircular(true);
-        } else {
-            roundedBitmapDrawable.setCornerRadius(getCornerRadius()/* * 2.7f*/);
-        }
+        //if (isCircle()) {
+            roundedBitmapDrawable.setCircular(isCircle);
+        //} else {
+        //    roundedBitmapDrawable.setCornerRadius(getCornerRadius() * 2.7f);
+        //}
 
         return roundedBitmapDrawable;
     }
 
-    private Bitmap getBitmap(Drawable drawable) {
+    protected final Bitmap getBitmap(Drawable drawable) {
         if (drawable == null) {
             return null;
         }
@@ -322,13 +314,5 @@ class ImageViewImplX {
             e.printStackTrace();
             return null;
         }
-    }
-
-    private boolean isVector(Drawable drawable) {
-        return drawable instanceof VectorDrawableCompat;
-    }
-
-    private boolean isTransition(Drawable drawable) {
-        return drawable instanceof TransitionDrawable;
     }
 }

@@ -1,22 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <attr name="materialImageViewStyle" format="reference"/>
+
     <declare-styleable name="ImageView">
         <attr name="circle" format="boolean"/>
-        <attr name="useCompatPadding" format="boolean"/>
+        <attr name="imageOverlap" format="boolean"/>
+        <!--<attr name="useCompatPadding" format="boolean"/>-->
         <attr name="cornerRadius" format="dimension"/>
         <attr name="borderWidth" format="dimension"/>
         <attr name="borderColor" format="color"/>
         <attr name="elevation" format="dimension"/>
-        <attr name="pressedTranslationZ" format="dimension"/>
+        <!--<attr name="pressedTranslationZ" format="dimension"/>-->
         <!-- TranslationZ value for the FAB when hovered, focused, or hovered and focused. -->
-        <attr name="hoveredFocusedTranslationZ" format="dimension"/>
+        <!--<attr name="hoveredFocusedTranslationZ" format="dimension"/>-->
         <attr name="backgroundTint"/>
         <attr name="backgroundTintMode"/>
         <!-- Motion spec for show animation. This should be a MotionSpec resource. -->
         <attr name="showMotionSpec"/>
         <!-- Motion spec for hide animation. This should be a MotionSpec resource. -->
         <attr name="hideMotionSpec"/>
-        <attr name="android:elevation"/>
+        <!--<attr name="android:elevation"/>-->
+        <attr name="srcCompat"/>
+        <attr name="tint"/>
+        <attr name="tintMode"/>
     </declare-styleable>
 
     <declare-styleable name="ImageView_Behavior_Layout">

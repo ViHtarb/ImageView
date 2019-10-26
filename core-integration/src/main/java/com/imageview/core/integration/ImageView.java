@@ -46,7 +46,7 @@ public abstract class ImageView extends com.imageview.core.ImageView {
     }
 
     public ImageView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, R.attr.materialImageViewStyle);
     }
 
     public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -63,19 +63,41 @@ public abstract class ImageView extends com.imageview.core.ImageView {
         a.recycle();
     }
 
+    /**
+     *
+     * @param resId
+     *
+     * @deprecated Use {@link #setPlaceholderDrawable(int)} or {@link #setErrorDrawable(int)} instead.
+     */
+    @Deprecated
     public void setDummyDrawable(@DrawableRes int resId) {
         setDummyDrawable(AppCompatResources.getDrawable(getContext(), resId));
     }
 
+    /**
+     *
+     * @param drawable
+     *
+     * @deprecated Use {@link #setPlaceholderDrawable(Drawable)} or {@link #setErrorDrawable(Drawable)} instead.
+     */
+    @Deprecated
     public void setDummyDrawable(Drawable drawable) {
         setPlaceholderDrawable(drawable);
         setErrorDrawable(drawable);
     }
 
+    /**
+     *
+     * @param resId
+     */
     public void setPlaceholderDrawable(@DrawableRes int resId) {
         setPlaceholderDrawable(AppCompatResources.getDrawable(getContext(), resId));
     }
 
+    /**
+     *
+     * @param drawable
+     */
     public void setPlaceholderDrawable(Drawable drawable) {
         if (mPlaceholderDrawable != drawable) {
             if (mPlaceholderDrawable == getDrawable()) {
@@ -86,10 +108,18 @@ public abstract class ImageView extends com.imageview.core.ImageView {
         }
     }
 
+    /**
+     *
+     * @param resId
+     */
     public void setErrorDrawable(@DrawableRes int resId) {
         setErrorDrawable(AppCompatResources.getDrawable(getContext(), resId));
     }
 
+    /**
+     *
+     * @param drawable
+     */
     public void setErrorDrawable(Drawable drawable) {
         if (mErrorDrawable != drawable) {
             if (mErrorDrawable == getDrawable()) {
@@ -100,15 +130,27 @@ public abstract class ImageView extends com.imageview.core.ImageView {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     @Nullable
     public Drawable getPlaceholderDrawable() {
         return mPlaceholderDrawable;
     }
 
+    /**
+     *
+     * @return
+     */
     @Nullable
     public Drawable getErrorDrawable() {
         return mErrorDrawable;
     }
 
+    /**
+     *
+     * @param url
+     */
     public abstract void setImageURL(String url);
 }

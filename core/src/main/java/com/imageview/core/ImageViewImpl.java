@@ -74,12 +74,6 @@ import static android.os.Build.VERSION_CODES.LOLLIPOP;
 @RequiresApi(ICE_CREAM_SANDWICH)
 @TargetApi(ICE_CREAM_SANDWICH)
 class ImageViewImpl {
-
-    private static final float HIDE_OPACITY = 0f;
-    private static final float HIDE_SCALE = 0f;
-    private static final float SHOW_OPACITY = 1f;
-    private static final float SHOW_SCALE = 1f;
-
     protected static final int NO_ID = SDK_INT >= LOLLIPOP ? -1 : 0;
 
     protected static final long ELEVATION_ANIM_DELAY = 100;
@@ -97,6 +91,11 @@ class ImageViewImpl {
     protected static final int[] HOVERED_FOCUSED_ENABLED_STATE_SET = {android.R.attr.state_hovered, android.R.attr.state_focused, android.R.attr.state_enabled};
 
     protected static final TimeInterpolator ELEVATION_ANIM_INTERPOLATOR = AnimationUtils.FAST_OUT_LINEAR_IN_INTERPOLATOR;
+
+    private static final float HIDE_OPACITY = 0f;
+    private static final float HIDE_SCALE = 0f;
+    private static final float SHOW_OPACITY = 1f;
+    private static final float SHOW_SCALE = 1f;
 
     private final Rect mTmpRect = new Rect();
 
@@ -119,7 +118,7 @@ class ImageViewImpl {
 
     protected final ColorStateList mTransparentTint = ColorStateList.valueOf(Color.TRANSPARENT);
     protected final ImageView mView;
-    protected final ViewDelegate mViewDelegate;
+    protected final ImageViewDelegate mViewDelegate;
 
     protected Drawable mShapeDrawable;
     protected BorderDrawable mBorderDrawable;
@@ -128,7 +127,7 @@ class ImageViewImpl {
 
     protected ViewTreeObserver.OnPreDrawListener mOnPreDrawListener;
 
-    protected ImageViewImpl(ImageView view, ViewDelegate viewDelegate) {
+    protected ImageViewImpl(ImageView view, ImageViewDelegate viewDelegate) {
         mView = view;
         mViewDelegate = viewDelegate;
 
@@ -519,7 +518,7 @@ class ImageViewImpl {
         Rect rect = mTmpRect;
         getPadding(rect);
         onPaddingUpdated(rect);
-        mViewDelegate.setShadowPadding(rect.left, rect.top, rect.right, rect.bottom);
+        //mViewDelegate.setShadowPadding(rect.left, rect.top, rect.right, rect.bottom);
     }
 
     protected boolean requirePreDrawListener() {

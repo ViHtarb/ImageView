@@ -1,79 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/test_view"
+    <com.imageview.ImageView
+        android:id="@+id/image"
+        android:layout_width="108dp"
+        android:layout_height="108dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="100dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:scaleType="centerCrop"
+        app:backgroundTint="?colorPrimary"
+        app:borderColor="@color/color"
+        app:borderWidth="8dp"
+        app:circle="false"
+        app:cornerRadius="16dp"
+        app:elevation="8dp"
+        app:imageOverlap="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_launcher"/>
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/stroke_slider"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:background="?selectableItemBackgroundBorderless"
-        tools:context="com.imageview.sample.MainActivity">
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:layout_constraintBottom_toTopOf="@+id/textView3"
+        tools:layout_editor_absoluteX="0dp"/>
 
-        <com.imageview.ImageView
-            android:id="@+id/image_view"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_margin="8dp"
-            android:src="@drawable/ic_error"
-            app:backgroundTint="@color/color"
-            app:circle="false"/>
+    <com.google.android.material.slider.Slider
+        android:id="@+id/elevation_slider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:layout_constraintBottom_toTopOf="@+id/textView2"/>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab"
+    <com.google.android.material.slider.Slider
+        android:id="@+id/corner_slider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:layout_editor_absoluteX="-16dp"/>
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/image_circle_check_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:text="Circle"
+        app:layout_constraintBottom_toTopOf="@+id/elevation_slider"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/image_overlapping_check_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="84dp"
+        android:layout_marginStart="84dp"
+        android:text="Overlapping"
+        app:layout_constraintBottom_toTopOf="@+id/elevation_slider"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:text="Elevation slider"
+        app:layout_constraintBottom_toTopOf="@+id/elevation_slider"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:text="Stroke slider"
+        app:layout_constraintBottom_toTopOf="@+id/stroke_slider"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:text="Corner slider"
+        app:layout_constraintBottom_toTopOf="@+id/corner_slider"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <!--    <Button
+            android:id="@+id/load_image_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_error"
-            app:tint="@color/colorPrimary"/>
-<!--
+            android:layout_marginBottom="16dp"
+            android:text="Load image"
+            app:layout_constraintBottom_toTopOf="@+id/elevation_slider"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"/>-->
+</androidx.constraintlayout.widget.ConstraintLayout>
 
-        <com.imageview.ImageView
-            android:id="@+id/image_view_2"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:src="@drawable/ic_placeholder"
-            app:backgroundTint="@color/colorPrimaryDark"
-            app:borderColor="@color/colorAccent"
-            app:borderWidth="2dp"
-            app:circle="true"
-            app:elevation="8dp"/>
-
-        <com.imageview.ImageView
-            android:id="@+id/image_view_3"
-            android:layout_width="160dp"
-            android:layout_height="160dp"
-            android:layout_margin="16dp"
-            android:src="@drawable/ic_placeholder"
-            app:borderColor="@color/colorAccent"
-            app:borderWidth="4dp"
-            app:cornerRadius="8dp"
-            app:elevation="8dp"/>
-
-        <android.support.design.widget.FloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            app:borderWidth="2dp"
-            app:elevation="8dp"
-            app:fabSize="normal"
-            app:useCompatPadding="true"/>
--->
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_test"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:icon="@drawable/ic_error"/>
-
-    </LinearLayout>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>

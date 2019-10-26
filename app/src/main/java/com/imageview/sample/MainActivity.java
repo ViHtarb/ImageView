@@ -24,25 +24,48 @@
 
 package com.imageview.sample;
 
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.imageview.ImageView;
+import com.imageview.sample.databinding.ActivityMainBinding;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.res.ResourcesCompat;
-
 
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
+        final ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        binding.imageCircleCheckBox.setChecked(binding.image.isCircle());
+        binding.imageCircleCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> binding.image.setCircle(isChecked));
+
+        binding.imageOverlappingCheckBox.setEnabled(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP); // overlapping doesn't support on pre-lollipop devices
+        binding.imageOverlappingCheckBox.setChecked(binding.image.isImageOverlap());
+        binding.imageOverlappingCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> binding.image.setImageOverlap(isChecked));
+
+        if (binding.image.getCompatElevation() > 0) {
+            binding.elevationSlider.setValueTo(binding.image.getCompatElevation() * 2);
+            binding.elevationSlider.setValueFrom(binding.image.getCompatElevation());
+            binding.elevationSlider.setOnChangeListener((slider, value) -> binding.image.setCompatElevation(value));
+        }
+
+        if (binding.image.getStrokeWidth() > 0) {
+            binding.strokeSlider.setValueTo(binding.image.getStrokeWidth() * 2);
+            binding.strokeSlider.setValueFrom(binding.image.getStrokeWidth());
+            binding.strokeSlider.setOnChangeListener((slider, value) -> binding.image.setStrokeWidth(value));
+        }
+
+        if (binding.image.getCornerRadius() > 0) {
+            binding.cornerSlider.setValueTo(binding.image.getCornerRadius() * 2);
+            binding.cornerSlider.setValueFrom(binding.image.getCornerRadius());
+            binding.cornerSlider.setOnChangeListener((slider, value) -> binding.image.setCornerRadius(value));
+        }
+
+        //binding.loadImageButton.setOnClickListener(v -> binding.image.setImageURL("https://images.pexels.com/photos/326055/pexels-photo-326055.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"));
 /*
         final ImageView imageViewTest1 = findViewById(R.id.image_view_3);
         new Handler().postDelayed(new Runnable() {
@@ -64,30 +87,27 @@ public class MainActivity extends AppCompatActivity {
             }
         });*/
 
-        final ImageView imageView = findViewById(R.id.image_view);
-        final FloatingActionButton fab = findViewById(R.id.fab);
+        //final ImageView imageView = findViewById(R.id.image_view);
+        //final FloatingActionButton fab = findViewById(R.id.fab);
         //imageView.setCompatElevation(20f);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
-            }
-        }, 1000);
+/*        new Handler().postDelayed(() -> {
+            //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
+        }, 1000);*/
         //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
         //imageView.setImageURL("https://pp.vk.me/c604531/v604531553/1d0f6/9gae9OTT_xo.jpg");
         //imageView.setImageResource(R.drawable.ic_noavatar);
         //imageView.setClipToOutline(true);
 
-        LinearLayout linearLayout = findViewById(R.id.test_view);
-        linearLayout.setOnClickListener(new View.OnClickListener() {
+        //LinearLayout linearLayout = findViewById(R.id.test_view);
+        /*linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
             }
-        });
+        });*/
 
-        Button button = findViewById(R.id.button_test);
-        button.setOnClickListener(new View.OnClickListener() {
+        //Button button = findViewById(R.id.button_test);
+        /*button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //fab.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_image, null));
@@ -102,6 +122,6 @@ public class MainActivity extends AppCompatActivity {
                 //imageView.setImageURL("https://s3.amazonaws.com/attached-images/point_images/a_15c85ed78d5349e1a2f984180e8efeb1.jpg");
                 //imageView.setCircle(!imageView.isCircle());
             }
-        });
+        });*/
     }
 }

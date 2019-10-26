@@ -28,7 +28,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
@@ -40,13 +39,17 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.google.android.material.animation.MotionSpec;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.internal.DescendantOffsetUtils;
-import com.google.android.material.internal.ViewUtils;
+import com.google.android.material.shape.MaterialShapeUtils;
+import com.google.android.material.shape.ShapeAppearanceModel;
+import com.google.android.material.shape.Shapeable;
 
 import java.util.List;
 
@@ -57,6 +60,8 @@ import androidx.annotation.DimenRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.Px;
+import androidx.annotation.StyleRes;
 import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.widget.AppCompatImageHelper;
 import androidx.appcompat.widget.AppCompatImageHelperUtils;
@@ -65,6 +70,8 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.TintableBackgroundView;
 import androidx.core.view.ViewCompat;
 import androidx.core.widget.TintableImageSourceView;
+
+import static com.google.android.material.theme.overlay.MaterialThemeOverlay.wrap;
 
 /**
  * That {@code ImageView} is copied some {@link FloatingActionButton} features and
@@ -79,15 +86,10 @@ import androidx.core.widget.TintableImageSourceView;
  * Changing view form with changing src drawable form - works with local drawables and don`t works with
  * transition drawables from Glide may be need initiate reload drawable on changing view form? // disabled 15.10.2017
  * <p>
- * TODO try to implement rounding vector drawables(i mean its real with layer drawable https://stackoverflow.com/questions/36070223/how-to-put-a-vector-in-a-shape-in-android)
- * TODO fix measuring view - fixed for android L and biggest
- * TODO for pre-lollipop need fix shadow drawing for square form and for square form with corners
- * TODO reformat project
- * TODO think about current tinting
  */
-@CoordinatorLayout.DefaultBehavior(ImageView.Behavior.class)
-public abstract class ImageView extends VisibilityAwareImageView implements TintableBackgroundView, TintableImageSourceView {
-
+//@CoordinatorLayout.DefaultBehavior(ImageView.Behavior.class)
+@SuppressLint("RestrictedApi")
+public abstract class ImageView extends VisibilityAwareImageView implements TintableBackgroundView, TintableImageSourceView, Shapeable/*, Checkable*/ {
     private static final String LOG_TAG = ImageView.class.getSimpleName();
 
     /**
@@ -114,82 +116,76 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
         }
     }
 
-    private boolean isCircle;
-    private boolean isCompatPadding;
+    private final ImageViewDelegate mDelegate = new ImageViewDelegate() {
 
-    private float mCornerRadius;
-    private float mBorderWidth;
+        @Override
+        public void setBackgroundDrawable(Drawable background) {
+            ImageView.super.setBackgroundDrawable(background);
+        }
 
-    private ColorStateList mBorderColor;
+        @Override
+        public void setImageDrawable(Drawable drawable) {
+            ImageView.super.setImageDrawable(drawable);
+        }
+    };
 
-    private ColorStateList mBackgroundTint;
-    private PorterDuff.Mode mBackgroundTintMode;
+    @StyleRes
+    private static final int DEF_STYLE_RES = R.style.Widget_ImageView;
 
     private final Rect mShadowPadding = new Rect();
-    //private final Rect mTouchArea = new Rect();
-
+    private final ImageViewImplX mImageViewHelper;
     private final AppCompatImageHelper mImageHelper;
-
-    private final ImageViewImpl mImpl;
 
     public ImageView(Context context) {
         this(context, null);
     }
 
     public ImageView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, R.attr.materialImageViewStyle);
     }
 
     @SuppressLint("RestrictedApi")
     public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        super(wrap(context, attrs, defStyleAttr, DEF_STYLE_RES), attrs, defStyleAttr);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ImageView, defStyleAttr, 0);
-
-        /*isCircle = a.getBoolean(R.styleable.ImageView_circle, false);
-        isCompatPadding = a.getBoolean(R.styleable.ImageView_useCompatPadding, false);
-
-        mCornerRadius = a.getDimension(R.styleable.ImageView_cornerRadius, 0);
-        mBorderWidth = a.getDimensionPixelSize(R.styleable.ImageView_borderWidth, 0);
-        mBorderColor = a.getColorStateList(R.styleable.ImageView_borderColor);
-
-        final float elevation = a.getDimension(R.styleable.ImageView_elevation, a.getDimension(R.styleable.ImageView_android_elevation, 0f));
-        final float pressedTranslationZ = a.getDimension(R.styleable.ImageView_pressedTranslationZ, 0f);
-        final float hoveredFocusedTranslationZ = a.getDimension(R.styleable.ImageView_hoveredFocusedTranslationZ, 0f);
-
-        mBackgroundTint = a.getColorStateList(R.styleable.ImageView_backgroundTint);
-        mBackgroundTintMode = ViewUtils.parseTintMode(a.getInt(R.styleable.ImageView_backgroundTintMode, -1), null);
-
-        MotionSpec showMotionSpec = MotionSpec.createFromAttribute(context, a, R.styleable.ImageView_showMotionSpec);
-        MotionSpec hideMotionSpec = MotionSpec.createFromAttribute(context, a, R.styleable.ImageView_hideMotionSpec);*/
-
-        mImpl = createImpl(); // TODO
-        mImpl.loadFromAttributes(a);
-
-        a.recycle();
+        if (Build.VERSION.SDK_INT >= 23) {
+            mImageViewHelper = new ImageViewApi23Impl(this, attrs, defStyleAttr, DEF_STYLE_RES);
+        } else if (Build.VERSION.SDK_INT >= 21) {
+            mImageViewHelper = new ImageViewApi21Impl(this, attrs, defStyleAttr, DEF_STYLE_RES);
+        } else {
+            mImageViewHelper = new ImageViewImplX(this, attrs, defStyleAttr, DEF_STYLE_RES);
+        }
 
         mImageHelper = new AppCompatImageHelper(this);
         mImageHelper.loadFromAttributes(attrs, defStyleAttr);
+    }
 
-/*        getImpl().setImageDrawable(getDrawable());
-        getImpl().setBackgroundDrawable(mBackgroundTint, mBackgroundTintMode, isCircle, mCornerRadius, mBorderWidth, mBorderColor);
-        getImpl().setElevation(elevation);
-        getImpl().setPressedTranslationZ(pressedTranslationZ);
-        getImpl().setHoveredFocusedTranslationZ(hoveredFocusedTranslationZ);
-        getImpl().setShowMotionSpec(showMotionSpec);
-        getImpl().setHideMotionSpec(hideMotionSpec);*/
+    @NonNull
+    private String getA11yClassName() {
+        // Use the platform widget classes so Talkback can recognize this as a button.
+        return ImageView.class.getName();
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(@NonNull AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(getA11yClassName());
+        //info.setCheckable(isCheckable());
+        //info.setChecked(isChecked());
+        info.setClickable(isClickable());
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(@NonNull AccessibilityEvent accessibilityEvent) {
+        super.onInitializeAccessibilityEvent(accessibilityEvent);
+        accessibilityEvent.setClassName(getA11yClassName());
+        //accessibilityEvent.setChecked(isChecked());
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        getImpl().onAttachedToWindow();
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        getImpl().onDetachedFromWindow();
+        MaterialShapeUtils.setParentAbsoluteElevation(this, mImageViewHelper.getBackgroundDrawable());
     }
 
     @Override
@@ -200,17 +196,28 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
-        getImpl().onDrawableStateChanged(getDrawableState());
+        //getImpl().onDrawableStateChanged(getDrawableState());
 
         if (mImageHelper != null) {
             AppCompatImageHelperUtils.applySupportImageTint(mImageHelper);
         }
     }
 
-    @Override
+/*    @Override
     public void jumpDrawablesToCurrentState() {
         super.jumpDrawablesToCurrentState();
-        getImpl().jumpDrawableToCurrentState();
+        //getImpl().jumpDrawableToCurrentState();
+    }*/
+
+    @Override
+    public void setPadding(@Px int left, @Px int top, @Px int right, @Px int bottom) {
+        mImageViewHelper.setPadding(left, top, right, bottom);
+    }
+
+    @Override
+    public void setPaddingRelative(@Px int start, @Px int top, @Px int end, @Px int bottom) {
+        super.setPaddingRelative(start, top, end, bottom);
+        mImageViewHelper.setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
     }
 
     @Override
@@ -231,29 +238,23 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     @Nullable
     @Override
     public ColorStateList getBackgroundTintList() {
-        return mBackgroundTint;
+        return mImageViewHelper.getBackgroundTintList();
     }
 
     @Override
     public void setBackgroundTintList(@Nullable ColorStateList tint) {
-        if (mBackgroundTint != tint) {
-            mBackgroundTint = tint;
-            getImpl().setBackgroundTintList(tint);
-        }
+        mImageViewHelper.setBackgroundTintList(tint);
     }
 
     @Nullable
     @Override
     public PorterDuff.Mode getBackgroundTintMode() {
-        return mBackgroundTintMode;
+        return mImageViewHelper.getBackgroundTintMode();
     }
 
     @Override
     public void setBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) {
-        if (mBackgroundTintMode != tintMode) {
-            mBackgroundTintMode = tintMode;
-            getImpl().setBackgroundTintMode(tintMode);
-        }
+        mImageViewHelper.setBackgroundTintMode(tintMode);
     }
 
     @Nullable
@@ -278,7 +279,6 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
         setBackgroundTintMode(tintMode);
     }
 
-    @SuppressLint("RestrictedApi")
     @Override
     public void setImageResource(int resId) {
         mImageHelper.setImageResource(resId);
@@ -287,7 +287,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     @Override
     public void setImageURI(@Nullable Uri uri) {
         super.setImageURI(uri);
-        getImpl().setImageDrawable(getDrawable()); // TODO check if setImageURI not call setImageDrawable method
+        mImageViewHelper.setImageDrawable(getDrawable());
         if (mImageHelper != null) {
             AppCompatImageHelperUtils.applySupportImageTint(mImageHelper);
         }
@@ -295,16 +295,12 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
 
     @Override
     public void setImageDrawable(@Nullable Drawable drawable) {
-        getImpl().setImageDrawable(drawable);
-        if (mImageHelper != null) {
-            AppCompatImageHelperUtils.applySupportImageTint(mImageHelper);
+        Log.d("TEST", "setImageDrawable");
+        if (mImageViewHelper != null) {
+            mImageViewHelper.setImageDrawable(drawable);
+        } else {
+            super.setImageDrawable(drawable);
         }
-    }
-
-    @Override
-    public void setImageBitmap(Bitmap bm) {
-        super.setImageBitmap(bm);
-        getImpl().setImageDrawable(getDrawable());
         if (mImageHelper != null) {
             AppCompatImageHelperUtils.applySupportImageTint(mImageHelper);
         }
@@ -336,21 +332,37 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
         return mImageHelper != null ? AppCompatImageHelperUtils.getSupportImageTintMode(mImageHelper) : null;
     }
 
+    @Override
+    public void setShapeAppearanceModel(@NonNull ShapeAppearanceModel shapeAppearanceModel) {
+        mImageViewHelper.setShapeAppearanceModel(shapeAppearanceModel);
+    }
+
+    @NonNull
+    @Override
+    public ShapeAppearanceModel getShapeAppearanceModel() {
+        return mImageViewHelper.getShapeAppearanceModel();
+    }
+
     /**
      * @return
      */
     public boolean isCircle() {
-        return isCircle;
+        return mImageViewHelper.isCircle();
     }
 
     /**
      * @param isCircle
      */
     public void setCircle(boolean isCircle) {
-        if (this.isCircle != isCircle) {
-            this.isCircle = isCircle;
-            getImpl().setCircle(isCircle);
-        }
+        mImageViewHelper.setCircle(isCircle);
+    }
+
+    public boolean isImageOverlap() {
+        return mImageViewHelper.isImageOverlap();
+    }
+
+    public void setImageOverlap(boolean isImageOverlap) {
+        mImageViewHelper.setImageOverlap(isImageOverlap);
     }
 
     /**
@@ -362,7 +374,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
      * @see #setUseCompatPadding(boolean)
      */
     public boolean getUseCompatPadding() {
-        return isCompatPadding;
+        return false;
     }
 
     /**
@@ -375,10 +387,10 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
      * @see #getUseCompatPadding()
      */
     public void setUseCompatPadding(boolean useCompatPadding) {
-        if (isCompatPadding != useCompatPadding) {
+        /*if (isCompatPadding != useCompatPadding) {
             isCompatPadding = useCompatPadding;
-            getImpl().onCompatShadowChanged();
-        }
+            //getImpl().onCompatShadowChanged();
+        }*/
     }
 
     /**
@@ -390,7 +402,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
      * @see #setCompatElevation(float)
      */
     public float getCompatElevation() {
-        return getImpl().getElevation();
+        return mImageViewHelper.getElevation();
     }
 
     /**
@@ -403,7 +415,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
      * @see #setUseCompatPadding(boolean)
      */
     public void setCompatElevation(float elevation) {
-        getImpl().setElevation(elevation);
+        mImageViewHelper.setElevation(elevation);
     }
 
     /**
@@ -427,7 +439,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
      * @see #setCompatPressedTranslationZ(float)
      */
     public float getCompatPressedTranslationZ() {
-        return getImpl().getPressedTranslationZ();
+        return 0;//getImpl().getPressedTranslationZ();
     }
 
     /**
@@ -439,7 +451,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
      * @see #setUseCompatPadding(boolean)
      */
     public void setCompatPressedTranslationZ(float translationZ) {
-        getImpl().setPressedTranslationZ(translationZ);
+        //getImpl().setPressedTranslationZ(translationZ);
     }
 
     /**
@@ -462,7 +474,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
      * @see #setCompatHoveredFocusedTranslationZ(float)
      */
     public float getCompatHoveredFocusedTranslationZ() {
-        return getImpl().getHoveredFocusedTranslationZ();
+        return 0;//getImpl().getHoveredFocusedTranslationZ();
     }
 
     /**
@@ -474,7 +486,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
      * @see #setUseCompatPadding(boolean)
      */
     public void setCompatHoveredFocusedTranslationZ(float translationZ) {
-        getImpl().setHoveredFocusedTranslationZ(translationZ);
+        //getImpl().setHoveredFocusedTranslationZ(translationZ);
     }
 
     /**
@@ -493,17 +505,14 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
      * @return
      */
     public float getCornerRadius() {
-        return mCornerRadius;
+        return mImageViewHelper.getCornerRadius();
     }
 
     /**
      * @param radius
      */
     public void setCornerRadius(float radius) {
-        if (mCornerRadius != radius) {
-            mCornerRadius = radius;
-            getImpl().setCornerRadius(radius);
-        }
+        mImageViewHelper.setCornerRadius(radius);
     }
 
     /**
@@ -516,63 +525,57 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     /**
      * @return
      */
-    public float getBorderWidth() {
-        return mBorderWidth;
+    public float getStrokeWidth() {
+        return mImageViewHelper.getStrokeWidth();
     }
 
     /**
      * @param width
      */
-    public void setBorderWidth(float width) {
-        if (mBorderWidth != width) {
-            mBorderWidth = width;
-            getImpl().setBorderWidth(mBorderWidth);
-        }
+    public void setStrokeWidth(float width) {
+        mImageViewHelper.setStrokeWidth(width);
     }
 
     /**
      * @param resId
      */
-    public void setBorderWidth(@DimenRes int resId) {
-        setBorderWidth(getResources().getDimension(resId));
+    public void setStrokeWidth(@DimenRes int resId) {
+        setStrokeWidth(getResources().getDimension(resId));
     }
 
     /**
      * @return
      */
-    public ColorStateList getBorderColor() {
-        return mBorderColor;
-    }
-
-    /**
-     * @param color
-     */
-    public void setBorderColor(@ColorInt int color) {
-        setBorderColor(ColorStateList.valueOf(color));
-    }
-
-    /**
-     * @param color
-     */
-    public void setBorderColor(ColorStateList color) {
-        if (mBorderColor != color) {
-            mBorderColor = color;
-            getImpl().setBorderColor(color);
-        }
+    public ColorStateList getStrokeColor() {
+        return mImageViewHelper.getStrokeColor();
     }
 
     /**
      * @param resId
      */
-    public void setBorderColorResource(@ColorRes int resId) {
-        setBorderColor(ResourcesCompat.getColor(getResources(), resId, null));
+    public void setStrokeColorResource(@ColorRes int resId) {
+        setStrokeColor(ResourcesCompat.getColor(getResources(), resId, null));
+    }
+
+    /**
+     * @param color
+     */
+    public void setStrokeColor(@ColorInt int color) {
+        setStrokeColor(ColorStateList.valueOf(color));
+    }
+
+    /**
+     * @param color
+     */
+    public void setStrokeColor(ColorStateList color) {
+        mImageViewHelper.setStrokeColor(color);
     }
 
     /**
      * Returns the motion spec for the show animation.
      */
     public MotionSpec getShowMotionSpec() {
-        return getImpl().getShowMotionSpec();
+        return null;//getImpl().getShowMotionSpec();
     }
 
     /**
@@ -581,7 +584,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
      * @attr ref R.styleable#ImageView_showMotionSpec
      */
     public void setShowMotionSpec(MotionSpec spec) {
-        getImpl().setShowMotionSpec(spec);
+        //getImpl().setShowMotionSpec(spec);
     }
 
     /**
@@ -597,7 +600,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
      * Returns the motion spec for the hide animation.
      */
     public MotionSpec getHideMotionSpec() {
-        return getImpl().getHideMotionSpec();
+        return null; //getImpl().getHideMotionSpec();
     }
 
     /**
@@ -606,7 +609,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
      * @attr ref R.styleable#ImageView_hideMotionSpec
      */
     public void setHideMotionSpec(MotionSpec spec) {
-        getImpl().setHideMotionSpec(spec);
+        //getImpl().setHideMotionSpec(spec);
     }
 
     /**
@@ -637,7 +640,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     }
 
     private void show(OnVisibilityChangedListener listener, boolean fromUser) {
-        getImpl().show(wrapOnVisibilityChangedListener(listener), fromUser);
+        //getImpl().show(wrapOnVisibilityChangedListener(listener), fromUser);
     }
 
     /**
@@ -659,7 +662,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     }
 
     private void hide(@Nullable OnVisibilityChangedListener listener, boolean fromUser) {
-        getImpl().hide(wrapOnVisibilityChangedListener(listener), fromUser);
+        //getImpl().hide(wrapOnVisibilityChangedListener(listener), fromUser);
     }
 
     @Nullable
@@ -681,32 +684,18 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
         };
     }
 
-    private ImageViewImpl getImpl() {
-       //if (mImpl == null) {
-            //mImpl = createImpl();
-        //}
-        return mImpl;
-    }
+    private class ViewDelegateImpl implements ImageViewDelegate {
 
-    private ImageViewImpl createImpl() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return new ImageViewLollipop(this, new ViewDelegateImpl());
-        }
-        return new ImageViewImpl(this, new ViewDelegateImpl());
-    }
-
-    private class ViewDelegateImpl implements ViewDelegate {
-
-        @Override
+        /*@Override
         public float getRadius() {
             return (getWidth() - (mShadowPadding.right + mShadowPadding.left)) / 2f;
-        }
+        }*/
 
-        @Override
+        /*@Override
         public void setShadowPadding(int left, int top, int right, int bottom) {
             //mShadowPadding.set(left, top, right, bottom);
             //setPadding(left + (int) getBorderWidth(), top + (int) getBorderWidth(), right + (int) getBorderWidth(), bottom + (int) getBorderWidth());
-        }
+        }*/
 
         @Override
         public void setBackgroundDrawable(Drawable background) {
@@ -718,10 +707,10 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
             ImageView.super.setImageDrawable(drawable);
         }
 
-        @Override
+        /*@Override
         public boolean isCompatPadding() {
             return isCompatPadding;
-        }
+        }*/
     }
 
     /**
@@ -933,5 +922,17 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
                 }
             }
         }
+    }
+
+    void setPaddingInternal(@Px int left, @Px int top, @Px int right, @Px int bottom) {
+        super.setPadding(left, top, right, bottom);
+    }
+
+    void setBackgroundInternal(Drawable drawable) {
+        super.setBackgroundDrawable(drawable);
+    }
+
+    void setImageDrawableInternal(Drawable drawable) {
+        super.setImageDrawable(drawable);
     }
 }

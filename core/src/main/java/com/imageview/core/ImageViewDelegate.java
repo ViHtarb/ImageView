@@ -26,15 +26,15 @@ package com.imageview.core;
 
 import android.graphics.drawable.Drawable;
 
-interface ViewDelegate {
+interface ImageViewDelegate {
 
-    boolean isCompatPadding();
+    //boolean isCompatPadding();
 
-    float getRadius();
+    //float getRadius();
 
     void setBackgroundDrawable(Drawable background);
 
     void setImageDrawable(Drawable drawable);
 
-    void setShadowPadding(int left, int top, int right, int bottom);
+    //void setShadowPadding(int left, int top, int right, int bottom);
 }

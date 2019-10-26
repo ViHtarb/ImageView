@@ -28,7 +28,12 @@ import android.content.Context;
 import android.util.AttributeSet;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.request.RequestOptions;
+import com.imageview.glide.R;
+
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 public class ImageView extends com.imageview.core.integration.ImageView {
 
@@ -39,7 +44,7 @@ public class ImageView extends com.imageview.core.integration.ImageView {
     }
 
     public ImageView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, R.attr.materialImageViewStyle);
     }
 
     public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -52,6 +57,10 @@ public class ImageView extends com.imageview.core.integration.ImageView {
 
     @Override
     public void setImageURL(String url) {
-        mManager.load(url).placeholder(getPlaceholderDrawable()).error(getErrorDrawable()).into(this);
+        RequestOptions options = new RequestOptions()
+                .placeholder(getPlaceholderDrawable())
+                .error(getErrorDrawable())
+                .priority(Priority.HIGH);
+        mManager.load(url).apply(options).transition(withCrossFade()).into(this);
     }
 }
