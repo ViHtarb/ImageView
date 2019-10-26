@@ -59,11 +59,15 @@ public class MainActivity extends AppCompatActivity {
             binding.strokeSlider.setOnChangeListener((slider, value) -> binding.image.setStrokeWidth(value));
         }
 
-        if (binding.image.getCornerRadius() > 0) {
-            binding.cornerSlider.setValueTo(binding.image.getCornerRadius() * 2);
-            binding.cornerSlider.setValueFrom(binding.image.getCornerRadius());
+        binding.image.post(() -> {
+            float currentValue = binding.image.isCircle() ? binding.image.getHeight() / 2f : binding.image.getCornerRadius();
+
+            binding.cornerSlider.setValueTo(binding.image.getHeight() / 2f);
+            binding.cornerSlider.setValue(currentValue);
             binding.cornerSlider.setOnChangeListener((slider, value) -> binding.image.setCornerRadius(value));
-        }
+        });
+
+        binding.rotationSlider.setOnChangeListener((slider, value) -> binding.image.setRotation(value));
 
         //binding.loadImageButton.setOnClickListener(v -> binding.image.setImageURL("https://images.pexels.com/photos/326055/pexels-photo-326055.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"));
 /*

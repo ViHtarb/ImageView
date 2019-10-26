@@ -1,12 +1,15 @@
 package com.imageview.core;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 
+import com.google.android.material.ripple.RippleUtils;
 import com.google.android.material.shape.AbsoluteCornerSize;
 import com.google.android.material.shape.CornerSize;
 import com.google.android.material.shape.MaterialShapeDrawable;
@@ -26,19 +29,39 @@ import static android.view.View.VISIBLE;
 @TargetApi(LOLLIPOP)
 class ImageViewApi21Impl extends ImageViewImplX {
 
-    protected final MaterialShapeDrawable mForegroundDrawable;
+    private final MaterialShapeDrawable mMaskDrawable;
+    private final MaterialShapeDrawable mForegroundDrawable;
+    private final RippleDrawable mRippleDrawable;
 
+    @SuppressLint("RestrictedApi")
     protected ImageViewApi21Impl(@NonNull ImageView view, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(view, attrs, defStyleAttr, defStyleRes);
 
         view.setClipToOutline(true);
         view.setElevation(mElevation);
 
+        mMaskDrawable = new MaterialShapeDrawable(getShapeAppearanceModel());
         mForegroundDrawable = new MaterialShapeDrawable(getShapeAppearanceModel());
         mForegroundDrawable.setFillColor(ColorStateList.valueOf(Color.TRANSPARENT));
         mForegroundDrawable.setStroke(mStrokeWidth, mStrokeColor);
 
-        setForeground(mForegroundDrawable);
+        mRippleDrawable = new RippleDrawable(RippleUtils.sanitizeRippleDrawableColor(mRippleColor), mForegroundDrawable, mMaskDrawable);
+        setForeground(mRippleDrawable);
+    }
+
+    @Override
+    protected void onDrawableStateChanged(int[] state) {
+        mRippleDrawable.setState(state);
+    }
+
+    @Override
+    protected void drawableHotspotChanged(float x, float y) {
+        mRippleDrawable.setHotspot(x, y);
+    }
+
+    @Override
+    protected void jumpDrawableToCurrentState() {
+        mRippleDrawable.jumpToCurrentState();
     }
 
     @Override
@@ -51,7 +74,7 @@ class ImageViewApi21Impl extends ImageViewImplX {
 
     @Override
     protected final void updatePadding(int padding) {
-        if (!isImageOverlap) {
+        if (isImageOverlap) {
             padding = 0;
         }
         super.updatePadding(padding);
@@ -63,6 +86,7 @@ class ImageViewApi21Impl extends ImageViewImplX {
             this.isCircle = isCircle;
 
             CornerSize cornerSize = isCircle ? ShapeAppearanceModel.PILL : new AbsoluteCornerSize(mCornerRadius);
+            mMaskDrawable.setCornerSize(cornerSize);
             mBackgroundDrawable.setCornerSize(cornerSize);
             mForegroundDrawable.setCornerSize(cornerSize);
         }
@@ -87,6 +111,7 @@ class ImageViewApi21Impl extends ImageViewImplX {
         if (mCornerRadius != cornerRadius) {
             mCornerRadius = cornerRadius;
 
+            mMaskDrawable.setCornerSize(mCornerRadius);
             mBackgroundDrawable.setCornerSize(mCornerRadius);
             mForegroundDrawable.setCornerSize(mCornerRadius);
         }
@@ -119,6 +144,24 @@ class ImageViewApi21Impl extends ImageViewImplX {
 
             mForegroundDrawable.setStrokeColor(strokeColor);
         }
+    }
+
+    @Override
+    @SuppressLint("RestrictedApi")
+    protected void setRippleColor(@Nullable ColorStateList rippleColor) {
+        if (mRippleColor != rippleColor) {
+            mRippleColor = rippleColor;
+
+            mRippleDrawable.setColor(RippleUtils.sanitizeRippleDrawableColor(mRippleColor));
+        }
+    }
+
+    @Override
+    protected final void setShapeAppearanceModel(@NonNull ShapeAppearanceModel shapeAppearanceModel) {
+        super.setShapeAppearanceModel(shapeAppearanceModel);
+
+        mMaskDrawable.setShapeAppearanceModel(shapeAppearanceModel);
+        mForegroundDrawable.setShapeAppearanceModel(shapeAppearanceModel);
     }
 
     @Override

@@ -22,6 +22,18 @@ final class ImageViewApi23Impl extends ImageViewApi21Impl {
     }
 
     @Override
+    protected void onDrawableStateChanged(int[] state) {
+    }
+
+    @Override
+    protected void drawableHotspotChanged(float x, float y) {
+    }
+
+    @Override
+    protected void jumpDrawableToCurrentState() {
+    }
+
+    @Override
     protected void setForeground(@NonNull Drawable foreground) {
         mView.setForeground(foreground);
     }

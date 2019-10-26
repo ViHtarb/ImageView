@@ -7,8 +7,9 @@
         <attr name="imageOverlap" format="boolean"/>
         <!--<attr name="useCompatPadding" format="boolean"/>-->
         <attr name="cornerRadius" format="dimension"/>
-        <attr name="borderWidth" format="dimension"/>
-        <attr name="borderColor" format="color"/>
+        <attr name="strokeWidth" format="dimension"/>
+        <attr name="strokeColor" format="color"/>
+        <attr name="rippleColor" format="color"/>
         <attr name="elevation" format="dimension"/>
         <!--<attr name="pressedTranslationZ" format="dimension"/>-->
         <!-- TranslationZ value for the FAB when hovered, focused, or hovered and focused. -->
@@ -19,7 +20,6 @@
         <attr name="showMotionSpec"/>
         <!-- Motion spec for hide animation. This should be a MotionSpec resource. -->
         <attr name="hideMotionSpec"/>
-        <!--<attr name="android:elevation"/>-->
         <attr name="srcCompat"/>
         <attr name="tint"/>
         <attr name="tintMode"/>

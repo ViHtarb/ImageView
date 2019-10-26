@@ -12,21 +12,26 @@
         android:layout_width="108dp"
         android:layout_height="108dp"
         android:layout_gravity="center"
-        android:layout_marginTop="100dp"
         android:clickable="true"
         android:focusable="true"
-        android:scaleType="centerCrop"
         app:backgroundTint="?colorPrimary"
-        app:borderColor="@color/color"
-        app:borderWidth="8dp"
-        app:circle="false"
-        app:cornerRadius="16dp"
+        app:circle="true"
         app:elevation="8dp"
-        app:imageOverlap="true"
+        app:layout_constraintBottom_toTopOf="@+id/elevation_slider"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_launcher"/>
+        app:layout_constraintVertical_bias="0.312"/>
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/rotation_slider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:valueFrom="0"
+        android:valueTo="360"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <com.google.android.material.slider.Slider
         android:id="@+id/stroke_slider"
@@ -48,8 +53,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="-16dp"/>
+        android:valueFrom="0"
+        app:layout_constraintBottom_toTopOf="@+id/textView4"
+        tools:layout_editor_absoluteX="0dp"/>
 
     <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/image_circle_check_box"
@@ -103,15 +109,14 @@
         app:layout_constraintBottom_toTopOf="@+id/corner_slider"
         app:layout_constraintStart_toStartOf="parent"/>
 
-    <!--    <Button
-            android:id="@+id/load_image_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:text="Load image"
-            app:layout_constraintBottom_toTopOf="@+id/elevation_slider"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"
-            app:layout_constraintStart_toStartOf="parent"/>-->
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:text="Rotation slider"
+        app:layout_constraintBottom_toTopOf="@+id/rotation_slider"
+        app:layout_constraintStart_toStartOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
 

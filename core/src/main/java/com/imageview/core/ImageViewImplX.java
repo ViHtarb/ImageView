@@ -71,6 +71,7 @@ class ImageViewImplX {
     //protected float mHoveredFocusedTranslationZ;
 
     protected ColorStateList mStrokeColor;
+    protected ColorStateList mRippleColor;
 
     protected ColorStateList mBackgroundTint;
     protected PorterDuff.Mode mBackgroundTintMode;
@@ -91,8 +92,9 @@ class ImageViewImplX {
         //isCompatPadding = a.getBoolean(R.styleable.ImageView_useCompatPadding, false);
 
         mCornerRadius = a.getDimension(R.styleable.ImageView_cornerRadius, 0);
-        mStrokeWidth = a.getDimension(R.styleable.ImageView_borderWidth, 0);
-        mStrokeColor = MaterialResources.getColorStateList(mContext, a, R.styleable.ImageView_borderColor);
+        mStrokeWidth = a.getDimension(R.styleable.ImageView_strokeWidth, 0);
+        mStrokeColor = MaterialResources.getColorStateList(mContext, a, R.styleable.ImageView_strokeColor);
+        mRippleColor = MaterialResources.getColorStateList(mContext, a, R.styleable.ImageView_rippleColor);
 
         mElevation = a.getDimension(R.styleable.ImageView_elevation, ViewCompat.getElevation(mView));
         //mPressedTranslationZ = a.getDimension(R.styleable.ImageView_pressedTranslationZ, 0f);
@@ -121,6 +123,15 @@ class ImageViewImplX {
         updatePadding((int) mStrokeWidth);
     }
 
+    protected void onDrawableStateChanged(int[] state) {
+    }
+
+    protected void drawableHotspotChanged(float x, float y) {
+    }
+
+    protected void jumpDrawableToCurrentState() {
+    }
+
     protected void updateStroke() {
         mBackgroundDrawable.setStroke(mStrokeWidth, mStrokeColor);
     }
@@ -135,7 +146,7 @@ class ImageViewImplX {
         mView.setPaddingInternal(mUserPadding.left + padding, mUserPadding.top + padding, mUserPadding.right + padding, mUserPadding.bottom + padding);
     }
 
-    protected void setPadding(@Px int left, @Px int top, @Px int right, @Px int bottom) {
+    protected final void setPadding(@Px int left, @Px int top, @Px int right, @Px int bottom) {
         mUserPadding.set(left, top, right, bottom);
         updatePadding((int) mStrokeWidth);
     }
@@ -207,6 +218,7 @@ class ImageViewImplX {
         }
     }
 
+    @Nullable
     protected final ColorStateList getStrokeColor() {
         return mStrokeColor;
     }
@@ -216,6 +228,17 @@ class ImageViewImplX {
             mStrokeColor = strokeColor;
 
             mBackgroundDrawable.setStrokeColor(mStrokeColor);
+        }
+    }
+
+    @Nullable
+    protected final ColorStateList getRippleColor() {
+        return mRippleColor;
+    }
+
+    protected void setRippleColor(@Nullable ColorStateList rippleColor) {
+        if (mRippleColor != rippleColor) {
+            mRippleColor = rippleColor;
         }
     }
 
@@ -247,16 +270,34 @@ class ImageViewImplX {
         return mBackgroundDrawable;
     }
 
+    @Nullable
+    protected final MotionSpec getShowMotionSpec() {
+        return mShowMotionSpec;
+    }
+
+    protected final void setShowMotionSpec(@Nullable MotionSpec spec) {
+        mShowMotionSpec = spec;
+    }
+
+    @Nullable
+    protected final MotionSpec getHideMotionSpec() {
+        return mHideMotionSpec;
+    }
+
+    protected final void setHideMotionSpec(@Nullable MotionSpec spec) {
+        mHideMotionSpec = spec;
+    }
+
     protected final ShapeAppearanceModel getShapeAppearanceModel() {
         return mBackgroundDrawable.getShapeAppearanceModel();
     }
 
-    protected final void setShapeAppearanceModel(@NonNull ShapeAppearanceModel shapeAppearanceModel) {
+    protected void setShapeAppearanceModel(@NonNull ShapeAppearanceModel shapeAppearanceModel) {
         mBackgroundDrawable.setShapeAppearanceModel(shapeAppearanceModel);
     }
 
     protected void setImageDrawable(Drawable drawable) { // TODO mb need to check is vector drawable out of view bounds
-        if ((getCornerRadius() > 0 || isCircle())) {
+        if (getCornerRadius() > 0 || isCircle()) {
             boolean isTransition = isTransition(drawable);
 
             if (!isTransition) {

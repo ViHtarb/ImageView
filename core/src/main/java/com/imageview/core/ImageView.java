@@ -66,9 +66,9 @@ import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.widget.AppCompatImageHelper;
 import androidx.appcompat.widget.AppCompatImageHelperUtils;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.coordinatorlayout.widget.CoordinatorLayout.AttachedBehavior;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.TintableBackgroundView;
-import androidx.core.view.ViewCompat;
 import androidx.core.widget.TintableImageSourceView;
 
 import static com.google.android.material.theme.overlay.MaterialThemeOverlay.wrap;
@@ -87,9 +87,8 @@ import static com.google.android.material.theme.overlay.MaterialThemeOverlay.wra
  * transition drawables from Glide may be need initiate reload drawable on changing view form? // disabled 15.10.2017
  * <p>
  */
-//@CoordinatorLayout.DefaultBehavior(ImageView.Behavior.class)
 @SuppressLint("RestrictedApi")
-public abstract class ImageView extends VisibilityAwareImageView implements TintableBackgroundView, TintableImageSourceView, Shapeable/*, Checkable*/ {
+public abstract class ImageView extends VisibilityAwareImageView implements TintableBackgroundView, TintableImageSourceView, Shapeable, AttachedBehavior {
     private static final String LOG_TAG = ImageView.class.getSimpleName();
 
     /**
@@ -116,25 +115,13 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
         }
     }
 
-    private final ImageViewDelegate mDelegate = new ImageViewDelegate() {
-
-        @Override
-        public void setBackgroundDrawable(Drawable background) {
-            ImageView.super.setBackgroundDrawable(background);
-        }
-
-        @Override
-        public void setImageDrawable(Drawable drawable) {
-            ImageView.super.setImageDrawable(drawable);
-        }
-    };
-
     @StyleRes
     private static final int DEF_STYLE_RES = R.style.Widget_ImageView;
 
-    private final Rect mShadowPadding = new Rect();
+    //private final Rect mShadowPadding = new Rect();
     private final ImageViewImplX mImageViewHelper;
     private final AppCompatImageHelper mImageHelper;
+    private final Behavior<ImageView> mBehavior;
 
     public ImageView(Context context) {
         this(context, null);
@@ -147,6 +134,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     @SuppressLint("RestrictedApi")
     public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(wrap(context, attrs, defStyleAttr, DEF_STYLE_RES), attrs, defStyleAttr);
+        mBehavior = new Behavior<>(context, attrs);
 
         if (Build.VERSION.SDK_INT >= 23) {
             mImageViewHelper = new ImageViewApi23Impl(this, attrs, defStyleAttr, DEF_STYLE_RES);
@@ -170,8 +158,6 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     public void onInitializeAccessibilityNodeInfo(@NonNull AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(getA11yClassName());
-        //info.setCheckable(isCheckable());
-        //info.setChecked(isChecked());
         info.setClickable(isClickable());
     }
 
@@ -179,7 +165,6 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     public void onInitializeAccessibilityEvent(@NonNull AccessibilityEvent accessibilityEvent) {
         super.onInitializeAccessibilityEvent(accessibilityEvent);
         accessibilityEvent.setClassName(getA11yClassName());
-        //accessibilityEvent.setChecked(isChecked());
     }
 
     @Override
@@ -196,18 +181,24 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
-        //getImpl().onDrawableStateChanged(getDrawableState());
+        mImageViewHelper.onDrawableStateChanged(getDrawableState());
 
         if (mImageHelper != null) {
             AppCompatImageHelperUtils.applySupportImageTint(mImageHelper);
         }
     }
 
-/*    @Override
+    @Override
+    public void drawableHotspotChanged(float x, float y) {
+        super.drawableHotspotChanged(x, y);
+        mImageViewHelper.drawableHotspotChanged(x, y);
+    }
+
+    @Override
     public void jumpDrawablesToCurrentState() {
         super.jumpDrawablesToCurrentState();
-        //getImpl().jumpDrawableToCurrentState();
-    }*/
+        mImageViewHelper.jumpDrawableToCurrentState();
+    }
 
     @Override
     public void setPadding(@Px int left, @Px int top, @Px int right, @Px int bottom) {
@@ -295,7 +286,6 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
 
     @Override
     public void setImageDrawable(@Nullable Drawable drawable) {
-        Log.d("TEST", "setImageDrawable");
         if (mImageViewHelper != null) {
             mImageViewHelper.setImageDrawable(drawable);
         } else {
@@ -341,6 +331,12 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     @Override
     public ShapeAppearanceModel getShapeAppearanceModel() {
         return mImageViewHelper.getShapeAppearanceModel();
+    }
+
+    @NonNull
+    @Override
+    public CoordinatorLayout.Behavior getBehavior() {
+        return mBehavior;
     }
 
     /**
@@ -546,6 +542,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     /**
      * @return
      */
+    @Nullable
     public ColorStateList getStrokeColor() {
         return mImageViewHelper.getStrokeColor();
     }
@@ -567,15 +564,33 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     /**
      * @param color
      */
-    public void setStrokeColor(ColorStateList color) {
+    public void setStrokeColor(@Nullable ColorStateList color) {
         mImageViewHelper.setStrokeColor(color);
+    }
+
+    @Nullable
+    public ColorStateList getRippleColor() {
+        return mImageViewHelper.getRippleColor();
+    }
+
+    public void setRippleColorResource(@ColorRes int resId) {
+        setRippleColor(ResourcesCompat.getColor(getResources(), resId, null));
+    }
+
+    public void setRippleColor(@ColorInt int color) {
+        setRippleColor(ColorStateList.valueOf(color));
+    }
+
+    public void setRippleColor(@Nullable ColorStateList color) {
+        mImageViewHelper.setRippleColor(color);
     }
 
     /**
      * Returns the motion spec for the show animation.
      */
+    @Nullable
     public MotionSpec getShowMotionSpec() {
-        return null;//getImpl().getShowMotionSpec();
+        return mImageViewHelper.getShowMotionSpec();
     }
 
     /**
@@ -583,8 +598,8 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
      *
      * @attr ref R.styleable#ImageView_showMotionSpec
      */
-    public void setShowMotionSpec(MotionSpec spec) {
-        //getImpl().setShowMotionSpec(spec);
+    public void setShowMotionSpec(@Nullable MotionSpec spec) {
+        mImageViewHelper.setShowMotionSpec(spec);
     }
 
     /**
@@ -599,8 +614,9 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     /**
      * Returns the motion spec for the hide animation.
      */
+    @Nullable
     public MotionSpec getHideMotionSpec() {
-        return null; //getImpl().getHideMotionSpec();
+        return mImageViewHelper.getHideMotionSpec();
     }
 
     /**
@@ -608,8 +624,8 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
      *
      * @attr ref R.styleable#ImageView_hideMotionSpec
      */
-    public void setHideMotionSpec(MotionSpec spec) {
-        //getImpl().setHideMotionSpec(spec);
+    public void setHideMotionSpec(@Nullable MotionSpec spec) {
+        mImageViewHelper.setHideMotionSpec(spec);
     }
 
     /**
@@ -684,55 +700,26 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
         };
     }
 
-    private class ViewDelegateImpl implements ImageViewDelegate {
-
-        /*@Override
-        public float getRadius() {
-            return (getWidth() - (mShadowPadding.right + mShadowPadding.left)) / 2f;
-        }*/
-
-        /*@Override
-        public void setShadowPadding(int left, int top, int right, int bottom) {
-            //mShadowPadding.set(left, top, right, bottom);
-            //setPadding(left + (int) getBorderWidth(), top + (int) getBorderWidth(), right + (int) getBorderWidth(), bottom + (int) getBorderWidth());
-        }*/
-
-        @Override
-        public void setBackgroundDrawable(Drawable background) {
-            ImageView.super.setBackgroundDrawable(background);
-        }
-
-        @Override
-        public void setImageDrawable(Drawable drawable) {
-            ImageView.super.setImageDrawable(drawable);
-        }
-
-        /*@Override
-        public boolean isCompatPadding() {
-            return isCompatPadding;
-        }*/
-    }
-
     /**
      * Behavior designed for use with {@link ImageView} instances. Its main function
      * is to move {@link ImageView} views so that any displayed {@link com.google.android.material.snackbar.Snackbar}s do
      * not cover them.
      * <p>
-     * TODO reimplement this after Google reimplement same behavior in FloatingActionButton
      */
-    public static class Behavior extends CoordinatorLayout.Behavior<ImageView> {
+    public static class Behavior<T extends ImageView> extends CoordinatorLayout.Behavior<T> {
         private static final boolean AUTO_HIDE_DEFAULT = true;
+
+        private boolean mAutoHideEnabled;
 
         private Rect mTmpRect;
         private OnVisibilityChangedListener mInternalAutoHideListener;
-        private boolean mAutoHideEnabled;
 
         public Behavior() {
             super();
             mAutoHideEnabled = AUTO_HIDE_DEFAULT;
         }
 
-        public Behavior(Context context, AttributeSet attrs) {
+        public Behavior(@NonNull Context context, @Nullable AttributeSet attrs) {
             super(context, attrs);
             TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ImageView_Behavior_Layout);
             mAutoHideEnabled = a.getBoolean(R.styleable.ImageView_Behavior_Layout_behavior_autoHide, AUTO_HIDE_DEFAULT);
@@ -814,7 +801,6 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
             return true;
         }
 
-        @SuppressLint("RestrictedApi")
         private boolean updateViewVisibilityForAppBarLayout(CoordinatorLayout parent, AppBarLayout appBarLayout, ImageView child) {
             if (!shouldUpdateVisibility(appBarLayout, child)) {
                 return false;
@@ -870,11 +856,11 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
             // Now let the CoordinatorLayout lay out the FAB
             parent.onLayoutChild(child, layoutDirection);
             // Now offset it if needed
-            offsetIfNeeded(parent, child);
+            //offsetIfNeeded(parent, child);
             return true;
         }
 
-        @Override
+/*        @Override
         public boolean getInsetDodgeRect(@NonNull CoordinatorLayout parent, @NonNull ImageView child, @NonNull Rect rect) {
             // Since we offset so that any internal shadow padding isn't shown, we need to make
             // sure that the shadow isn't used for any dodge inset calculations
@@ -884,14 +870,14 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
                     child.getRight() - shadowPadding.right,
                     child.getBottom() - shadowPadding.bottom);
             return true;
-        }
+        }*/
 
         /**
          * Pre-Lollipop we use padding so that the shadow has enough space to be drawn. This method
          * offsets our layout position so that we're positioned correctly if we're on one of
          * our parent's edges.
          */
-        private void offsetIfNeeded(CoordinatorLayout parent, ImageView fab) {
+        /*private void offsetIfNeeded(CoordinatorLayout parent, ImageView fab) {
             final Rect padding = fab.mShadowPadding;
 
             if (padding != null && padding.centerX() > 0 && padding.centerY() > 0) {
@@ -921,7 +907,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
                     ViewCompat.offsetLeftAndRight(fab, offsetLR);
                 }
             }
-        }
+        }*/
     }
 
     void setPaddingInternal(@Px int left, @Px int top, @Px int right, @Px int bottom) {
