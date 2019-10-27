@@ -24,6 +24,8 @@
 
 package com.imageview.core;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -69,6 +71,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.coordinatorlayout.widget.CoordinatorLayout.AttachedBehavior;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.TintableBackgroundView;
+import androidx.core.view.ViewCompat;
 import androidx.core.widget.TintableImageSourceView;
 
 import static com.google.android.material.theme.overlay.MaterialThemeOverlay.wrap;
@@ -87,36 +90,39 @@ import static com.google.android.material.theme.overlay.MaterialThemeOverlay.wra
  * transition drawables from Glide may be need initiate reload drawable on changing view form? // disabled 15.10.2017
  * <p>
  */
-@SuppressLint("RestrictedApi")
-public abstract class ImageView extends VisibilityAwareImageView implements TintableBackgroundView, TintableImageSourceView, Shapeable, AttachedBehavior {
+@SuppressLint({"RestrictedApi", "AppCompatCustomView"})
+public abstract class ImageView extends android.widget.ImageView implements TintableBackgroundView, TintableImageSourceView, Shapeable, AttachedBehavior {
     private static final String LOG_TAG = ImageView.class.getSimpleName();
 
     /**
-     * Callback to be invoked when the visibility of a ImageView changes.
+     * Callback to be invoked when the visibility or the state of an ExtendedFloatingActionButton
+     * changes.
      */
-    public abstract static class OnVisibilityChangedListener {
+    public abstract static class OnChangedCallback {
 
         /**
          * Called when a {@code ImageView} has been
-         * {@link #show(OnVisibilityChangedListener) shown}.
+         * {@link #show(OnChangedCallback) shown}.
          *
          * @param imageView the ImageView that was shown.
          */
-        public void onShown(ImageView imageView) {
-        }
+        public void onShown(ImageView imageView) {}
 
         /**
          * Called when a {@code ImageView} has been
-         * {@link #hide(OnVisibilityChangedListener) hidden}.
+         * {@link #hide(OnChangedCallback) hidden}.
          *
          * @param imageView the ImageView that was hidden.
          */
-        public void onHidden(ImageView imageView) {
-        }
+        public void onHidden(ImageView imageView) {}
     }
 
     @StyleRes
     private static final int DEF_STYLE_RES = R.style.Widget_ImageView;
+
+    private final AnimatorTracker mChangeVisibilityTracker = new AnimatorTracker();
+    private final MotionStrategy mShowStrategy = new ShowStrategy(mChangeVisibilityTracker);
+    private final MotionStrategy mHideStrategy = new HideStrategy(mChangeVisibilityTracker);
 
     //private final Rect mShadowPadding = new Rect();
     private final ImageViewImpl mImageViewHelper;
@@ -143,6 +149,9 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
         } else {
             mImageViewHelper = new ImageViewImpl(this, attrs, defStyleAttr, DEF_STYLE_RES);
         }
+
+        mShowStrategy.setMotionSpec(mImageViewHelper.getShowMotionSpec());
+        mHideStrategy.setMotionSpec(mImageViewHelper.getHideMotionSpec());
 
         mImageHelper = new AppCompatImageHelper(this);
         mImageHelper.loadFromAttributes(attrs, defStyleAttr);
@@ -649,14 +658,10 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
      * Shows the image view.
      * <p>This method will animate the image view show if the view has already been laid out.</p>
      *
-     * @param listener the listener to notify when this view is shown
+     * @param callback the listener to notify when this view is shown
      */
-    public void show(@Nullable final OnVisibilityChangedListener listener) {
-        show(listener, true);
-    }
-
-    private void show(OnVisibilityChangedListener listener, boolean fromUser) {
-        //getImpl().show(wrapOnVisibilityChangedListener(listener), fromUser);
+    public void show(@Nullable OnChangedCallback callback) {
+        performMotion(mShowStrategy, callback);
     }
 
     /**
@@ -671,33 +676,10 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
      * Hides the image view.
      * <p>This method will animate the image view hide if the view has already been laid out.</p>
      *
-     * @param listener the listener to notify when this view is hidden
+     * @param callback the listener to notify when this view is hidden
      */
-    public void hide(@Nullable OnVisibilityChangedListener listener) {
-        hide(listener, true);
-    }
-
-    private void hide(@Nullable OnVisibilityChangedListener listener, boolean fromUser) {
-        //getImpl().hide(wrapOnVisibilityChangedListener(listener), fromUser);
-    }
-
-    @Nullable
-    private ImageViewImplOld.InternalVisibilityChangedListener wrapOnVisibilityChangedListener(@Nullable final OnVisibilityChangedListener listener) {
-        if (listener == null) {
-            return null;
-        }
-
-        return new ImageViewImplOld.InternalVisibilityChangedListener() {
-            @Override
-            public void onShown() {
-                listener.onShown(ImageView.this);
-            }
-
-            @Override
-            public void onHidden() {
-                listener.onHidden(ImageView.this);
-            }
-        };
+    public void hide(@Nullable OnChangedCallback callback) {
+        performMotion(mHideStrategy, callback);
     }
 
     /**
@@ -712,7 +694,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
         private boolean mAutoHideEnabled;
 
         private Rect mTmpRect;
-        private OnVisibilityChangedListener mInternalAutoHideListener;
+        private OnChangedCallback mInternalAutoHideListener;
 
         public Behavior() {
             super();
@@ -776,7 +758,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
         }
 
         @VisibleForTesting
-        void setInternalAutoHideListener(OnVisibilityChangedListener listener) {
+        void setInternalAutoHideListener(OnChangedCallback listener) {
             mInternalAutoHideListener = listener;
         }
 
@@ -791,13 +773,6 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
                 // show/hide the FAB
                 return false;
             }
-
-            //noinspection RedundantIfStatement
-            if (child.getUserSetVisibility() != VISIBLE) {
-                // The view isn't set to be visible so skip changing its visibility
-                return false;
-            }
-
             return true;
         }
 
@@ -816,10 +791,12 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
 
             if (rect.bottom <= appBarLayout.getMinimumHeightForVisibleOverlappingContent()) {
                 // If the anchor's bottom is below the seam, we'll animate our FAB out
-                child.hide(mInternalAutoHideListener, false);
+                child.hide(mInternalAutoHideListener);
+                Log.d("TEST", "hide");
             } else {
                 // Else, we'll animate our FAB back in
-                child.show(mInternalAutoHideListener, false);
+                child.show(mInternalAutoHideListener);
+                Log.d("TEST", "show");
             }
             return true;
         }
@@ -830,9 +807,9 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
             }
             CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) child.getLayoutParams();
             if (bottomSheet.getTop() < child.getHeight() / 2 + lp.topMargin) {
-                child.hide(mInternalAutoHideListener, false);
+                child.hide(mInternalAutoHideListener);
             } else {
-                child.show(mInternalAutoHideListener, false);
+                child.show(mInternalAutoHideListener);
             }
             return true;
         }
@@ -920,5 +897,180 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
 
     void setImageDrawableInternal(Drawable drawable) {
         super.setImageDrawable(drawable);
+    }
+
+    private boolean shouldAnimateVisibilityChange() {
+        return ViewCompat.isLaidOut(this) && !isInEditMode();
+    }
+
+    private void performMotion(@NonNull final MotionStrategy strategy, @Nullable final OnChangedCallback callback) {
+        if (strategy.shouldCancel()) {
+            return;
+        }
+
+        boolean shouldAnimate = shouldAnimateVisibilityChange();
+        if (!shouldAnimate) {
+            strategy.performNow();
+            strategy.onChange(callback);
+            return;
+        }
+
+        measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        Animator animator = strategy.createAnimator();
+        animator.addListener(
+                new AnimatorListenerAdapter() {
+                    private boolean cancelled;
+
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        strategy.onAnimationStart(animation);
+                        cancelled = false;
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+                        cancelled = true;
+                        strategy.onAnimationCancel();
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        strategy.onAnimationEnd();
+                        if (!cancelled) {
+                            strategy.onChange(callback);
+                        }
+                    }
+                });
+
+        for (Animator.AnimatorListener l : strategy.getListeners()) {
+            animator.addListener(l);
+        }
+
+        animator.start();
+    }
+
+    private static final int ANIM_STATE_NONE = 0;
+    private static final int ANIM_STATE_HIDING = 1;
+    private static final int ANIM_STATE_SHOWING = 2;
+
+    private int animState = ANIM_STATE_NONE;
+
+    private boolean isOrWillBeShown() {
+        if (getVisibility() != View.VISIBLE) {
+            // If we're not currently visible, return true if we're animating to be shown
+            return animState == ANIM_STATE_SHOWING;
+        } else {
+            // Otherwise if we're visible, return true if we're not animating to be hidden
+            return animState != ANIM_STATE_HIDING;
+        }
+    }
+
+    private boolean isOrWillBeHidden() {
+        if (getVisibility() == View.VISIBLE) {
+            // If we're currently visible, return true if we're animating to be hidden
+            return animState == ANIM_STATE_HIDING;
+        } else {
+            // Otherwise if we're not visible, return true if we're not animating to be shown
+            return animState != ANIM_STATE_SHOWING;
+        }
+    }
+
+    class ShowStrategy extends BaseMotionStrategy {
+
+        public ShowStrategy(AnimatorTracker animatorTracker) {
+            super(ImageView.this, animatorTracker);
+        }
+
+        @Override
+        public void performNow() {
+            setVisibility(VISIBLE);
+            setAlpha(1f);
+            setScaleY(1f);
+            setScaleX(1f);
+        }
+
+        @Override
+        public void onChange(@Nullable final OnChangedCallback callback) {
+            if (callback != null) {
+                callback.onShown(ImageView.this);
+            }
+        }
+
+        @Override
+        public int getDefaultMotionSpecResource() {
+            return com.google.android.material.R.animator.mtrl_extended_fab_show_motion_spec; // TODO update
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+            super.onAnimationStart(animation);
+            setVisibility(VISIBLE);
+            animState = ANIM_STATE_SHOWING;
+        }
+
+        @Override
+        public void onAnimationEnd() {
+            super.onAnimationEnd();
+            animState = ANIM_STATE_NONE;
+        }
+
+        @Override
+        public boolean shouldCancel() {
+            return isOrWillBeShown();
+        }
+    }
+
+    class HideStrategy extends BaseMotionStrategy {
+
+        private boolean isCancelled;
+
+        public HideStrategy(AnimatorTracker animatorTracker) {
+            super(ImageView.this, animatorTracker);
+        }
+
+        @Override
+        public void performNow() {
+            setVisibility(GONE);
+        }
+
+        @Override
+        public void onChange(@Nullable final OnChangedCallback callback) {
+            if (callback != null) {
+                callback.onHidden(ImageView.this);
+            }
+        }
+
+        @Override
+        public boolean shouldCancel() {
+            return isOrWillBeHidden();
+        }
+
+        @Override
+        public int getDefaultMotionSpecResource() {
+            return com.google.android.material.R.animator.mtrl_extended_fab_hide_motion_spec; // TODO update
+        }
+
+        @Override
+        public void onAnimationStart(Animator animator) {
+            super.onAnimationStart(animator);
+            isCancelled = false;
+            setVisibility(VISIBLE);
+            animState = ANIM_STATE_HIDING;
+        }
+
+        @Override
+        public void onAnimationCancel() {
+            super.onAnimationCancel();
+            isCancelled = true;
+        }
+
+        @Override
+        public void onAnimationEnd() {
+            super.onAnimationEnd();
+            animState = ANIM_STATE_NONE;
+            if (!isCancelled) {
+                setVisibility(GONE);
+            }
+        }
     }
 }

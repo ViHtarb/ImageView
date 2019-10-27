@@ -2,7 +2,7 @@
 <resources>
     <!-- Defines the base Material card style. -->
     <style name="Widget.ImageView" parent="">
-        <item name="enforceMaterialTheme">true</item>
+        <item name="enforceMaterialTheme">false</item>
         <item name="backgroundTint">@android:color/transparent</item>
         <!--<item name="rippleColor">?colorControlHighlight</item>-->
         <!--<item name="rippleColor">@android:color/holo_green_dark</item>-->

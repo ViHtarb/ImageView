@@ -353,7 +353,7 @@ class ImageViewImplOld {
 
                 @Override
                 public void onAnimationStart(Animator animation) {
-                    mView.internalSetVisibility(View.VISIBLE, fromUser);
+                    //mView.internalSetVisibility(View.VISIBLE, fromUser);
 
                     mAnimState = ANIM_STATE_HIDING;
                     mCurrentAnimator = animation;
@@ -371,7 +371,7 @@ class ImageViewImplOld {
                     mCurrentAnimator = null;
 
                     if (!mCancelled) {
-                        mView.internalSetVisibility(fromUser ? View.GONE : View.INVISIBLE, fromUser);
+                        //mView.internalSetVisibility(fromUser ? View.GONE : View.INVISIBLE, fromUser);
                         if (listener != null) {
                             listener.onHidden();
                         }
@@ -422,7 +422,7 @@ class ImageViewImplOld {
                     });*/
         } else {
             // If the view isn't laid out, or we're in the editor, don't run the animation
-            mView.internalSetVisibility(fromUser ? View.GONE : View.INVISIBLE, fromUser);
+            //mView.internalSetVisibility(fromUser ? View.GONE : View.INVISIBLE, fromUser);
             if (listener != null) {
                 listener.onHidden();
             }
@@ -457,7 +457,7 @@ class ImageViewImplOld {
             set.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animation) {
-                    mView.internalSetVisibility(View.VISIBLE, fromUser);
+                    //mView.internalSetVisibility(View.VISIBLE, fromUser);
 
                     mAnimState = ANIM_STATE_SHOWING;
                     mCurrentAnimator = animation;
@@ -501,7 +501,7 @@ class ImageViewImplOld {
                         }
                     });*/
         } else {
-            mView.internalSetVisibility(View.VISIBLE, fromUser);
+            //mView.internalSetVisibility(View.VISIBLE, fromUser);
             mView.setAlpha(1f);
             mView.setScaleY(1f);
             mView.setScaleX(1f);

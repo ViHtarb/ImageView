@@ -9,8 +9,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        android:theme="@style/AppTheme.Coordinator">
+        <activity android:name=".ActivityCoordinatorTest">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -18,5 +18,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>
