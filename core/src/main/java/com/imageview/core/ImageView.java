@@ -119,7 +119,7 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     private static final int DEF_STYLE_RES = R.style.Widget_ImageView;
 
     //private final Rect mShadowPadding = new Rect();
-    private final ImageViewImplX mImageViewHelper;
+    private final ImageViewImpl mImageViewHelper;
     private final AppCompatImageHelper mImageHelper;
     private final Behavior<ImageView> mBehavior;
 
@@ -137,11 +137,11 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
         mBehavior = new Behavior<>(context, attrs);
 
         if (Build.VERSION.SDK_INT >= 23) {
-            mImageViewHelper = new ImageViewApi23Impl(this, attrs, defStyleAttr, DEF_STYLE_RES);
+            mImageViewHelper = new ImageViewImplApi23(this, attrs, defStyleAttr, DEF_STYLE_RES);
         } else if (Build.VERSION.SDK_INT >= 21) {
-            mImageViewHelper = new ImageViewApi21Impl(this, attrs, defStyleAttr, DEF_STYLE_RES);
+            mImageViewHelper = new ImageViewImplApi21(this, attrs, defStyleAttr, DEF_STYLE_RES);
         } else {
-            mImageViewHelper = new ImageViewImplX(this, attrs, defStyleAttr, DEF_STYLE_RES);
+            mImageViewHelper = new ImageViewImpl(this, attrs, defStyleAttr, DEF_STYLE_RES);
         }
 
         mImageHelper = new AppCompatImageHelper(this);
@@ -682,12 +682,12 @@ public abstract class ImageView extends VisibilityAwareImageView implements Tint
     }
 
     @Nullable
-    private ImageViewImpl.InternalVisibilityChangedListener wrapOnVisibilityChangedListener(@Nullable final OnVisibilityChangedListener listener) {
+    private ImageViewImplOld.InternalVisibilityChangedListener wrapOnVisibilityChangedListener(@Nullable final OnVisibilityChangedListener listener) {
         if (listener == null) {
             return null;
         }
 
-        return new ImageViewImpl.InternalVisibilityChangedListener() {
+        return new ImageViewImplOld.InternalVisibilityChangedListener() {
             @Override
             public void onShown() {
                 listener.onShown(ImageView.this);

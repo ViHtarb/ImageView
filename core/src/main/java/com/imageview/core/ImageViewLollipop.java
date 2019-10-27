@@ -26,7 +26,7 @@ import static android.os.Build.VERSION_CODES.LOLLIPOP;
 
 @RequiresApi(LOLLIPOP)
 @TargetApi(LOLLIPOP)
-class ImageViewLollipop extends ImageViewImpl {
+class ImageViewLollipop extends ImageViewImplOld {
 
     protected ImageViewLollipop(ImageView view, ImageViewDelegate viewDelegate) {
         super(view, viewDelegate);

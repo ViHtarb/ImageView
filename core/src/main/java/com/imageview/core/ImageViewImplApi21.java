@@ -27,14 +27,14 @@ import static android.view.View.VISIBLE;
  */
 @RequiresApi(LOLLIPOP)
 @TargetApi(LOLLIPOP)
-class ImageViewApi21Impl extends ImageViewImplX {
+class ImageViewImplApi21 extends ImageViewImpl {
 
     private final MaterialShapeDrawable mMaskDrawable;
     private final MaterialShapeDrawable mForegroundDrawable;
     private final RippleDrawable mRippleDrawable;
 
     @SuppressLint("RestrictedApi")
-    protected ImageViewApi21Impl(@NonNull ImageView view, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    protected ImageViewImplApi21(@NonNull ImageView view, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(view, attrs, defStyleAttr, defStyleRes);
 
         view.setClipToOutline(true);

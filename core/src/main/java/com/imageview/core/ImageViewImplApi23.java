@@ -15,9 +15,9 @@ import static android.os.Build.VERSION_CODES.M;
  */
 @RequiresApi(M)
 @TargetApi(M)
-final class ImageViewApi23Impl extends ImageViewApi21Impl {
+final class ImageViewImplApi23 extends ImageViewImplApi21 {
 
-    protected ImageViewApi23Impl(@NonNull ImageView view, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    protected ImageViewImplApi23(@NonNull ImageView view, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(view, attrs, defStyleAttr, defStyleRes);
     }
 
