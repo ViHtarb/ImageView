@@ -4,12 +4,7 @@
     <style name="Widget.ImageView" parent="">
         <item name="enforceMaterialTheme">false</item>
         <item name="backgroundTint">@android:color/transparent</item>
-        <!--<item name="rippleColor">?colorControlHighlight</item>-->
-        <!--<item name="rippleColor">@android:color/holo_green_dark</item>-->
         <item name="showMotionSpec">@animator/mtrl_image_view_show_motion_spec</item>
         <item name="hideMotionSpec">@animator/mtrl_image_view_hide_motion_spec</item>
-        <!--<item name="android:stateListAnimator" tools:ignore="NewApi">
-            @animator/mtrl_extended_fab_state_list_animator
-        </item>-->
     </style>
 </resources>
