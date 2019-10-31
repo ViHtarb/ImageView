@@ -106,9 +106,7 @@ class ImageViewImplApi21 extends ImageViewImpl {
 
     @Override
     protected final void setCircle(boolean isCircle) {
-        if (this.isCircle != isCircle) {
-            this.isCircle = isCircle;
-
+        if (isCircle() != isCircle) {
             CornerSize cornerSize = isCircle ? ShapeAppearanceModel.PILL : new AbsoluteCornerSize(mCornerRadius);
             mMaskDrawable.setCornerSize(cornerSize);
             mBackgroundDrawable.setCornerSize(cornerSize);

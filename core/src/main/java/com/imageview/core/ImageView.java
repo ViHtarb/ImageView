@@ -38,6 +38,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Property;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -115,6 +116,42 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
         public void onHidden(ImageView imageView) {
         }
     }
+
+    /**
+     * A Property wrapper around the <code>radius</code> functionality handled by the {@link
+     * ImageView#setCornerRadius(float)} value.
+     */
+    public static final Property<ImageView, Float> RADIUS =
+            new Property<ImageView, Float>(Float.class, "radius") {
+                @Override
+                public void set(@NonNull ImageView view, @NonNull Float value) {
+                    view.setCornerRadius(value);
+                }
+
+                @NonNull
+                @Override
+                public Float get(@NonNull ImageView view) {
+                    return view.getCornerRadius();
+                }
+            };
+
+    /**
+     * A Property wrapper around the <code>stroke</code> functionality handled by the {@link
+     * ImageView#setStrokeWidth(float)}} value.
+     */
+    public static final Property<ImageView, Float> STROKE =
+            new Property<ImageView, Float>(Float.class, "stroke") {
+                @Override
+                public void set(@NonNull ImageView view, @NonNull Float value) {
+                    view.setStrokeWidth(value);
+                }
+
+                @NonNull
+                @Override
+                public Float get(@NonNull ImageView view) {
+                    return view.getStrokeWidth();
+                }
+            };
 
     private static final int ANIM_STATE_NONE = 0;
     private static final int ANIM_STATE_HIDING = 1;

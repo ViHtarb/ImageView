@@ -75,7 +75,6 @@ class ImageViewImpl {
     protected final ImageView mView;
     protected final MaterialShapeDrawable mBackgroundDrawable;
 
-    protected boolean isCircle;
     protected boolean isImageOverlap;
 
     protected float mCornerRadius;
@@ -96,7 +95,7 @@ class ImageViewImpl {
 
         TypedArray a = ThemeEnforcement.obtainStyledAttributes(mContext, attrs, R.styleable.ImageView, defStyleAttr, defStyleRes);
 
-        isCircle = a.getBoolean(R.styleable.ImageView_circle, false);
+        boolean isCircle = a.getBoolean(R.styleable.ImageView_circle, false);
         isImageOverlap = a.getBoolean(R.styleable.ImageView_imageOverlap, false);
 
         mCornerRadius = a.getDimension(R.styleable.ImageView_cornerRadius, 0);
@@ -155,13 +154,11 @@ class ImageViewImpl {
     }
 
     protected final boolean isCircle() {
-        return isCircle;
+        return mBackgroundDrawable.getBottomRightCornerResolvedSize() == mView.getHeight() * 0.5;
     }
 
     protected void setCircle(boolean isCircle) {
-        if (this.isCircle != isCircle) {
-            this.isCircle = isCircle;
-
+        if (isCircle() != isCircle) {
             CornerSize cornerSize = isCircle ? ShapeAppearanceModel.PILL : new AbsoluteCornerSize(mCornerRadius);
             mBackgroundDrawable.setCornerSize(cornerSize);
 
@@ -180,11 +177,11 @@ class ImageViewImpl {
     }
 
     protected final float getCornerRadius() {
-        return mCornerRadius;
+        return mBackgroundDrawable.getBottomRightCornerResolvedSize();
     }
 
     protected void setCornerRadius(float cornerRadius) { // not checks
-        if (mCornerRadius != cornerRadius) {
+        if (getCornerRadius() != cornerRadius) {
             mCornerRadius = cornerRadius;
 
             mBackgroundDrawable.setCornerSize(cornerRadius);
@@ -282,7 +279,7 @@ class ImageViewImpl {
     }
 
     protected void setImageDrawable(Drawable drawable) { // TODO mb need to check is vector drawable out of view bounds
-        if (getCornerRadius() > 0 || isCircle()) {
+        if (getCornerRadius() > 0) {
             boolean isTransition = isTransition(drawable);
 
             if (!isTransition) {
@@ -317,7 +314,7 @@ class ImageViewImpl {
         if (isCircle()) {
             roundedBitmapDrawable.setCircular(true);
         } else {
-            roundedBitmapDrawable.setCornerRadius(getCornerRadius());
+            roundedBitmapDrawable.setCornerRadius(getCornerRadius()); // TODO fix corner size scaling
         }
 
         return roundedBitmapDrawable;

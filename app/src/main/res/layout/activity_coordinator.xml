@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -48,35 +49,17 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="68dp"
-        android:layout_height="68dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginStart="16dp"
-        android:src="@drawable/avatar"
-        app:circle="true"
-        app:elevation="8dp"
-        app:layout_anchor="@id/app_bar"
-        app:layout_anchorGravity="end|bottom"
-        app:strokeColor="@color/colorAccent"
-        app:strokeWidth="4dp" />
-
     <com.imageview.ImageView
         android:id="@+id/image"
         android:layout_width="68dp"
         android:layout_height="68dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:layout_marginStart="16dp"
         android:src="@drawable/avatar"
         app:circle="true"
         app:elevation="8dp"
         app:layout_anchor="@id/app_bar"
-        app:layout_anchorGravity="start|bottom"
+        app:layout_anchorGravity="end|bottom"
         app:strokeColor="@color/colorAccent"
         app:strokeWidth="4dp" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

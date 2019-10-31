@@ -15,14 +15,18 @@
         android:clickable="true"
         android:focusable="true"
         app:backgroundTint="?colorPrimary"
-        app:circle="true"
+        app:circle="false"
+        app:cornerRadius="16dp"
         app:elevation="8dp"
         app:layout_constraintBottom_toTopOf="@+id/elevation_slider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.312"/>
+        app:layout_constraintVertical_bias="0.312"
+        app:srcCompat="@drawable/avatar"
+        app:strokeColor="?colorAccent"
+        app:strokeWidth="4dp"/>
 
     <com.google.android.material.slider.Slider
         android:id="@+id/rotation_slider"
@@ -46,7 +50,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        app:layout_constraintBottom_toTopOf="@+id/textView2"/>
+        app:layout_constraintBottom_toTopOf="@+id/textView2" />
 
     <com.google.android.material.slider.Slider
         android:id="@+id/corner_slider"
@@ -118,5 +122,6 @@
         android:text="Rotation slider"
         app:layout_constraintBottom_toTopOf="@+id/rotation_slider"
         app:layout_constraintStart_toStartOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 

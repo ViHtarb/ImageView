@@ -24,9 +24,12 @@
 
 package com.imageview.sample;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.os.Build;
 import android.os.Bundle;
 
+import com.imageview.ImageView;
 import com.imageview.sample.databinding.ActivityMainBinding;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,7 +44,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         binding.imageCircleCheckBox.setChecked(binding.image.isCircle());
-        binding.imageCircleCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> binding.image.setCircle(isChecked));
+        binding.imageCircleCheckBox.setOnClickListener(v -> {
+            float value = 0;
+            if (!binding.image.isCircle()) {
+                value = binding.image.getHeight() * 0.5f;
+            }
+            ValueAnimator animator = ObjectAnimator.ofFloat(binding.image, ImageView.RADIUS, value);
+            animator.setDuration(500);
+            animator.addUpdateListener(animation -> {
+                binding.cornerSlider.setValue((Float) animation.getAnimatedValue());
+                binding.cornerSlider.requestLayout();
+            });
+            animator.start();
+        });
 
         binding.imageOverlappingCheckBox.setEnabled(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP); // overlapping doesn't support on pre-lollipop devices
         binding.imageOverlappingCheckBox.setChecked(binding.image.isImageOverlap());
@@ -60,11 +75,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         binding.image.post(() -> {
-            float currentValue = binding.image.isCircle() ? binding.image.getHeight() / 2f : binding.image.getCornerRadius();
-
             binding.cornerSlider.setValueTo(binding.image.getHeight() / 2f);
-            binding.cornerSlider.setValue(currentValue);
-            binding.cornerSlider.setOnChangeListener((slider, value) -> binding.image.setCornerRadius(value));
+            binding.cornerSlider.setValue(binding.image.getCornerRadius());
+            binding.cornerSlider.setOnChangeListener((slider, value) -> {
+                binding.image.setCornerRadius(value);
+                binding.imageCircleCheckBox.setChecked(binding.image.isCircle());
+            });
         });
 
         binding.rotationSlider.setOnChangeListener((slider, value) -> binding.image.setRotation(value));
