@@ -5,15 +5,11 @@
     <declare-styleable name="ImageView">
         <attr name="circle" format="boolean"/>
         <attr name="imageOverlap" format="boolean"/>
-        <!--<attr name="useCompatPadding" format="boolean"/>-->
         <attr name="cornerRadius" format="dimension"/>
         <attr name="strokeWidth" format="dimension"/>
         <attr name="strokeColor" format="color"/>
         <attr name="rippleColor" format="color"/>
         <attr name="elevation" format="dimension"/>
-        <!--<attr name="pressedTranslationZ" format="dimension"/>-->
-        <!-- TranslationZ value for the FAB when hovered, focused, or hovered and focused. -->
-        <!--<attr name="hoveredFocusedTranslationZ" format="dimension"/>-->
         <attr name="backgroundTint"/>
         <attr name="backgroundTintMode"/>
         <!-- Motion spec for show animation. This should be a MotionSpec resource. -->
