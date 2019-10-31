@@ -49,6 +49,7 @@ import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.internal.DescendantOffsetUtils;
+import com.google.android.material.internal.ThemeEnforcement;
 import com.google.android.material.shape.MaterialShapeUtils;
 import com.google.android.material.shape.ShapeAppearanceModel;
 import com.google.android.material.shape.Shapeable;
@@ -106,7 +107,8 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
          *
          * @param imageView the ImageView that was shown.
          */
-        public void onShown(ImageView imageView) {}
+        public void onShown(ImageView imageView) {
+        }
 
         /**
          * Called when a {@code ImageView} has been
@@ -114,8 +116,13 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
          *
          * @param imageView the ImageView that was hidden.
          */
-        public void onHidden(ImageView imageView) {}
+        public void onHidden(ImageView imageView) {
+        }
     }
+
+    private static final int ANIM_STATE_NONE = 0;
+    private static final int ANIM_STATE_HIDING = 1;
+    private static final int ANIM_STATE_SHOWING = 2;
 
     @StyleRes
     private static final int DEF_STYLE_RES = R.style.Widget_ImageView;
@@ -124,10 +131,11 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     private final MotionStrategy mShowStrategy = new ShowStrategy(mChangeVisibilityTracker);
     private final MotionStrategy mHideStrategy = new HideStrategy(mChangeVisibilityTracker);
 
-    //private final Rect mShadowPadding = new Rect();
     private final ImageViewImpl mImageViewHelper;
     private final AppCompatImageHelper mImageHelper;
     private final Behavior<ImageView> mBehavior;
+
+    private int mAnimState = ANIM_STATE_NONE;
 
     public ImageView(Context context) {
         this(context, null);
@@ -150,8 +158,12 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
             mImageViewHelper = new ImageViewImpl(this, attrs, defStyleAttr, DEF_STYLE_RES);
         }
 
-        mShowStrategy.setMotionSpec(mImageViewHelper.getShowMotionSpec());
-        mHideStrategy.setMotionSpec(mImageViewHelper.getHideMotionSpec());
+        TypedArray a = ThemeEnforcement.obtainStyledAttributes(context, attrs, R.styleable.ImageView, defStyleAttr, DEF_STYLE_RES);
+
+        mShowStrategy.setMotionSpec(MotionSpec.createFromAttribute(context, a, R.styleable.ImageView_showMotionSpec));
+        mHideStrategy.setMotionSpec(MotionSpec.createFromAttribute(context, a, R.styleable.ImageView_hideMotionSpec));
+
+        a.recycle();
 
         mImageHelper = new AppCompatImageHelper(this);
         mImageHelper.loadFromAttributes(attrs, defStyleAttr);
@@ -378,10 +390,10 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
      * @attr ref R.styleable#ImageView_useCompatPadding
      * @see #setUseCompatPadding(boolean)
      */
-    public boolean getUseCompatPadding() {
+    /*public boolean getUseCompatPadding() {
         return false;
     }
-
+*/
     /**
      * Set whether ImageView should add inner padding on platforms Lollipop and after,
      * to ensure consistent dimensions on all platforms.
@@ -391,12 +403,12 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
      * @attr ref R.styleable#ImageView_useCompatPadding
      * @see #getUseCompatPadding()
      */
-    public void setUseCompatPadding(boolean useCompatPadding) {
-        /*if (isCompatPadding != useCompatPadding) {
+    /*public void setUseCompatPadding(boolean useCompatPadding) {
+        *//*if (isCompatPadding != useCompatPadding) {
             isCompatPadding = useCompatPadding;
             //getImpl().onCompatShadowChanged();
-        }*/
-    }
+        }*//*
+    }*/
 
     /**
      * Returns the backward compatible elevation of the ImageView.
@@ -432,9 +444,9 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
      * @see #getCompatElevation()
      * @see #setUseCompatPadding(boolean)
      */
-    public void setCompatElevationResource(@DimenRes int resId) {
+    /*public void setCompatElevationResource(@DimenRes int resId) {
         setCompatElevation(getResources().getDimension(resId));
-    }
+    }*/
 
     /**
      * Returns the backward compatible pressed translationZ of the ImageView.
@@ -443,9 +455,9 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
      * @attr ref com.google.android.material.R.styleable#FloatingActionButton_pressedTranslationZ
      * @see #setCompatPressedTranslationZ(float)
      */
-    public float getCompatPressedTranslationZ() {
+    /*public float getCompatPressedTranslationZ() {
         return 0;//getImpl().getPressedTranslationZ();
-    }
+    }*/
 
     /**
      * Updates the backward compatible pressed translationZ of the ImageView.
@@ -455,9 +467,9 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
      * @see #getCompatPressedTranslationZ()
      * @see #setUseCompatPadding(boolean)
      */
-    public void setCompatPressedTranslationZ(float translationZ) {
+    /*public void setCompatPressedTranslationZ(float translationZ) {
         //getImpl().setPressedTranslationZ(translationZ);
-    }
+    }*/
 
     /**
      * Updates the backward compatible pressed translationZ of the ImageView.
@@ -467,9 +479,9 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
      * @see #getCompatPressedTranslationZ()
      * @see #setUseCompatPadding(boolean)
      */
-    public void setCompatPressedTranslationZ(@DimenRes int resId) {
+    /*public void setCompatPressedTranslationZ(@DimenRes int resId) {
         setCompatPressedTranslationZ(getResources().getDimension(resId));
-    }
+    }*/
 
     /**
      * Returns the backward compatible hovered/focused translationZ of the ImageView.
@@ -478,9 +490,9 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
      * @attr ref R.styleable#ImageView_hoveredFocusedTranslationZ
      * @see #setCompatHoveredFocusedTranslationZ(float)
      */
-    public float getCompatHoveredFocusedTranslationZ() {
+    /*public float getCompatHoveredFocusedTranslationZ() {
         return 0;//getImpl().getHoveredFocusedTranslationZ();
-    }
+    }*/
 
     /**
      * Updates the backward compatible hovered/focused translationZ of the ImageView.
@@ -490,9 +502,9 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
      * @see #getCompatHoveredFocusedTranslationZ()
      * @see #setUseCompatPadding(boolean)
      */
-    public void setCompatHoveredFocusedTranslationZ(float translationZ) {
+    /*public void setCompatHoveredFocusedTranslationZ(float translationZ) {
         //getImpl().setHoveredFocusedTranslationZ(translationZ);
-    }
+    }*/
 
     /**
      * Updates the backward compatible hovered/focused translationZ of the ImageView.
@@ -502,54 +514,92 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
      * @see #getCompatHoveredFocusedTranslationZ()
      * @see #setUseCompatPadding(boolean)
      */
-    public void setCompatHoveredFocusedTranslationZ(@DimenRes int resId) {
+    /*public void setCompatHoveredFocusedTranslationZ(@DimenRes int resId) {
         setCompatHoveredFocusedTranslationZ(getResources().getDimension(resId));
-    }
+    }*/
 
     /**
-     * @return
+     * Gets the corner radius for this image view.
+     *
+     * @return Corner radius for this image view.
+     * @attr ref R.styleable#ImageView_cornerRadius
+     * @see #setCornerRadius(float)
+     * @see #setCornerRadius(int)
      */
     public float getCornerRadius() {
         return mImageViewHelper.getCornerRadius();
     }
 
     /**
-     * @param radius
+     * Sets the corner radius for this image view.
+     *
+     * @param radius Corner radius for this image view.
+     * @attr ref R.styleable#ImageView_cornerRadius
+     * @see #setCornerRadius(int)
+     * @see #getCornerRadius()
      */
     public void setCornerRadius(float radius) {
         mImageViewHelper.setCornerRadius(radius);
     }
 
     /**
-     * @param resId
+     * Sets the corner radius dimension resource for this image view.
+     *
+     * @param resId Corner radius dimension resource for this image view.
+     * @attr ref R.styleable#ImageView_cornerRadius
+     * @see #setCornerRadius(float)
+     * @see #getCornerRadius()
      */
     public void setCornerRadius(@DimenRes int resId) {
         setCornerRadius(getResources().getDimension(resId));
     }
 
     /**
-     * @return
+     * Gets the stroke width for this image view.
+     *
+     * @return Stroke width for this image view.
+     * @attr ref R.styleable#ImageView_strokeWidth
+     * @see #setStrokeWidth(int)
+     * @see #setStrokeWidth(float)
      */
     public float getStrokeWidth() {
         return mImageViewHelper.getStrokeWidth();
     }
 
     /**
-     * @param width
+     * Sets the stroke width for this image view. Both stroke color and stroke width must be set for a
+     * stroke to be drawn.
+     *
+     * @param width Stroke width for this image view.
+     * @attr ref R.styleable#ImageView_strokeWidth
+     * @see #setStrokeWidth(int)
+     * @see #getStrokeWidth()
      */
     public void setStrokeWidth(float width) {
         mImageViewHelper.setStrokeWidth(width);
     }
 
     /**
-     * @param resId
+     * Sets the stroke width dimension resource for this image view. Both stroke color and stroke width
+     * must be set for a stroke to be drawn.
+     *
+     * @param resId Stroke width dimension resource for this image view.
+     * @attr ref R.styleable#ImageView_strokeWidth
+     * @see #setStrokeWidth(float)
+     * @see #getStrokeWidth()
      */
     public void setStrokeWidth(@DimenRes int resId) {
         setStrokeWidth(getResources().getDimension(resId));
     }
 
     /**
-     * @return
+     * Gets the stroke color for this image view.
+     *
+     * @return The color used for the stroke.
+     * @attr ref R.styleable#ImageView_strokeColor
+     * @see #setStrokeColor(int)
+     * @see #setStrokeColor(ColorStateList)
+     * @see #setStrokeColorResource(int)
      */
     @Nullable
     public ColorStateList getStrokeColor() {
@@ -557,39 +607,96 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * @param resId
+     * Sets the stroke color resource for this image view. Both stroke color and stroke width must be set
+     * for a stroke to be drawn.
+     *
+     * @param resId Color resource to use for the stroke.
+     * @attr ref R.styleable#ImageView_strokeColor
+     * @see #setStrokeColor(int)
+     * @see #setStrokeColor(ColorStateList)
+     * @see #getStrokeColor()
      */
     public void setStrokeColorResource(@ColorRes int resId) {
         setStrokeColor(ResourcesCompat.getColor(getResources(), resId, null));
     }
 
     /**
-     * @param color
+     * Sets the stroke color for this image view. Both stroke color and stroke width must be set for a
+     * stroke to be drawn.
+     *
+     * @param color Color to use for the stroke.
+     * @attr ref R.styleable#ImageView_strokeColor
+     * @see #setStrokeColor(ColorStateList)
+     * @see #setStrokeColorResource(int)
+     * @see #getStrokeColor()
      */
     public void setStrokeColor(@ColorInt int color) {
         setStrokeColor(ColorStateList.valueOf(color));
     }
 
     /**
-     * @param color
+     * Sets the stroke color for this image view. Both stroke color and stroke width must be set for a
+     * stroke to be drawn.
+     *
+     * @param color Color to use for the stroke.
+     * @attr ref R.styleable#ImageView_strokeColor
+     * @see #setStrokeColor(int)
+     * @see #setStrokeColorResource(int)
+     * @see #getStrokeColor()
      */
     public void setStrokeColor(@Nullable ColorStateList color) {
         mImageViewHelper.setStrokeColor(color);
     }
 
+    /**
+     * Gets the ripple color for this image view.
+     *
+     * @return The color used for the ripple.
+     * @attr ref R.styleable#ImageView_rippleColor
+     * @see #setRippleColor(int)
+     * @see #setRippleColor(ColorStateList)
+     * @see #setRippleColorResource(int)
+     */
     @Nullable
     public ColorStateList getRippleColor() {
         return mImageViewHelper.getRippleColor();
     }
 
-    public void setRippleColorResource(@ColorRes int resId) {
-        setRippleColor(ResourcesCompat.getColor(getResources(), resId, null));
-    }
-
+    /**
+     * Sets the ripple color for this image view.
+     *
+     * @param color Color to use for the ripple.
+     * @attr ref R.styleable#ImageView_rippleColor
+     * @see #setRippleColor(ColorStateList)
+     * @see #setRippleColorResource(int)
+     * @see #getRippleColor()
+     */
     public void setRippleColor(@ColorInt int color) {
         setRippleColor(ColorStateList.valueOf(color));
     }
 
+    /**
+     * Sets the ripple color resource for this image view.
+     *
+     * @param resId Color resource to use for the ripple.
+     * @attr ref R.styleable#ImageView_rippleColor
+     * @see #setRippleColor(int)
+     * @see #setRippleColor(ColorStateList)
+     * @see #getRippleColor()
+     */
+    public void setRippleColorResource(@ColorRes int resId) {
+        setRippleColor(ResourcesCompat.getColorStateList(getResources(), resId, null));
+    }
+
+    /**
+     * Sets the ripple color for this image view
+     *
+     * @param color Color to use for the ripple.
+     * @attr ref R.styleable#ImageView_rippleColor
+     * @see #setRippleColor(int)
+     * @see #setRippleColorResource(int)
+     * @see #getRippleColor()
+     */
     public void setRippleColor(@Nullable ColorStateList color) {
         mImageViewHelper.setRippleColor(color);
     }
@@ -599,7 +706,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
      */
     @Nullable
     public MotionSpec getShowMotionSpec() {
-        return mImageViewHelper.getShowMotionSpec();
+        return mShowStrategy.getMotionSpec();
     }
 
     /**
@@ -608,7 +715,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
      * @attr ref R.styleable#ImageView_showMotionSpec
      */
     public void setShowMotionSpec(@Nullable MotionSpec spec) {
-        mImageViewHelper.setShowMotionSpec(spec);
+        mShowStrategy.setMotionSpec(spec);
     }
 
     /**
@@ -625,7 +732,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
      */
     @Nullable
     public MotionSpec getHideMotionSpec() {
-        return mImageViewHelper.getHideMotionSpec();
+        return mHideStrategy.getMotionSpec();
     }
 
     /**
@@ -634,7 +741,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
      * @attr ref R.styleable#ImageView_hideMotionSpec
      */
     public void setHideMotionSpec(@Nullable MotionSpec spec) {
-        mImageViewHelper.setHideMotionSpec(spec);
+        mHideStrategy.setMotionSpec(spec);
     }
 
     /**
@@ -682,6 +789,186 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
         performMotion(mHideStrategy, callback);
     }
 
+    void setPaddingInternal(@Px int left, @Px int top, @Px int right, @Px int bottom) {
+        super.setPadding(left, top, right, bottom);
+    }
+
+    void setBackgroundInternal(Drawable drawable) {
+        super.setBackgroundDrawable(drawable);
+    }
+
+    void setImageDrawableInternal(@Nullable Drawable drawable) {
+        super.setImageDrawable(drawable);
+    }
+
+    private boolean isOrWillBeShown() {
+        if (getVisibility() != View.VISIBLE) {
+            // If we're not currently visible, return true if we're animating to be shown
+            return mAnimState == ANIM_STATE_SHOWING;
+        } else {
+            // Otherwise if we're visible, return true if we're not animating to be hidden
+            return mAnimState != ANIM_STATE_HIDING;
+        }
+    }
+
+    private boolean isOrWillBeHidden() {
+        if (getVisibility() == View.VISIBLE) {
+            // If we're currently visible, return true if we're animating to be hidden
+            return mAnimState == ANIM_STATE_HIDING;
+        } else {
+            // Otherwise if we're not visible, return true if we're not animating to be shown
+            return mAnimState != ANIM_STATE_SHOWING;
+        }
+    }
+
+    private boolean shouldAnimateVisibilityChange() {
+        return ViewCompat.isLaidOut(this) && !isInEditMode();
+    }
+
+    private void performMotion(@NonNull final MotionStrategy strategy, @Nullable final OnChangedCallback callback) {
+        if (strategy.shouldCancel()) {
+            return;
+        }
+
+        boolean shouldAnimate = shouldAnimateVisibilityChange();
+        if (!shouldAnimate) {
+            strategy.performNow();
+            strategy.onChange(callback);
+            return;
+        }
+
+        Animator animator = strategy.createAnimator();
+        animator.addListener(
+                new AnimatorListenerAdapter() {
+                    private boolean cancelled;
+
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        strategy.onAnimationStart(animation);
+                        cancelled = false;
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+                        cancelled = true;
+                        strategy.onAnimationCancel();
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        strategy.onAnimationEnd();
+                        if (!cancelled) {
+                            strategy.onChange(callback);
+                        }
+                    }
+                });
+
+        for (Animator.AnimatorListener l : strategy.getListeners()) {
+            animator.addListener(l);
+        }
+
+        animator.start();
+    }
+
+    private class ShowStrategy extends BaseMotionStrategy {
+
+        public ShowStrategy(AnimatorTracker animatorTracker) {
+            super(ImageView.this, animatorTracker);
+        }
+
+        @Override
+        public void performNow() {
+            setVisibility(VISIBLE);
+            setAlpha(1f);
+            setScaleY(1f);
+            setScaleX(1f);
+        }
+
+        @Override
+        public void onChange(@Nullable final OnChangedCallback callback) {
+            if (callback != null) {
+                callback.onShown(ImageView.this);
+            }
+        }
+
+        @Override
+        public int getDefaultMotionSpecResource() {
+            return R.animator.design_image_view_show_motion_spec;
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+            super.onAnimationStart(animation);
+            setVisibility(VISIBLE);
+            mAnimState = ANIM_STATE_SHOWING;
+        }
+
+        @Override
+        public void onAnimationEnd() {
+            super.onAnimationEnd();
+            mAnimState = ANIM_STATE_NONE;
+        }
+
+        @Override
+        public boolean shouldCancel() {
+            return isOrWillBeShown();
+        }
+    }
+
+    private class HideStrategy extends BaseMotionStrategy {
+
+        private boolean isCancelled;
+
+        public HideStrategy(AnimatorTracker animatorTracker) {
+            super(ImageView.this, animatorTracker);
+        }
+
+        @Override
+        public void performNow() {
+            setVisibility(INVISIBLE);
+        }
+
+        @Override
+        public void onChange(@Nullable final OnChangedCallback callback) {
+            if (callback != null) {
+                callback.onHidden(ImageView.this);
+            }
+        }
+
+        @Override
+        public boolean shouldCancel() {
+            return isOrWillBeHidden();
+        }
+
+        @Override
+        public int getDefaultMotionSpecResource() {
+            return R.animator.design_image_view_hide_motion_spec;
+        }
+
+        @Override
+        public void onAnimationStart(Animator animator) {
+            super.onAnimationStart(animator);
+            isCancelled = false;
+            setVisibility(VISIBLE);
+            mAnimState = ANIM_STATE_HIDING;
+        }
+
+        @Override
+        public void onAnimationCancel() {
+            super.onAnimationCancel();
+            isCancelled = true;
+        }
+
+        @Override
+        public void onAnimationEnd() {
+            super.onAnimationEnd();
+            mAnimState = ANIM_STATE_NONE;
+            if (!isCancelled) {
+                setVisibility(INVISIBLE);
+            }
+        }
+    }
+
     /**
      * Behavior designed for use with {@link ImageView} instances. Its main function
      * is to move {@link ImageView} views so that any displayed {@link com.google.android.material.snackbar.Snackbar}s do
@@ -709,7 +996,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
         }
 
         /**
-         * Sets whether the associated FloatingActionButton automatically hides when there is
+         * Sets whether the associated {@code ImageView} automatically hides when there is
          * not enough space to be displayed. This works with {@link AppBarLayout}
          * and {@link BottomSheetBehavior}.
          *
@@ -721,7 +1008,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
         }
 
         /**
-         * Returns whether the associated FloatingActionButton automatically hides when there is
+         * Returns whether the associated {@code ImageView} automatically hides when there is
          * not enough space to be displayed.
          *
          * @return true if enabled
@@ -768,12 +1055,9 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
                 return false;
             }
 
-            if (lp.getAnchorId() != dependency.getId()) {
-                // The anchor ID doesn't match the dependency, so we won't automatically
-                // show/hide the FAB
-                return false;
-            }
-            return true;
+            // The anchor ID doesn't match the dependency, so we won't automatically
+            // show/hide the FAB
+            return lp.getAnchorId() == dependency.getId();
         }
 
         private boolean updateViewVisibilityForAppBarLayout(CoordinatorLayout parent, AppBarLayout appBarLayout, ImageView child) {
@@ -792,11 +1076,9 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
             if (rect.bottom <= appBarLayout.getMinimumHeightForVisibleOverlappingContent()) {
                 // If the anchor's bottom is below the seam, we'll animate our FAB out
                 child.hide(mInternalAutoHideListener);
-                Log.d("TEST", "hide");
             } else {
                 // Else, we'll animate our FAB back in
                 child.show(mInternalAutoHideListener);
-                Log.d("TEST", "show");
             }
             return true;
         }
@@ -832,245 +1114,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
             }
             // Now let the CoordinatorLayout lay out the FAB
             parent.onLayoutChild(child, layoutDirection);
-            // Now offset it if needed
-            //offsetIfNeeded(parent, child);
             return true;
-        }
-
-/*        @Override
-        public boolean getInsetDodgeRect(@NonNull CoordinatorLayout parent, @NonNull ImageView child, @NonNull Rect rect) {
-            // Since we offset so that any internal shadow padding isn't shown, we need to make
-            // sure that the shadow isn't used for any dodge inset calculations
-            final Rect shadowPadding = child.mShadowPadding;
-            rect.set(child.getLeft() + shadowPadding.left,
-                    child.getTop() + shadowPadding.top,
-                    child.getRight() - shadowPadding.right,
-                    child.getBottom() - shadowPadding.bottom);
-            return true;
-        }*/
-
-        /**
-         * Pre-Lollipop we use padding so that the shadow has enough space to be drawn. This method
-         * offsets our layout position so that we're positioned correctly if we're on one of
-         * our parent's edges.
-         */
-        /*private void offsetIfNeeded(CoordinatorLayout parent, ImageView fab) {
-            final Rect padding = fab.mShadowPadding;
-
-            if (padding != null && padding.centerX() > 0 && padding.centerY() > 0) {
-                final CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
-
-                int offsetTB = 0, offsetLR = 0;
-
-                if (fab.getRight() >= parent.getWidth() - lp.rightMargin) {
-                    // If we're on the right edge, shift it the right
-                    offsetLR = padding.right;
-                } else if (fab.getLeft() <= lp.leftMargin) {
-                    // If we're on the left edge, shift it the left
-                    offsetLR = -padding.left;
-                }
-                if (fab.getBottom() >= parent.getHeight() - lp.bottomMargin) {
-                    // If we're on the bottom edge, shift it down
-                    offsetTB = padding.bottom;
-                } else if (fab.getTop() <= lp.topMargin) {
-                    // If we're on the top edge, shift it up
-                    offsetTB = -padding.top;
-                }
-
-                if (offsetTB != 0) {
-                    ViewCompat.offsetTopAndBottom(fab, offsetTB);
-                }
-                if (offsetLR != 0) {
-                    ViewCompat.offsetLeftAndRight(fab, offsetLR);
-                }
-            }
-        }*/
-    }
-
-    void setPaddingInternal(@Px int left, @Px int top, @Px int right, @Px int bottom) {
-        super.setPadding(left, top, right, bottom);
-    }
-
-    void setBackgroundInternal(Drawable drawable) {
-        super.setBackgroundDrawable(drawable);
-    }
-
-    void setImageDrawableInternal(Drawable drawable) {
-        super.setImageDrawable(drawable);
-    }
-
-    private boolean shouldAnimateVisibilityChange() {
-        return ViewCompat.isLaidOut(this) && !isInEditMode();
-    }
-
-    private void performMotion(@NonNull final MotionStrategy strategy, @Nullable final OnChangedCallback callback) {
-        if (strategy.shouldCancel()) {
-            return;
-        }
-
-        boolean shouldAnimate = shouldAnimateVisibilityChange();
-        if (!shouldAnimate) {
-            strategy.performNow();
-            strategy.onChange(callback);
-            return;
-        }
-
-        measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
-        Animator animator = strategy.createAnimator();
-        animator.addListener(
-                new AnimatorListenerAdapter() {
-                    private boolean cancelled;
-
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        strategy.onAnimationStart(animation);
-                        cancelled = false;
-                    }
-
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
-                        cancelled = true;
-                        strategy.onAnimationCancel();
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        strategy.onAnimationEnd();
-                        if (!cancelled) {
-                            strategy.onChange(callback);
-                        }
-                    }
-                });
-
-        for (Animator.AnimatorListener l : strategy.getListeners()) {
-            animator.addListener(l);
-        }
-
-        animator.start();
-    }
-
-    private static final int ANIM_STATE_NONE = 0;
-    private static final int ANIM_STATE_HIDING = 1;
-    private static final int ANIM_STATE_SHOWING = 2;
-
-    private int animState = ANIM_STATE_NONE;
-
-    private boolean isOrWillBeShown() {
-        if (getVisibility() != View.VISIBLE) {
-            // If we're not currently visible, return true if we're animating to be shown
-            return animState == ANIM_STATE_SHOWING;
-        } else {
-            // Otherwise if we're visible, return true if we're not animating to be hidden
-            return animState != ANIM_STATE_HIDING;
-        }
-    }
-
-    private boolean isOrWillBeHidden() {
-        if (getVisibility() == View.VISIBLE) {
-            // If we're currently visible, return true if we're animating to be hidden
-            return animState == ANIM_STATE_HIDING;
-        } else {
-            // Otherwise if we're not visible, return true if we're not animating to be shown
-            return animState != ANIM_STATE_SHOWING;
-        }
-    }
-
-    class ShowStrategy extends BaseMotionStrategy {
-
-        public ShowStrategy(AnimatorTracker animatorTracker) {
-            super(ImageView.this, animatorTracker);
-        }
-
-        @Override
-        public void performNow() {
-            setVisibility(VISIBLE);
-            setAlpha(1f);
-            setScaleY(1f);
-            setScaleX(1f);
-        }
-
-        @Override
-        public void onChange(@Nullable final OnChangedCallback callback) {
-            if (callback != null) {
-                callback.onShown(ImageView.this);
-            }
-        }
-
-        @Override
-        public int getDefaultMotionSpecResource() {
-            return com.google.android.material.R.animator.mtrl_extended_fab_show_motion_spec; // TODO update
-        }
-
-        @Override
-        public void onAnimationStart(Animator animation) {
-            super.onAnimationStart(animation);
-            setVisibility(VISIBLE);
-            animState = ANIM_STATE_SHOWING;
-        }
-
-        @Override
-        public void onAnimationEnd() {
-            super.onAnimationEnd();
-            animState = ANIM_STATE_NONE;
-        }
-
-        @Override
-        public boolean shouldCancel() {
-            return isOrWillBeShown();
-        }
-    }
-
-    class HideStrategy extends BaseMotionStrategy {
-
-        private boolean isCancelled;
-
-        public HideStrategy(AnimatorTracker animatorTracker) {
-            super(ImageView.this, animatorTracker);
-        }
-
-        @Override
-        public void performNow() {
-            setVisibility(GONE);
-        }
-
-        @Override
-        public void onChange(@Nullable final OnChangedCallback callback) {
-            if (callback != null) {
-                callback.onHidden(ImageView.this);
-            }
-        }
-
-        @Override
-        public boolean shouldCancel() {
-            return isOrWillBeHidden();
-        }
-
-        @Override
-        public int getDefaultMotionSpecResource() {
-            return com.google.android.material.R.animator.mtrl_extended_fab_hide_motion_spec; // TODO update
-        }
-
-        @Override
-        public void onAnimationStart(Animator animator) {
-            super.onAnimationStart(animator);
-            isCancelled = false;
-            setVisibility(VISIBLE);
-            animState = ANIM_STATE_HIDING;
-        }
-
-        @Override
-        public void onAnimationCancel() {
-            super.onAnimationCancel();
-            isCancelled = true;
-        }
-
-        @Override
-        public void onAnimationEnd() {
-            super.onAnimationEnd();
-            animState = ANIM_STATE_NONE;
-            if (!isCancelled) {
-                setVisibility(GONE);
-            }
         }
     }
 }

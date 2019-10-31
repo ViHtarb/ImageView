@@ -169,7 +169,7 @@ class ImageViewImplApi21 extends ImageViewImpl {
         mView.setImageDrawableInternal(drawable);
     }
 
-    protected void setForeground(@NonNull final Drawable foreground) { // TODO implement drawable states support for this foreground implementation
+    protected void setForeground(@NonNull final Drawable foreground) {
         // setForeground analog for API 18 - 22
         mView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
             if (v.getVisibility() == VISIBLE) {

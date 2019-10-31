@@ -16,7 +16,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.util.AttributeSet;
 
-import com.google.android.material.animation.MotionSpec;
 import com.google.android.material.internal.ThemeEnforcement;
 import com.google.android.material.internal.ViewUtils;
 import com.google.android.material.resources.MaterialResources;
@@ -45,13 +44,13 @@ import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 @TargetApi(ICE_CREAM_SANDWICH)
 class ImageViewImpl {
     private static final int NO_ID = 0;
-
+/*
     private static final int[] EMPTY_STATE_SET = new int[0];
     private static final int[] ENABLED_STATE_SET = {android.R.attr.state_enabled};
     private static final int[] PRESSED_ENABLED_STATE_SET = {android.R.attr.state_pressed, android.R.attr.state_enabled};
     private static final int[] FOCUSED_ENABLED_STATE_SET = {android.R.attr.state_focused, android.R.attr.state_enabled};
     private static final int[] HOVERED_ENABLED_STATE_SET = {android.R.attr.state_hovered, android.R.attr.state_enabled};
-    private static final int[] HOVERED_FOCUSED_ENABLED_STATE_SET = {android.R.attr.state_hovered, android.R.attr.state_focused, android.R.attr.state_enabled};
+    private static final int[] HOVERED_FOCUSED_ENABLED_STATE_SET = {android.R.attr.state_hovered, android.R.attr.state_focused, android.R.attr.state_enabled};*/
 
     private final Rect mUserPadding = new Rect();
 
@@ -76,9 +75,6 @@ class ImageViewImpl {
     protected ColorStateList mBackgroundTint;
     protected PorterDuff.Mode mBackgroundTintMode;
 
-    protected MotionSpec mShowMotionSpec;
-    protected MotionSpec mHideMotionSpec;
-
     @SuppressLint("RestrictedApi")
     protected ImageViewImpl(@NonNull ImageView view, @Nullable AttributeSet attrs, @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
         mContext = view.getContext();
@@ -102,9 +98,6 @@ class ImageViewImpl {
 
         mBackgroundTint = MaterialResources.getColorStateList(mContext, a, R.styleable.ImageView_backgroundTint);
         mBackgroundTintMode = ViewUtils.parseTintMode(a.getInt(R.styleable.ImageView_backgroundTintMode, -1), PorterDuff.Mode.SRC_IN);
-
-        mShowMotionSpec = MotionSpec.createFromAttribute(mContext, a, R.styleable.ImageView_showMotionSpec);
-        mHideMotionSpec = MotionSpec.createFromAttribute(mContext, a, R.styleable.ImageView_hideMotionSpec);
 
         a.recycle();
 
@@ -268,24 +261,6 @@ class ImageViewImpl {
 
     protected final MaterialShapeDrawable getBackgroundDrawable() {
         return mBackgroundDrawable;
-    }
-
-    @Nullable
-    protected final MotionSpec getShowMotionSpec() {
-        return mShowMotionSpec;
-    }
-
-    protected final void setShowMotionSpec(@Nullable MotionSpec spec) {
-        mShowMotionSpec = spec;
-    }
-
-    @Nullable
-    protected final MotionSpec getHideMotionSpec() {
-        return mHideMotionSpec;
-    }
-
-    protected final void setHideMotionSpec(@Nullable MotionSpec spec) {
-        mHideMotionSpec = spec;
     }
 
     protected final ShapeAppearanceModel getShapeAppearanceModel() {
