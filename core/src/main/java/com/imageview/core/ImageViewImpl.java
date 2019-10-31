@@ -44,13 +44,6 @@ import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 @TargetApi(ICE_CREAM_SANDWICH)
 class ImageViewImpl {
     private static final int NO_ID = 0;
-/*
-    private static final int[] EMPTY_STATE_SET = new int[0];
-    private static final int[] ENABLED_STATE_SET = {android.R.attr.state_enabled};
-    private static final int[] PRESSED_ENABLED_STATE_SET = {android.R.attr.state_pressed, android.R.attr.state_enabled};
-    private static final int[] FOCUSED_ENABLED_STATE_SET = {android.R.attr.state_focused, android.R.attr.state_enabled};
-    private static final int[] HOVERED_ENABLED_STATE_SET = {android.R.attr.state_hovered, android.R.attr.state_enabled};
-    private static final int[] HOVERED_FOCUSED_ENABLED_STATE_SET = {android.R.attr.state_hovered, android.R.attr.state_focused, android.R.attr.state_enabled};*/
 
     private final Rect mUserPadding = new Rect();
 
@@ -60,14 +53,10 @@ class ImageViewImpl {
 
     protected boolean isCircle;
     protected boolean isImageOverlap;
-    //protected boolean isCompatPadding;
 
     protected float mCornerRadius;
     protected float mStrokeWidth;
-    //protected float mRotation;
     protected float mElevation;
-    //protected float mPressedTranslationZ;
-    //protected float mHoveredFocusedTranslationZ;
 
     protected ColorStateList mStrokeColor;
     protected ColorStateList mRippleColor;
@@ -85,7 +74,6 @@ class ImageViewImpl {
 
         isCircle = a.getBoolean(R.styleable.ImageView_circle, false);
         isImageOverlap = a.getBoolean(R.styleable.ImageView_imageOverlap, false);
-        //isCompatPadding = a.getBoolean(R.styleable.ImageView_useCompatPadding, false);
 
         mCornerRadius = a.getDimension(R.styleable.ImageView_cornerRadius, 0);
         mStrokeWidth = a.getDimension(R.styleable.ImageView_strokeWidth, 0);
@@ -93,8 +81,6 @@ class ImageViewImpl {
         mRippleColor = MaterialResources.getColorStateList(mContext, a, R.styleable.ImageView_rippleColor);
 
         mElevation = a.getDimension(R.styleable.ImageView_elevation, ViewCompat.getElevation(mView));
-        //mPressedTranslationZ = a.getDimension(R.styleable.ImageView_pressedTranslationZ, 0f);
-        //mHoveredFocusedTranslationZ = a.getDimension(R.styleable.ImageView_hoveredFocusedTranslationZ, 0f);
 
         mBackgroundTint = MaterialResources.getColorStateList(mContext, a, R.styleable.ImageView_backgroundTint);
         mBackgroundTintMode = ViewUtils.parseTintMode(a.getInt(R.styleable.ImageView_backgroundTintMode, -1), PorterDuff.Mode.SRC_IN);
@@ -307,7 +293,7 @@ class ImageViewImpl {
         if (isCircle()) {
             roundedBitmapDrawable.setCircular(true);
         } else {
-            roundedBitmapDrawable.setCornerRadius(getCornerRadius()/* * 2.7f*/);
+            roundedBitmapDrawable.setCornerRadius(getCornerRadius());
         }
 
         return roundedBitmapDrawable;

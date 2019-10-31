@@ -86,17 +86,13 @@ import static com.google.android.material.theme.overlay.MaterialThemeOverlay.wra
  *
  * <p>The background color of this view defaults is {@link Color#TRANSPARENT}. If you
  * wish to change this at runtime then you can do so via {@link #setBackgroundTintList(ColorStateList)}.
- * <p>
- * Changing view form with changing src drawable form - works with local drawables and don`t works with
- * transition drawables from Glide may be need initiate reload drawable on changing view form? // disabled 15.10.2017
- * <p>
  */
 @SuppressLint({"RestrictedApi", "AppCompatCustomView"})
 public abstract class ImageView extends android.widget.ImageView implements TintableBackgroundView, TintableImageSourceView, Shapeable, AttachedBehavior {
     private static final String LOG_TAG = ImageView.class.getSimpleName();
 
     /**
-     * Callback to be invoked when the visibility or the state of an ExtendedFloatingActionButton
+     * Callback to be invoked when the visibility or the state of an {@code ImageView}
      * changes.
      */
     public abstract static class OnChangedCallback {
@@ -383,34 +379,6 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Returns whether ImageView will add inner padding on platforms Lollipop and after.
-     *
-     * @return true if ImageView is adding inner padding on platforms Lollipop and after,
-     * to ensure consistent dimensions on all platforms.
-     * @attr ref R.styleable#ImageView_useCompatPadding
-     * @see #setUseCompatPadding(boolean)
-     */
-    /*public boolean getUseCompatPadding() {
-        return false;
-    }
-*/
-    /**
-     * Set whether ImageView should add inner padding on platforms Lollipop and after,
-     * to ensure consistent dimensions on all platforms.
-     *
-     * @param useCompatPadding true if ImageView is adding inner padding on platforms
-     *                         Lollipop and after, to ensure consistent dimensions on all platforms.
-     * @attr ref R.styleable#ImageView_useCompatPadding
-     * @see #getUseCompatPadding()
-     */
-    /*public void setUseCompatPadding(boolean useCompatPadding) {
-        *//*if (isCompatPadding != useCompatPadding) {
-            isCompatPadding = useCompatPadding;
-            //getImpl().onCompatShadowChanged();
-        }*//*
-    }*/
-
-    /**
      * Returns the backward compatible elevation of the ImageView.
      *
      * @return the backward compatible elevation in pixels.
@@ -429,94 +397,10 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
      * @attr ref R.styleable#ImageView_elevation
      * @attr ref R.styleable#ImageView_android_elevation
      * @see #getCompatElevation()
-     * @see #setUseCompatPadding(boolean)
      */
     public void setCompatElevation(float elevation) {
         mImageViewHelper.setElevation(elevation);
     }
-
-    /**
-     * Updates the backward compatible elevation of the ImageView.
-     *
-     * @param resId The resource id of the backward compatible elevation.
-     * @attr ref R.styleable#ImageView_elevation
-     * @attr ref R.styleable#ImageView_android_elevation
-     * @see #getCompatElevation()
-     * @see #setUseCompatPadding(boolean)
-     */
-    /*public void setCompatElevationResource(@DimenRes int resId) {
-        setCompatElevation(getResources().getDimension(resId));
-    }*/
-
-    /**
-     * Returns the backward compatible pressed translationZ of the ImageView.
-     *
-     * @return the backward compatible pressed translationZ in pixels.
-     * @attr ref com.google.android.material.R.styleable#FloatingActionButton_pressedTranslationZ
-     * @see #setCompatPressedTranslationZ(float)
-     */
-    /*public float getCompatPressedTranslationZ() {
-        return 0;//getImpl().getPressedTranslationZ();
-    }*/
-
-    /**
-     * Updates the backward compatible pressed translationZ of the ImageView.
-     *
-     * @param translationZ The backward compatible pressed translationZ in pixels.
-     * @attr R.styleable#ImageView_pressedTranslationZ
-     * @see #getCompatPressedTranslationZ()
-     * @see #setUseCompatPadding(boolean)
-     */
-    /*public void setCompatPressedTranslationZ(float translationZ) {
-        //getImpl().setPressedTranslationZ(translationZ);
-    }*/
-
-    /**
-     * Updates the backward compatible pressed translationZ of the ImageView.
-     *
-     * @param resId The resource id of the backward compatible pressed translationZ.
-     * @attr ref R.styleable#ImageView_pressedTranslationZ
-     * @see #getCompatPressedTranslationZ()
-     * @see #setUseCompatPadding(boolean)
-     */
-    /*public void setCompatPressedTranslationZ(@DimenRes int resId) {
-        setCompatPressedTranslationZ(getResources().getDimension(resId));
-    }*/
-
-    /**
-     * Returns the backward compatible hovered/focused translationZ of the ImageView.
-     *
-     * @return the backward compatible hovered/focused translationZ in pixels.
-     * @attr ref R.styleable#ImageView_hoveredFocusedTranslationZ
-     * @see #setCompatHoveredFocusedTranslationZ(float)
-     */
-    /*public float getCompatHoveredFocusedTranslationZ() {
-        return 0;//getImpl().getHoveredFocusedTranslationZ();
-    }*/
-
-    /**
-     * Updates the backward compatible hovered/focused translationZ of the ImageView.
-     *
-     * @param translationZ The backward compatible hovered/focused translationZ in pixels.
-     * @attr ref R.styleable#ImageView_hoveredFocusedTranslationZ
-     * @see #getCompatHoveredFocusedTranslationZ()
-     * @see #setUseCompatPadding(boolean)
-     */
-    /*public void setCompatHoveredFocusedTranslationZ(float translationZ) {
-        //getImpl().setHoveredFocusedTranslationZ(translationZ);
-    }*/
-
-    /**
-     * Updates the backward compatible hovered/focused translationZ of the ImageView.
-     *
-     * @param resId The resource id of the backward compatible hovered/focused translationZ.
-     * @attr ref R.styleable#ImageView_hoveredFocusedTranslationZ
-     * @see #getCompatHoveredFocusedTranslationZ()
-     * @see #setUseCompatPadding(boolean)
-     */
-    /*public void setCompatHoveredFocusedTranslationZ(@DimenRes int resId) {
-        setCompatHoveredFocusedTranslationZ(getResources().getDimension(resId));
-    }*/
 
     /**
      * Gets the corner radius for this image view.
@@ -751,6 +635,52 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
      */
     public void setHideMotionSpec(@AnimatorRes int id) {
         setHideMotionSpec(MotionSpec.createFromResource(getContext(), id));
+    }
+
+    /**
+     * Add a listener that will be invoked when this {@code ImageView} is shown. See {@link
+     * Animator.AnimatorListener}.
+     *
+     * <p>Components that add a listener should take care to remove it when finished via {@link
+     * #removeOnShowAnimationListener(Animator.AnimatorListener)}.
+     *
+     * @param listener listener to add
+     */
+    public void addOnShowAnimationListener(@NonNull Animator.AnimatorListener listener) {
+        mShowStrategy.addAnimationListener(listener);
+    }
+
+    /**
+     * Remove a listener that was previously added via
+     * {@link #addOnShowAnimationListener(Animator.AnimatorListener)}.
+     *
+     * @param listener listener to remove
+     */
+    public void removeOnShowAnimationListener(@NonNull Animator.AnimatorListener listener) {
+        mShowStrategy.removeAnimationListener(listener);
+    }
+
+    /**
+     * Add a listener that will be invoked when this {@code ImageView} is hidden. See
+     * {@link Animator.AnimatorListener}.
+     *
+     * <p>Components that add a listener should take care to remove it when finished via {@link
+     * #removeOnHideAnimationListener(Animator.AnimatorListener)}.
+     *
+     * @param listener listener to add
+     */
+    public void addOnHideAnimationListener(@NonNull Animator.AnimatorListener listener) {
+        mHideStrategy.addAnimationListener(listener);
+    }
+
+    /**
+     * Remove a listener that was previously added via
+     * {@link #addOnHideAnimationListener(Animator.AnimatorListener)}.
+     *
+     * @param listener listener to remove
+     */
+    public void removeOnHideAnimationListener(@NonNull Animator.AnimatorListener listener) {
+        mHideStrategy.removeAnimationListener(listener);
     }
 
     /**
