@@ -407,10 +407,18 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
         mImageViewHelper.setCircle(isCircle);
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isImageOverlap() {
         return mImageViewHelper.isImageOverlap();
     }
 
+    /**
+     *
+     * @param isImageOverlap
+     */
     public void setImageOverlap(boolean isImageOverlap) {
         mImageViewHelper.setImageOverlap(isImageOverlap);
     }
