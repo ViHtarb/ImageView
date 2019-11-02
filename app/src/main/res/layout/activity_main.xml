@@ -24,9 +24,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.312"
+        app:rippleColor="@color/colorAccent"
         app:srcCompat="@drawable/avatar"
         app:strokeColor="?colorAccent"
-        app:strokeWidth="4dp"/>
+        app:strokeWidth="4dp" />
 
     <com.google.android.material.slider.Slider
         android:id="@+id/rotation_slider"
@@ -122,6 +123,5 @@
         android:text="Rotation slider"
         app:layout_constraintBottom_toTopOf="@+id/rotation_slider"
         app:layout_constraintStart_toStartOf="parent"/>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
 

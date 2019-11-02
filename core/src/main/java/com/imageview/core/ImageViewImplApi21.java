@@ -170,7 +170,7 @@ class ImageViewImplApi21 extends ImageViewImpl {
 
     @Override
     @SuppressLint("RestrictedApi")
-    protected void setRippleColor(@Nullable ColorStateList rippleColor) {
+    protected final void setRippleColor(@Nullable ColorStateList rippleColor) {
         if (mRippleColor != rippleColor) {
             mRippleColor = rippleColor;
 

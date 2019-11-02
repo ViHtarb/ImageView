@@ -139,9 +139,7 @@ class ImageViewImpl {
     }
 
     protected void updateDrawable() {
-        if (mView.getDrawable() != null) {
-            setImageDrawable(mView.getDrawable());
-        }
+        mView.post(() -> setImageDrawable(mView.getDrawable()));
     }
 
     protected void updatePadding(@Px int padding) {
@@ -163,9 +161,7 @@ class ImageViewImpl {
             mBackgroundDrawable.setCornerSize(cornerSize);
 
             // update the image view drawable with round rect drawable, needs only on pre-lollipop to provide something similar to outline provider
-            if (mView.getDrawable() != null) {
-                setImageDrawable(mView.getDrawable());
-            }
+            setImageDrawable(mView.getDrawable());
         }
     }
 
@@ -180,16 +176,14 @@ class ImageViewImpl {
         return mBackgroundDrawable.getBottomRightCornerResolvedSize();
     }
 
-    protected void setCornerRadius(float cornerRadius) { // not checks
+    protected void setCornerRadius(float cornerRadius) {
         if (getCornerRadius() != cornerRadius) {
             mCornerRadius = cornerRadius;
 
             mBackgroundDrawable.setCornerSize(cornerRadius);
 
             // update the image view drawable with round rect drawable, needs only on pre-lollipop to provide something similar to outline provider
-            if (mView.getDrawable() != null) {
-                setImageDrawable(mView.getDrawable());
-            }
+            setImageDrawable(mView.getDrawable());
         }
     }
 
@@ -197,7 +191,7 @@ class ImageViewImpl {
         return mElevation;
     }
 
-    protected void setElevation(float elevation) { // checks
+    protected void setElevation(float elevation) {
         if (mElevation != elevation) {
             mElevation = elevation;
 
@@ -209,7 +203,7 @@ class ImageViewImpl {
         return mStrokeWidth;
     }
 
-    protected void setStrokeWidth(float strokeWidth) { // not checks
+    protected void setStrokeWidth(float strokeWidth) {
         if (mStrokeWidth != strokeWidth) {
             mStrokeWidth = strokeWidth;
 
@@ -223,7 +217,7 @@ class ImageViewImpl {
         return mStrokeColor;
     }
 
-    protected void setStrokeColor(@Nullable ColorStateList strokeColor) { // checks
+    protected void setStrokeColor(@Nullable ColorStateList strokeColor) {
         if (mStrokeColor != strokeColor) {
             mStrokeColor = strokeColor;
 
@@ -246,7 +240,7 @@ class ImageViewImpl {
         return mBackgroundTint;
     }
 
-    protected final void setBackgroundTintList(@Nullable ColorStateList tint) { // not checks
+    protected final void setBackgroundTintList(@Nullable ColorStateList tint) {
         if (mBackgroundTint != tint) {
             mBackgroundTint = tint;
 
@@ -258,7 +252,7 @@ class ImageViewImpl {
         return mBackgroundTintMode;
     }
 
-    protected final void setBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) { // checks
+    protected final void setBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) {
         if (mBackgroundTintMode != tintMode) {
             mBackgroundTintMode = tintMode;
 
@@ -279,7 +273,7 @@ class ImageViewImpl {
     }
 
     protected void setImageDrawable(Drawable drawable) { // TODO mb need to check is vector drawable out of view bounds
-        if (getCornerRadius() > 0) {
+        if (drawable != null && getCornerRadius() > 0) {
             boolean isTransition = isTransition(drawable);
 
             if (!isTransition) {
@@ -314,7 +308,11 @@ class ImageViewImpl {
         if (isCircle()) {
             roundedBitmapDrawable.setCircular(true);
         } else {
-            roundedBitmapDrawable.setCornerRadius(getCornerRadius()); // TODO fix corner size scaling
+            float cornerRadius = getCornerRadius();
+            if (mView.getHeight() > 0) {
+                cornerRadius *= Math.max(1, roundedBitmapDrawable.getBounds().height() / mView.getHeight());
+            }
+            roundedBitmapDrawable.setCornerRadius(cornerRadius);
         }
 
         return roundedBitmapDrawable;
