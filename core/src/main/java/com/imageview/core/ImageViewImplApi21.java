@@ -130,7 +130,7 @@ class ImageViewImplApi21 extends ImageViewImpl {
 
     @Override
     protected final void setCornerRadius(float cornerRadius) {
-        if (mCornerRadius != cornerRadius) {
+        if (getCornerRadius() != cornerRadius) {
             mCornerRadius = cornerRadius;
 
             mMaskDrawable.setCornerSize(mCornerRadius);
