@@ -42,6 +42,7 @@ import com.google.android.material.shape.ShapeAppearanceModel;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.core.view.ViewCompat;
 
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.view.View.VISIBLE;
@@ -106,7 +107,7 @@ class ImageViewImplApi21 extends ImageViewImpl {
 
     @Override
     protected final void setCircle(boolean isCircle) {
-        if (isCircle() != isCircle) {
+        if (isCircle() != isCircle || !ViewCompat.isLaidOut(mView)) {
             CornerSize cornerSize = isCircle ? ShapeAppearanceModel.PILL : new AbsoluteCornerSize(mCornerRadius);
             mMaskDrawable.setCornerSize(cornerSize);
             mBackgroundDrawable.setCornerSize(cornerSize);

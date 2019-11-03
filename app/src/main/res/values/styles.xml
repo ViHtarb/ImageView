@@ -30,7 +30,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="materialImageViewStyle">@style/Widget.ImageView</item>
+        <item name="materialImageViewStyle">@style/Widget.MaterialComponents.ImageView</item>
     </style>
 
     <style name="AppTheme.Coordinator" parent="Theme.MaterialComponents.NoActionBar">
@@ -38,8 +38,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="materialImageViewStyle">@style/Widget.ImageView</item>
+        <item name="materialImageViewStyle">@style/Widget.MaterialComponents.ImageView</item>
 
-        <item name="android:statusBarColor">#4000</item>
+        <!--<item name="android:statusBarColor">#4000</item>-->
     </style>
 </resources>

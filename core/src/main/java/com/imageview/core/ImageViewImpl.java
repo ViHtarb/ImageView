@@ -156,7 +156,7 @@ class ImageViewImpl {
     }
 
     protected void setCircle(boolean isCircle) {
-        if (isCircle() != isCircle) {
+        if (isCircle() != isCircle || !ViewCompat.isLaidOut(mView)) {
             CornerSize cornerSize = isCircle ? ShapeAppearanceModel.PILL : new AbsoluteCornerSize(mCornerRadius);
             mBackgroundDrawable.setCornerSize(cornerSize);
 

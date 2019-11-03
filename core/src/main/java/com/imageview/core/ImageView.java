@@ -158,7 +158,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     private static final int ANIM_STATE_SHOWING = 2;
 
     @StyleRes
-    private static final int DEF_STYLE_RES = R.style.Widget_ImageView;
+    private static final int DEF_STYLE_RES = R.style.Widget_MaterialComponents_ImageView;
 
     private final AnimatorTracker mChangeVisibilityTracker = new AnimatorTracker();
     private final MotionStrategy mShowStrategy = new ShowStrategy(mChangeVisibilityTracker);
