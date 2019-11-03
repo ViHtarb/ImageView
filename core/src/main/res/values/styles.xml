@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Defines the base Material card style. -->
+    <style name="Widget.MaterialComponents.ImageView" parent="">
+        <item name="enforceMaterialTheme">false</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="showMotionSpec">@animator/mtrl_image_view_show_motion_spec</item>
+        <item name="hideMotionSpec">@animator/mtrl_image_view_hide_motion_spec</item>
+    </style>
+</resources>

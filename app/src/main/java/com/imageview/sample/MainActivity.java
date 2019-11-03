@@ -24,38 +24,124 @@
 
 package com.imageview.sample;
 
-import android.graphics.Color;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.Button;
 
 import com.imageview.ImageView;
+import com.imageview.sample.databinding.ActivityMainBinding;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        final ImageView imageView = (ImageView) findViewById(R.id.image_view);
-        imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
+        final ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        binding.imageCircleCheckBox.setChecked(binding.image.isCircle());
+        binding.imageCircleCheckBox.setOnClickListener(v -> {
+            float value = 0;
+            if (!binding.image.isCircle()) {
+                value = binding.image.getHeight() * 0.5f;
+            }
+            ValueAnimator animator = ObjectAnimator.ofFloat(binding.image, ImageView.RADIUS, value);
+            animator.setDuration(500);
+            animator.addUpdateListener(animation -> {
+                binding.cornerSlider.setValue((Float) animation.getAnimatedValue());
+                binding.cornerSlider.requestLayout();
+            });
+            animator.start();
+        });
+
+        binding.imageOverlappingCheckBox.setEnabled(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP); // overlapping doesn't support on pre-lollipop devices
+        binding.imageOverlappingCheckBox.setChecked(binding.image.isImageOverlap());
+        binding.imageOverlappingCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> binding.image.setImageOverlap(isChecked));
+
+        if (binding.image.getCompatElevation() > 0) {
+            binding.elevationSlider.setValueTo(binding.image.getCompatElevation() * 2);
+            binding.elevationSlider.setValueFrom(binding.image.getCompatElevation());
+            binding.elevationSlider.setOnChangeListener((slider, value) -> binding.image.setCompatElevation(value));
+        }
+
+        if (binding.image.getStrokeWidth() > 0) {
+            binding.strokeSlider.setValueTo(binding.image.getStrokeWidth() * 2);
+            binding.strokeSlider.setValueFrom(binding.image.getStrokeWidth());
+            binding.strokeSlider.setOnChangeListener((slider, value) -> binding.image.setStrokeWidth(value));
+        }
+
+        binding.image.post(() -> {
+            binding.cornerSlider.setValueTo(binding.image.getHeight() / 2f);
+            binding.cornerSlider.setValue(binding.image.getCornerRadius());
+            binding.cornerSlider.setOnChangeListener((slider, value) -> {
+                binding.image.setCornerRadius(value);
+                binding.imageCircleCheckBox.setChecked(binding.image.isCircle());
+            });
+        });
+
+        binding.rotationSlider.setOnChangeListener((slider, value) -> binding.image.setRotation(value));
+
+        //binding.loadImageButton.setOnClickListener(v -> binding.image.setImageURL("https://images.pexels.com/photos/326055/pexels-photo-326055.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"));
+/*
+        final ImageView imageViewTest1 = findViewById(R.id.image_view_3);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //imageViewTest1.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
+                //imageViewTest1.setClipToOutline(true);
+                //imageViewTest1.setBorderColor(ColorUtils.setAlphaComponent(imageViewTest1.getBorderColor().getDefaultColor(), 15));
+            }
+        }, 1000);
+        //imageViewTest1.setImageURL("https://i.ytimg.com/vi/6lt2JfJdGSY/maxresdefault.jpg");
+
+        final ImageView imageViewTest = findViewById(R.id.image_view_2);
+        //imageViewTest.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
+        imageViewTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });*/
+
+        //final ImageView imageView = findViewById(R.id.image_view);
+        //final FloatingActionButton fab = findViewById(R.id.fab);
+        //imageView.setCompatElevation(20f);
+/*        new Handler().postDelayed(() -> {
+            //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
+        }, 1000);*/
+        //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
         //imageView.setImageURL("https://pp.vk.me/c604531/v604531553/1d0f6/9gae9OTT_xo.jpg");
         //imageView.setImageResource(R.drawable.ic_noavatar);
         //imageView.setClipToOutline(true);
 
-        Button button = (Button) findViewById(R.id.button_test);
-        button.setOnClickListener(new View.OnClickListener() {
+        //LinearLayout linearLayout = findViewById(R.id.test_view);
+        /*linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imageView.setBorderWidth(30f);
-                imageView.setBorderColor(Color.GREEN);
+
+            }
+        });*/
+
+        //Button button = findViewById(R.id.button_test);
+        /*button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //fab.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_image, null));
+                //imageView.setBackgroundTintList(null);
+                //imageViewTest.setBackgroundTintList(ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorAccent, null)));
+                //imageView.setCompatElevation(20f);
+                //imageView.setCircle(!imageView.isCircle());
+                //imageView.setBorderWidth(30f);
+                //imageView.setBorderColor(Color.GREEN);
                 //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
                 //imageView.setImageURL("https://pp.vk.me/c604531/v604531553/1d0f6/9gae9OTT_xo.jpg");
                 //imageView.setImageURL("https://s3.amazonaws.com/attached-images/point_images/a_15c85ed78d5349e1a2f984180e8efeb1.jpg");
                 //imageView.setCircle(!imageView.isCircle());
             }
-        });
+        });*/
     }
 }

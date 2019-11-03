@@ -28,6 +28,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 
+import com.imageview.picasso.R;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 
@@ -40,14 +41,14 @@ public class ImageView extends com.imageview.core.integration.ImageView {
     }
 
     public ImageView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, R.attr.materialImageViewStyle);
     }
 
     public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
         if (!isInEditMode()) {
-            mManager = Picasso.with(context);
+            mManager = Picasso.get();
         }
     }
 
