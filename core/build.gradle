@@ -25,9 +25,9 @@ android {
 }
 
 dependencies {
-    api 'androidx.appcompat:appcompat:' + rootProject.ext.androidXVersions.appCompat
-    api 'androidx.annotation:annotation:' + rootProject.ext.androidXVersions.annotation
+    //api 'androidx.annotation:annotation:' + rootProject.ext.androidXVersions.annotation
     api 'androidx.core:core:' + rootProject.ext.androidXVersions.core
+    api 'androidx.appcompat:appcompat:' + rootProject.ext.androidXVersions.appCompat
     api 'com.google.android.material:material:' + rootProject.ext.materialLibraryVersion
 
     testImplementation 'junit:junit:' + rootProject.ext.junitVersion
