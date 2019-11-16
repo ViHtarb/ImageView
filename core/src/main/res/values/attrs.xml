@@ -12,9 +12,7 @@
         <attr name="elevation" format="dimension"/>
         <attr name="backgroundTint"/>
         <attr name="backgroundTintMode"/>
-        <!-- Motion spec for show animation. This should be a MotionSpec resource. -->
         <attr name="showMotionSpec"/>
-        <!-- Motion spec for hide animation. This should be a MotionSpec resource. -->
         <attr name="hideMotionSpec"/>
         <attr name="srcCompat"/>
         <attr name="tint"/>

@@ -394,37 +394,47 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * @return
+     * Returns whether the {@code ImageView} is circular.
+     *
+     * @attr ref R.styleable#ImageView_circle
+     * @see #setCircle(boolean)
      */
     public boolean isCircle() {
         return mImageViewHelper.isCircle();
     }
 
     /**
-     * @param isCircle
+     * Sets whether the {@code ImageView} is circular.
+     *
+     * @attr ref R.styleable#ImageView_circle
+     * @see #isCircle()
      */
     public void setCircle(boolean isCircle) {
         mImageViewHelper.setCircle(isCircle);
     }
 
     /**
+     * Returns whether the image will be overlapped by stroke.
      *
-     * @return
+     * @attr ref R.styleable#ImageView_imageOverlap
+     * @see #setImageOverlap(boolean)
      */
     public boolean isImageOverlap() {
         return mImageViewHelper.isImageOverlap();
     }
 
     /**
+     * Sets whether the image will be overlapped by stroke.
      *
-     * @param isImageOverlap
+     * @attr ref R.styleable#ImageView_imageOverlap
+     * @see #isImageOverlap()
      */
     public void setImageOverlap(boolean isImageOverlap) {
         mImageViewHelper.setImageOverlap(isImageOverlap);
     }
 
     /**
-     * Returns the backward compatible elevation of the ImageView.
+     * Returns the backward compatible elevation of the {@code ImageView}.
      *
      * @return the backward compatible elevation in pixels.
      * @attr ref R.styleable#ImageView_elevation
@@ -436,7 +446,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Updates the backward compatible elevation of the ImageView.
+     * Updates the backward compatible elevation of the {@code ImageView}.
      *
      * @param elevation The backward compatible elevation in pixels.
      * @attr ref R.styleable#ImageView_elevation
@@ -448,9 +458,9 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Gets the corner radius for this image view.
+     * Gets the corner radius for this {@code ImageView}.
      *
-     * @return Corner radius for this image view.
+     * @return Corner radius.
      * @attr ref R.styleable#ImageView_cornerRadius
      * @see #setCornerRadius(float)
      * @see #setCornerRadius(int)
@@ -460,9 +470,9 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Sets the corner radius for this image view.
+     * Sets the corner radius for this {@code ImageView}.
      *
-     * @param radius Corner radius for this image view.
+     * @param radius Corner radius.
      * @attr ref R.styleable#ImageView_cornerRadius
      * @see #setCornerRadius(int)
      * @see #getCornerRadius()
@@ -472,9 +482,9 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Sets the corner radius dimension resource for this image view.
+     * Sets the corner radius dimension resource for this {@code ImageView}.
      *
-     * @param resId Corner radius dimension resource for this image view.
+     * @param resId Corner radius dimension resource.
      * @attr ref R.styleable#ImageView_cornerRadius
      * @see #setCornerRadius(float)
      * @see #getCornerRadius()
@@ -484,9 +494,9 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Gets the stroke width for this image view.
+     * Gets the stroke width for this {@code ImageView}.
      *
-     * @return Stroke width for this image view.
+     * @return Stroke width.
      * @attr ref R.styleable#ImageView_strokeWidth
      * @see #setStrokeWidth(int)
      * @see #setStrokeWidth(float)
@@ -496,10 +506,10 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Sets the stroke width for this image view. Both stroke color and stroke width must be set for a
+     * Sets the stroke width for this {@code ImageView}. Both stroke color and stroke width must be set for a
      * stroke to be drawn.
      *
-     * @param width Stroke width for this image view.
+     * @param width Stroke width.
      * @attr ref R.styleable#ImageView_strokeWidth
      * @see #setStrokeWidth(int)
      * @see #getStrokeWidth()
@@ -509,10 +519,10 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Sets the stroke width dimension resource for this image view. Both stroke color and stroke width
+     * Sets the stroke width dimension resource for this {@code ImageView}. Both stroke color and stroke width
      * must be set for a stroke to be drawn.
      *
-     * @param resId Stroke width dimension resource for this image view.
+     * @param resId Stroke width dimension resource.
      * @attr ref R.styleable#ImageView_strokeWidth
      * @see #setStrokeWidth(float)
      * @see #getStrokeWidth()
@@ -522,7 +532,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Gets the stroke color for this image view.
+     * Gets the stroke color for this {@code ImageView}.
      *
      * @return The color used for the stroke.
      * @attr ref R.styleable#ImageView_strokeColor
@@ -536,7 +546,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Sets the stroke color resource for this image view. Both stroke color and stroke width must be set
+     * Sets the stroke color resource for this {@code ImageView}. Both stroke color and stroke width must be set
      * for a stroke to be drawn.
      *
      * @param resId Color resource to use for the stroke.
@@ -550,7 +560,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Sets the stroke color for this image view. Both stroke color and stroke width must be set for a
+     * Sets the stroke color for this {@code ImageView}. Both stroke color and stroke width must be set for a
      * stroke to be drawn.
      *
      * @param color Color to use for the stroke.
@@ -564,7 +574,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Sets the stroke color for this image view. Both stroke color and stroke width must be set for a
+     * Sets the stroke color for this {@code ImageView}. Both stroke color and stroke width must be set for a
      * stroke to be drawn.
      *
      * @param color Color to use for the stroke.
@@ -578,7 +588,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Gets the ripple color for this image view.
+     * Gets the ripple color for this {@code ImageView}.
      *
      * @return The color used for the ripple.
      * @attr ref R.styleable#ImageView_rippleColor
@@ -592,7 +602,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Sets the ripple color for this image view.
+     * Sets the ripple color for this {@code ImageView}.
      *
      * @param color Color to use for the ripple.
      * @attr ref R.styleable#ImageView_rippleColor
@@ -605,7 +615,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Sets the ripple color resource for this image view.
+     * Sets the ripple color resource for this {@code ImageView}.
      *
      * @param resId Color resource to use for the ripple.
      * @attr ref R.styleable#ImageView_rippleColor
@@ -618,7 +628,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Sets the ripple color for this image view
+     * Sets the ripple color for this {@code ImageView}.
      *
      * @param color Color to use for the ripple.
      * @attr ref R.styleable#ImageView_rippleColor
@@ -729,7 +739,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Shows the image view.
+     * Shows the {@code ImageView}.
      * <p>This method will animate the image view show if the view has already been laid out.</p>
      */
     public void show() {
@@ -737,7 +747,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Shows the image view.
+     * Shows the {@code ImageView}.
      * <p>This method will animate the image view show if the view has already been laid out.</p>
      *
      * @param callback the listener to notify when this view is shown
@@ -747,7 +757,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Hides the image view.
+     * Hides the {@code ImageView}.
      * <p>This method will animate the image view hide if the view has already been laid out.</p>
      */
     public void hide() {
@@ -755,7 +765,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     }
 
     /**
-     * Hides the image view.
+     * Hides the {@code ImageView}.
      * <p>This method will animate the image view hide if the view has already been laid out.</p>
      *
      * @param callback the listener to notify when this view is hidden
