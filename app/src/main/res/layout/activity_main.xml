@@ -74,12 +74,23 @@
         app:layout_constraintStart_toStartOf="parent"/>
 
     <com.google.android.material.checkbox.MaterialCheckBox
-        android:id="@+id/image_overlapping_check_box"
+        android:id="@+id/image_circle_animated_check_box"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:layout_marginLeft="84dp"
         android:layout_marginStart="84dp"
+        android:text="Animated"
+        app:layout_constraintBottom_toTopOf="@+id/elevation_slider"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/image_overlapping_check_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="178dp"
+        android:layout_marginStart="178dp"
         android:text="Overlapping"
         app:layout_constraintBottom_toTopOf="@+id/elevation_slider"
         app:layout_constraintStart_toStartOf="parent"/>

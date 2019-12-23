@@ -37,12 +37,16 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.util.AttributeSet;
 
 import com.google.android.material.internal.ThemeEnforcement;
+import com.google.android.material.internal.ViewOverlayImpl;
 import com.google.android.material.internal.ViewUtils;
 import com.google.android.material.resources.MaterialResources;
+import com.google.android.material.ripple.RippleDrawableCompat;
+import com.google.android.material.ripple.RippleUtils;
 import com.google.android.material.shape.AbsoluteCornerSize;
 import com.google.android.material.shape.CornerSize;
 import com.google.android.material.shape.MaterialShapeDrawable;
@@ -54,12 +58,14 @@ import androidx.annotation.Nullable;
 import androidx.annotation.Px;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.StyleRes;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.core.view.ViewCompat;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
 import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+import static android.view.View.VISIBLE;
 
 /**
  * Created by Viнt@rь on 25.10.2019
@@ -74,6 +80,9 @@ class ImageViewImpl {
     protected final Context mContext;
     protected final ImageView mView;
     protected final MaterialShapeDrawable mBackgroundDrawable;
+    protected final MaterialShapeDrawable mForegroundDrawable;
+    protected final MaterialShapeDrawable mMaskDrawable;
+    protected final Drawable mRippleDrawable;
 
     protected boolean isImageOverlap;
 
@@ -120,29 +129,50 @@ class ImageViewImpl {
 
         mView.setBackgroundInternal(mBackgroundDrawable);
 
-        updateStroke();
+        mForegroundDrawable = new MaterialShapeDrawable(getShapeAppearanceModel());
+        mForegroundDrawable.setFillColor(ColorStateList.valueOf(Color.TRANSPARENT));
+        mForegroundDrawable.setStroke(mStrokeWidth, mStrokeColor);
+
+        mMaskDrawable = createMaskDrawable();
+        mRippleDrawable = createRippleDrawable();
+
+        setForeground(mergeForegroundDrawable());
+
         updateDrawable();
         updatePadding((int) mStrokeWidth);
     }
 
-    protected void onDrawableStateChanged(int[] state) {
+    protected void drawableStateChanged(int[] state) {
+        boolean changed = mRippleDrawable.isStateful() && mRippleDrawable.setState(state);
+        changed |= mForegroundDrawable.isStateful() && mForegroundDrawable.setState(state);
+
+        if (changed) {
+            mView.invalidate();
+        }
     }
 
     protected void drawableHotspotChanged(float x, float y) {
     }
 
     protected void jumpDrawableToCurrentState() {
-    }
-
-    protected void updateStroke() {
-        mBackgroundDrawable.setStroke(mStrokeWidth, mStrokeColor);
+        mRippleDrawable.jumpToCurrentState();
+        mForegroundDrawable.jumpToCurrentState();
     }
 
     protected void updateDrawable() {
         mView.post(() -> setImageDrawable(mView.getDrawable()));
     }
 
-    protected void updatePadding(@Px int padding) {
+    protected int fixPadding(@Px int padding) {
+        return (int) (padding / 1.3);
+    }
+
+    protected final void updatePadding(@Px int padding) {
+        if (isImageOverlap) {
+            padding = 0;
+        } else {
+            padding = fixPadding(padding);
+        }
         mView.setPaddingInternal(mUserPadding.left + padding, mUserPadding.top + padding, mUserPadding.right + padding, mUserPadding.bottom + padding);
     }
 
@@ -155,33 +185,44 @@ class ImageViewImpl {
         return mBackgroundDrawable.getBottomRightCornerResolvedSize() == mView.getHeight() * 0.5;
     }
 
+    @SuppressLint("RestrictedApi")
     protected void setCircle(boolean isCircle) {
         if (isCircle() != isCircle || !ViewCompat.isLaidOut(mView)) {
             CornerSize cornerSize = isCircle ? ShapeAppearanceModel.PILL : new AbsoluteCornerSize(mCornerRadius);
             mBackgroundDrawable.setCornerSize(cornerSize);
+            mForegroundDrawable.setCornerSize(cornerSize);
 
+            ((RippleDrawableCompat) mRippleDrawable).setShapeAppearanceModel(getShapeAppearanceModel());
             // update the image view drawable with round rect drawable, needs only on pre-lollipop to provide something similar to outline provider
             setImageDrawable(mView.getDrawable());
         }
     }
 
-    public boolean isImageOverlap() {
-        return false;
+    public final boolean isImageOverlap() {
+        return isImageOverlap;
     }
 
-    public void setImageOverlap(boolean isImageOverlap) {
+    public final void setImageOverlap(boolean isImageOverlap) {
+        if (this.isImageOverlap != isImageOverlap) {
+            this.isImageOverlap = isImageOverlap;
+
+            updatePadding((int) mStrokeWidth);
+        }
     }
 
     protected final float getCornerRadius() {
         return mBackgroundDrawable.getBottomRightCornerResolvedSize();
     }
 
+    @SuppressLint("RestrictedApi")
     protected void setCornerRadius(float cornerRadius) {
         if (getCornerRadius() != cornerRadius) {
             mCornerRadius = cornerRadius;
 
-            mBackgroundDrawable.setCornerSize(cornerRadius);
+            mBackgroundDrawable.setCornerSize(mCornerRadius);
+            mForegroundDrawable.setCornerSize(mCornerRadius);
 
+            ((RippleDrawableCompat) mRippleDrawable).setShapeAppearanceModel(getShapeAppearanceModel());
             // update the image view drawable with round rect drawable, needs only on pre-lollipop to provide something similar to outline provider
             setImageDrawable(mView.getDrawable());
         }
@@ -203,11 +244,11 @@ class ImageViewImpl {
         return mStrokeWidth;
     }
 
-    protected void setStrokeWidth(float strokeWidth) {
+    protected final void setStrokeWidth(float strokeWidth) {
         if (mStrokeWidth != strokeWidth) {
             mStrokeWidth = strokeWidth;
 
-            mBackgroundDrawable.setStrokeWidth(mStrokeWidth);
+            mForegroundDrawable.setStrokeWidth(mStrokeWidth);
             updatePadding((int) mStrokeWidth);
         }
     }
@@ -217,11 +258,11 @@ class ImageViewImpl {
         return mStrokeColor;
     }
 
-    protected void setStrokeColor(@Nullable ColorStateList strokeColor) {
+    protected final void setStrokeColor(@Nullable ColorStateList strokeColor) {
         if (mStrokeColor != strokeColor) {
             mStrokeColor = strokeColor;
 
-            mBackgroundDrawable.setStrokeColor(mStrokeColor);
+            mForegroundDrawable.setStrokeColor(mStrokeColor);
         }
     }
 
@@ -233,6 +274,8 @@ class ImageViewImpl {
     protected void setRippleColor(@Nullable ColorStateList rippleColor) {
         if (mRippleColor != rippleColor) {
             mRippleColor = rippleColor;
+
+            DrawableCompat.setTintList(mRippleDrawable, mRippleColor);
         }
     }
 
@@ -268,12 +311,47 @@ class ImageViewImpl {
         return mBackgroundDrawable.getShapeAppearanceModel();
     }
 
+    @SuppressLint("RestrictedApi")
     protected void setShapeAppearanceModel(@NonNull ShapeAppearanceModel shapeAppearanceModel) {
         mBackgroundDrawable.setShapeAppearanceModel(shapeAppearanceModel);
+        mForegroundDrawable.setShapeAppearanceModel(shapeAppearanceModel);
+
+        ((RippleDrawableCompat) mRippleDrawable).setShapeAppearanceModel(shapeAppearanceModel);
+    }
+
+    protected MaterialShapeDrawable createMaskDrawable() {
+        return null;
+    }
+
+    @SuppressLint("RestrictedApi")
+    protected Drawable createRippleDrawable() {
+        RippleDrawableCompat drawable = new RippleDrawableCompat(getShapeAppearanceModel());
+        drawable.setTintList(RippleUtils.sanitizeRippleDrawableColor(mRippleColor));
+        return drawable;
+    }
+
+    protected Drawable mergeForegroundDrawable() {
+        return new LayerDrawable(new Drawable[]{mForegroundDrawable, mRippleDrawable});
+    }
+
+    @SuppressLint("RestrictedApi")
+    protected void setForeground(@NonNull final Drawable foreground) {
+        mView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            if (v.getVisibility() == VISIBLE) {
+                Rect bounds = new Rect();
+                v.getDrawingRect(bounds);
+                foreground.setBounds(bounds);
+            }
+        });
+
+        ViewOverlayImpl overlay = ViewUtils.getOverlay(mView);
+        if (overlay != null) {
+            overlay.add(foreground);
+        }
     }
 
     protected void setImageDrawable(Drawable drawable) { // TODO mb need to check is vector drawable out of view bounds
-        if (drawable != null && getCornerRadius() > 0) {
+        if (drawable != null /*&& getCornerRadius() > 0*/) {
             boolean isTransition = isTransition(drawable);
 
             if (!isTransition) {
@@ -305,15 +383,11 @@ class ImageViewImpl {
             roundedBitmapDrawable = (RoundedBitmapDrawable) drawable;
         }
 
-        if (isCircle()) {
-            roundedBitmapDrawable.setCircular(true);
-        } else {
-            float cornerRadius = getCornerRadius();
-            if (mView.getHeight() > 0) {
-                cornerRadius *= Math.max(1, roundedBitmapDrawable.getBounds().height() / mView.getHeight());
-            }
-            roundedBitmapDrawable.setCornerRadius(cornerRadius);
+        float cornerRadius = getCornerRadius();
+        if (mView.getHeight() > 0) {
+            cornerRadius *= roundedBitmapDrawable.getBounds().height() / (float) mView.getHeight();
         }
+        roundedBitmapDrawable.setCornerRadius(cornerRadius);
 
         return roundedBitmapDrawable;
     }

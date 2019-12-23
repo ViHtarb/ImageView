@@ -27,8 +27,6 @@ package com.imageview.core;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
@@ -45,7 +43,6 @@ import androidx.annotation.RequiresApi;
 import androidx.core.view.ViewCompat;
 
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
-import static android.view.View.VISIBLE;
 
 /**
  * Created by Viнt@rь on 25.10.2019
@@ -54,29 +51,12 @@ import static android.view.View.VISIBLE;
 @TargetApi(LOLLIPOP)
 class ImageViewImplApi21 extends ImageViewImpl {
 
-    private final MaterialShapeDrawable mMaskDrawable;
-    private final MaterialShapeDrawable mForegroundDrawable;
-    private final RippleDrawable mRippleDrawable;
-
     @SuppressLint("RestrictedApi")
     protected ImageViewImplApi21(@NonNull ImageView view, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(view, attrs, defStyleAttr, defStyleRes);
 
         view.setClipToOutline(true);
         view.setElevation(mElevation);
-
-        mMaskDrawable = new MaterialShapeDrawable(getShapeAppearanceModel());
-        mForegroundDrawable = new MaterialShapeDrawable(getShapeAppearanceModel());
-        mForegroundDrawable.setFillColor(ColorStateList.valueOf(Color.TRANSPARENT));
-        mForegroundDrawable.setStroke(mStrokeWidth, mStrokeColor);
-
-        mRippleDrawable = new RippleDrawable(RippleUtils.sanitizeRippleDrawableColor(mRippleColor), mForegroundDrawable, mMaskDrawable);
-        setForeground(mRippleDrawable);
-    }
-
-    @Override
-    protected void onDrawableStateChanged(int[] state) {
-        mRippleDrawable.setState(state);
     }
 
     @Override
@@ -85,12 +65,8 @@ class ImageViewImplApi21 extends ImageViewImpl {
     }
 
     @Override
-    protected void jumpDrawableToCurrentState() {
-        mRippleDrawable.jumpToCurrentState();
-    }
-
-    @Override
-    protected final void updateStroke() {
+    protected final int fixPadding(int padding) {
+        return padding;
     }
 
     @Override
@@ -98,34 +74,12 @@ class ImageViewImplApi21 extends ImageViewImpl {
     }
 
     @Override
-    protected final void updatePadding(int padding) {
-        if (isImageOverlap) {
-            padding = 0;
-        }
-        super.updatePadding(padding);
-    }
-
-    @Override
     protected final void setCircle(boolean isCircle) {
         if (isCircle() != isCircle || !ViewCompat.isLaidOut(mView)) {
             CornerSize cornerSize = isCircle ? ShapeAppearanceModel.PILL : new AbsoluteCornerSize(mCornerRadius);
-            mMaskDrawable.setCornerSize(cornerSize);
             mBackgroundDrawable.setCornerSize(cornerSize);
             mForegroundDrawable.setCornerSize(cornerSize);
-        }
-    }
-
-    @Override
-    public final boolean isImageOverlap() {
-        return isImageOverlap;
-    }
-
-    @Override
-    public final void setImageOverlap(boolean isImageOverlap) {
-        if (this.isImageOverlap != isImageOverlap) {
-            this.isImageOverlap = isImageOverlap;
-
-            updatePadding((int) mStrokeWidth);
+            mMaskDrawable.setCornerSize(cornerSize);
         }
     }
 
@@ -133,10 +87,9 @@ class ImageViewImplApi21 extends ImageViewImpl {
     protected final void setCornerRadius(float cornerRadius) {
         if (getCornerRadius() != cornerRadius) {
             mCornerRadius = cornerRadius;
-
-            mMaskDrawable.setCornerSize(mCornerRadius);
             mBackgroundDrawable.setCornerSize(mCornerRadius);
             mForegroundDrawable.setCornerSize(mCornerRadius);
+            mMaskDrawable.setCornerSize(mCornerRadius);
         }
     }
 
@@ -151,56 +104,40 @@ class ImageViewImplApi21 extends ImageViewImpl {
     }
 
     @Override
-    protected final void setStrokeWidth(float strokeWidth) {
-        if (mStrokeWidth != strokeWidth) {
-            mStrokeWidth = strokeWidth;
-
-            mForegroundDrawable.setStrokeWidth(mStrokeWidth);
-            updatePadding((int) mStrokeWidth);
-        }
-    }
-
-    @Override
-    protected final void setStrokeColor(@Nullable ColorStateList strokeColor) {
-        if (mStrokeColor != strokeColor) {
-            mStrokeColor = strokeColor;
-
-            mForegroundDrawable.setStrokeColor(strokeColor);
-        }
-    }
-
-    @Override
     @SuppressLint("RestrictedApi")
     protected final void setRippleColor(@Nullable ColorStateList rippleColor) {
         if (mRippleColor != rippleColor) {
             mRippleColor = rippleColor;
 
-            mRippleDrawable.setColor(RippleUtils.sanitizeRippleDrawableColor(mRippleColor));
+            ((RippleDrawable) mRippleDrawable).setColor(RippleUtils.sanitizeRippleDrawableColor(mRippleColor));
         }
     }
 
     @Override
     protected final void setShapeAppearanceModel(@NonNull ShapeAppearanceModel shapeAppearanceModel) {
-        super.setShapeAppearanceModel(shapeAppearanceModel);
-
-        mMaskDrawable.setShapeAppearanceModel(shapeAppearanceModel);
+        mBackgroundDrawable.setShapeAppearanceModel(shapeAppearanceModel);
         mForegroundDrawable.setShapeAppearanceModel(shapeAppearanceModel);
+        mMaskDrawable.setShapeAppearanceModel(shapeAppearanceModel);
+    }
+
+    @Override
+    protected final Drawable mergeForegroundDrawable() {
+        return mRippleDrawable;
+    }
+
+    @Override
+    protected final MaterialShapeDrawable createMaskDrawable() {
+        return new MaterialShapeDrawable(getShapeAppearanceModel());
+    }
+
+    @SuppressLint("RestrictedApi")
+    @Override
+    protected final Drawable createRippleDrawable() {
+        return new RippleDrawable(RippleUtils.sanitizeRippleDrawableColor(mRippleColor), mForegroundDrawable, mMaskDrawable);
     }
 
     @Override
     protected final void setImageDrawable(Drawable drawable) {
         mView.setImageDrawableInternal(drawable);
-    }
-
-    protected void setForeground(@NonNull final Drawable foreground) {
-        // setForeground analog for API 18 - 22
-        mView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-            if (v.getVisibility() == VISIBLE) {
-                Rect bounds = new Rect();
-                v.getDrawingRect(bounds);
-                foreground.setBounds(bounds);
-            }
-        });
-        mView.getOverlay().add(foreground);
     }
 }

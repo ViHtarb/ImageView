@@ -26,7 +26,6 @@ package com.imageview.sample;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.os.Build;
 import android.os.Bundle;
 
 import com.imageview.ImageView;
@@ -45,32 +44,36 @@ public class MainActivity extends AppCompatActivity {
 
         binding.imageCircleCheckBox.setChecked(binding.image.isCircle());
         binding.imageCircleCheckBox.setOnClickListener(v -> {
-            float value = 0;
-            if (!binding.image.isCircle()) {
-                value = binding.image.getHeight() * 0.5f;
+            if (binding.imageCircleAnimatedCheckBox.isChecked()) {
+                float value = 0;
+                if (!binding.image.isCircle()) {
+                    value = binding.image.getHeight() * 0.5f;
+                }
+                ValueAnimator animator = ObjectAnimator.ofFloat(binding.image, ImageView.RADIUS, value);
+                animator.setDuration(500);
+                animator.addUpdateListener(animation -> {
+                    binding.cornerSlider.setValue((Float) animation.getAnimatedValue());
+                    //binding.cornerSlider.requestLayout();
+                });
+                animator.start();
+            } else {
+                binding.image.setCircle(binding.imageCircleCheckBox.isChecked());
+                binding.cornerSlider.setValue(binding.image.getCornerRadius());
             }
-            ValueAnimator animator = ObjectAnimator.ofFloat(binding.image, ImageView.RADIUS, value);
-            animator.setDuration(500);
-            animator.addUpdateListener(animation -> {
-                binding.cornerSlider.setValue((Float) animation.getAnimatedValue());
-                binding.cornerSlider.requestLayout();
-            });
-            animator.start();
         });
 
-        binding.imageOverlappingCheckBox.setEnabled(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP); // overlapping doesn't support on pre-lollipop devices
         binding.imageOverlappingCheckBox.setChecked(binding.image.isImageOverlap());
         binding.imageOverlappingCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> binding.image.setImageOverlap(isChecked));
 
         if (binding.image.getCompatElevation() > 0) {
             binding.elevationSlider.setValueTo(binding.image.getCompatElevation() * 2);
-            binding.elevationSlider.setValueFrom(binding.image.getCompatElevation());
+            binding.elevationSlider.setValue(binding.image.getCompatElevation());
             binding.elevationSlider.setOnChangeListener((slider, value) -> binding.image.setCompatElevation(value));
         }
 
         if (binding.image.getStrokeWidth() > 0) {
             binding.strokeSlider.setValueTo(binding.image.getStrokeWidth() * 2);
-            binding.strokeSlider.setValueFrom(binding.image.getStrokeWidth());
+            binding.strokeSlider.setValue(binding.image.getStrokeWidth());
             binding.strokeSlider.setOnChangeListener((slider, value) -> binding.image.setStrokeWidth(value));
         }
 

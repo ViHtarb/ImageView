@@ -235,7 +235,7 @@ public abstract class ImageView extends android.widget.ImageView implements Tint
     @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
-        mImageViewHelper.onDrawableStateChanged(getDrawableState());
+        mImageViewHelper.drawableStateChanged(getDrawableState());
 
         if (mImageHelper != null) {
             AppCompatImageHelperUtils.applySupportImageTint(mImageHelper);

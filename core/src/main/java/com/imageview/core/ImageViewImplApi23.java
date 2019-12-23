@@ -46,7 +46,7 @@ final class ImageViewImplApi23 extends ImageViewImplApi21 {
     }
 
     @Override
-    protected void onDrawableStateChanged(int[] state) {
+    protected void drawableStateChanged(int[] state) {
     }
 
     @Override
