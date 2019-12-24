@@ -62,7 +62,6 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.core.view.ViewCompat;
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
 import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 import static android.view.View.VISIBLE;
@@ -417,10 +416,6 @@ class ImageViewImpl {
             e.printStackTrace();
             return null;
         }
-    }
-
-    private boolean isVector(Drawable drawable) {
-        return drawable instanceof VectorDrawableCompat;
     }
 
     private boolean isTransition(Drawable drawable) {
