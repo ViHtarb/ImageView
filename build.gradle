@@ -6,7 +6,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.0-alpha06'
+        classpath 'com.android.tools.build:gradle:4.0.0-alpha07'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -38,5 +38,5 @@ ext {
 
     materialLibraryVersion = "1.2.0-alpha03"
 
-    junitVersion = "4.13-beta-1"
+    junitVersion = "4.13-rc-2"
 }

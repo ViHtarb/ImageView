@@ -53,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
                 animator.setDuration(500);
                 animator.addUpdateListener(animation -> {
                     binding.cornerSlider.setValue((Float) animation.getAnimatedValue());
-                    //binding.cornerSlider.requestLayout();
                 });
                 animator.start();
             } else {
@@ -87,64 +86,5 @@ public class MainActivity extends AppCompatActivity {
         });
 
         binding.rotationSlider.setOnChangeListener((slider, value) -> binding.image.setRotation(value));
-
-        //binding.loadImageButton.setOnClickListener(v -> binding.image.setImageURL("https://images.pexels.com/photos/326055/pexels-photo-326055.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"));
-/*
-        final ImageView imageViewTest1 = findViewById(R.id.image_view_3);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //imageViewTest1.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
-                //imageViewTest1.setClipToOutline(true);
-                //imageViewTest1.setBorderColor(ColorUtils.setAlphaComponent(imageViewTest1.getBorderColor().getDefaultColor(), 15));
-            }
-        }, 1000);
-        //imageViewTest1.setImageURL("https://i.ytimg.com/vi/6lt2JfJdGSY/maxresdefault.jpg");
-
-        final ImageView imageViewTest = findViewById(R.id.image_view_2);
-        //imageViewTest.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
-        imageViewTest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });*/
-
-        //final ImageView imageView = findViewById(R.id.image_view);
-        //final FloatingActionButton fab = findViewById(R.id.fab);
-        //imageView.setCompatElevation(20f);
-/*        new Handler().postDelayed(() -> {
-            //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
-        }, 1000);*/
-        //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
-        //imageView.setImageURL("https://pp.vk.me/c604531/v604531553/1d0f6/9gae9OTT_xo.jpg");
-        //imageView.setImageResource(R.drawable.ic_noavatar);
-        //imageView.setClipToOutline(true);
-
-        //LinearLayout linearLayout = findViewById(R.id.test_view);
-        /*linearLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });*/
-
-        //Button button = findViewById(R.id.button_test);
-        /*button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //fab.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_image, null));
-                //imageView.setBackgroundTintList(null);
-                //imageViewTest.setBackgroundTintList(ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.colorAccent, null)));
-                //imageView.setCompatElevation(20f);
-                //imageView.setCircle(!imageView.isCircle());
-                //imageView.setBorderWidth(30f);
-                //imageView.setBorderColor(Color.GREEN);
-                //imageView.setImageURL("https://avatars2.githubusercontent.com/u/8938207?v=3&s=460");
-                //imageView.setImageURL("https://pp.vk.me/c604531/v604531553/1d0f6/9gae9OTT_xo.jpg");
-                //imageView.setImageURL("https://s3.amazonaws.com/attached-images/point_images/a_15c85ed78d5349e1a2f984180e8efeb1.jpg");
-                //imageView.setCircle(!imageView.isCircle());
-            }
-        });*/
     }
 }

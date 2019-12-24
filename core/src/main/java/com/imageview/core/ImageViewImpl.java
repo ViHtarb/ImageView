@@ -350,8 +350,8 @@ class ImageViewImpl {
         }
     }
 
-    protected void setImageDrawable(Drawable drawable) { // TODO mb need to check is vector drawable out of view bounds
-        if (drawable != null /*&& getCornerRadius() > 0*/) {
+    protected void setImageDrawable(Drawable drawable) {
+        if (drawable != null) {
             boolean isTransition = isTransition(drawable);
 
             if (!isTransition) {
