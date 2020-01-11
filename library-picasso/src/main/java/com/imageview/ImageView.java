@@ -34,7 +34,7 @@ import com.squareup.picasso.RequestCreator;
 
 public class ImageView extends com.imageview.core.integration.ImageView {
 
-    private Picasso mManager;
+    protected Picasso mManager;
 
     public ImageView(Context context) {
         this(context, null);

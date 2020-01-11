@@ -64,39 +64,18 @@ public abstract class ImageView extends com.imageview.core.ImageView {
     }
 
     /**
+     * Sets an {@link Drawable} from resources to display while a resource is loading or ImageView drawable is not set
      *
-     * @param resId
-     *
-     * @deprecated Use {@link #setPlaceholderDrawable(int)} or {@link #setErrorDrawable(int)} instead.
-     */
-    @Deprecated
-    public void setDummyDrawable(@DrawableRes int resId) {
-        setDummyDrawable(AppCompatResources.getDrawable(getContext(), resId));
-    }
-
-    /**
-     *
-     * @param drawable
-     *
-     * @deprecated Use {@link #setPlaceholderDrawable(Drawable)} or {@link #setErrorDrawable(Drawable)} instead.
-     */
-    @Deprecated
-    public void setDummyDrawable(Drawable drawable) {
-        setPlaceholderDrawable(drawable);
-        setErrorDrawable(drawable);
-    }
-
-    /**
-     *
-     * @param resId
+     * @param resId The desired resource identifier of the drawable to display as a placeholder.
      */
     public void setPlaceholderDrawable(@DrawableRes int resId) {
         setPlaceholderDrawable(AppCompatResources.getDrawable(getContext(), resId));
     }
 
     /**
+     * Sets an {@link Drawable} to display while a resource is loading or ImageView drawable is not set
      *
-     * @param drawable
+     * @param drawable The drawable to display as a placeholder.
      */
     public void setPlaceholderDrawable(Drawable drawable) {
         if (mPlaceholderDrawable != drawable) {
@@ -109,16 +88,18 @@ public abstract class ImageView extends com.imageview.core.ImageView {
     }
 
     /**
+     * Sets a {@link Drawable} from resources to display if a load fails.
      *
-     * @param resId
+     * @param resId The desired resource identifier of the drawable to display.
      */
     public void setErrorDrawable(@DrawableRes int resId) {
         setErrorDrawable(AppCompatResources.getDrawable(getContext(), resId));
     }
 
     /**
+     * Sets a {@link Drawable} to display if a load fails.
      *
-     * @param drawable
+     * @param drawable The drawable to display.
      */
     public void setErrorDrawable(Drawable drawable) {
         if (mErrorDrawable != drawable) {
@@ -131,8 +112,7 @@ public abstract class ImageView extends com.imageview.core.ImageView {
     }
 
     /**
-     *
-     * @return
+     * @return placeholder drawable.
      */
     @Nullable
     public Drawable getPlaceholderDrawable() {
@@ -140,8 +120,7 @@ public abstract class ImageView extends com.imageview.core.ImageView {
     }
 
     /**
-     *
-     * @return
+     * @return error drawable.
      */
     @Nullable
     public Drawable getErrorDrawable() {
@@ -149,8 +128,9 @@ public abstract class ImageView extends com.imageview.core.ImageView {
     }
 
     /**
+     * Sets the url for load image.
      *
-     * @param url
+     * @param url A file path, or a uri or url.
      */
     public abstract void setImageURL(String url);
 }
