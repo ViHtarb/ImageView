@@ -133,14 +133,6 @@ abstract class BaseMotionStrategy implements MotionStrategy {
             animators.add(spec.getAnimator("scale", mView, View.SCALE_X));
         }
 
-/*        if (spec.hasPropertyValues("width")) {
-            animators.add(spec.getAnimator("width", fab, ExtendedFloatingActionButton.WIDTH));
-        }
-
-        if (spec.hasPropertyValues("height")) {
-            animators.add(spec.getAnimator("height", fab, ExtendedFloatingActionButton.HEIGHT));
-        }*/
-
         AnimatorSet set = new AnimatorSet();
         AnimatorSetCompat.playTogether(set, animators);
         return set;
