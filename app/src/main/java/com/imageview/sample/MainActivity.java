@@ -67,24 +67,24 @@ public class MainActivity extends AppCompatActivity {
         if (binding.image.getCompatElevation() > 0) {
             binding.elevationSlider.setValueTo(binding.image.getCompatElevation() * 2);
             binding.elevationSlider.setValue(binding.image.getCompatElevation());
-            binding.elevationSlider.setOnChangeListener((slider, value) -> binding.image.setCompatElevation(value));
+            binding.elevationSlider.addOnChangeListener((slider, value, fromUser) -> binding.image.setCompatElevation(value));
         }
 
         if (binding.image.getStrokeWidth() > 0) {
             binding.strokeSlider.setValueTo(binding.image.getStrokeWidth() * 2);
             binding.strokeSlider.setValue(binding.image.getStrokeWidth());
-            binding.strokeSlider.setOnChangeListener((slider, value) -> binding.image.setStrokeWidth(value));
+            binding.strokeSlider.addOnChangeListener((slider, value, fromUser) -> binding.image.setStrokeWidth(value));
         }
 
         binding.image.post(() -> {
             binding.cornerSlider.setValueTo(binding.image.getHeight() / 2f);
             binding.cornerSlider.setValue(binding.image.getCornerRadius());
-            binding.cornerSlider.setOnChangeListener((slider, value) -> {
+            binding.cornerSlider.addOnChangeListener((slider, value, fromUser) -> {
                 binding.image.setCornerRadius(value);
                 binding.imageCircleCheckBox.setChecked(binding.image.isCircle());
             });
         });
 
-        binding.rotationSlider.setOnChangeListener((slider, value) -> binding.image.setRotation(value));
+        binding.rotationSlider.addOnChangeListener((slider, value, fromUser) -> binding.image.setRotation(value));
     }
 }
