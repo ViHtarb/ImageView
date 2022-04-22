@@ -1,7 +1,8 @@
 apply plugin: 'com.android.library'
-apply from: '../maven_push.gradle'
+//apply from: '../maven_push.gradle'
 
 android {
+    namespace 'com.imageview.picasso'
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
@@ -23,6 +24,6 @@ android {
 }
 
 dependencies {
-    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.squareup.picasso:picasso:2.8'
     api project(':core-integration')
 }

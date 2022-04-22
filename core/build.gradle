@@ -1,7 +1,8 @@
 apply plugin: 'com.android.library'
-apply from: '../maven_push.gradle'
+//apply from: '../maven_push.gradle'
 
 android {
+    namespace 'com.imageview.core'
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
@@ -30,6 +31,6 @@ dependencies {
     api 'com.google.android.material:material:' + rootProject.ext.materialLibraryVersion
 
     testImplementation 'junit:junit:' + rootProject.ext.junitVersion
-    androidTestImplementation 'androidx.test:runner:1.3.0-rc01'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0-rc01'
+    androidTestImplementation 'androidx.test:runner:1.5.0-alpha02'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0-alpha05'
 }

@@ -2,11 +2,11 @@
 
 buildscript {
     repositories {
-        jcenter()
         google()
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.0'
+        classpath 'com.android.tools.build:gradle:7.1.3'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -15,8 +15,8 @@ buildscript {
 
 allprojects {
     repositories {
-        jcenter()
         google()
+        mavenCentral()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     }
 }
@@ -26,17 +26,16 @@ task clean(type: Delete) {
 }
 
 ext {
-    compileSdkVersion = 29
+    compileSdkVersion = 31
     minSdkVersion = 14
-    targetSdkVersion = 29
+    targetSdkVersion = 31
 
     androidXVersions = [
-        appCompat  : '1.3.0-alpha01',
-        annotation : '1.2.0-alpha01',
-        core       : '1.5.0-alpha01',
+        appCompat  : '1.6.0-alpha01',
+        core       : '1.9.0-alpha02',
     ]
 
-    materialLibraryVersion = "1.3.0-alpha01"
+    materialLibraryVersion = "1.7.0-alpha01"
 
-    junitVersion = "4.13-rc-2"
+    junitVersion = "4.13"
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Defines the base Material card style. -->
+    <!-- Defines the base Material image view style. -->
     <style name="Widget.MaterialComponents.ImageView" parent="">
         <item name="enforceMaterialTheme">false</item>
         <item name="backgroundTint">@android:color/transparent</item>

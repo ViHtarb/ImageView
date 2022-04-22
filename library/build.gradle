@@ -1,7 +1,8 @@
 apply plugin: 'com.android.library'
-apply from: '../maven_push.gradle'
+//apply from: '../maven_push.gradle'
 
 android {
+    namespace 'com.imageview'
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {

@@ -51,9 +51,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 ValueAnimator animator = ObjectAnimator.ofFloat(binding.image, ImageView.RADIUS, value);
                 animator.setDuration(500);
-                animator.addUpdateListener(animation -> {
-                    binding.cornerSlider.setValue((Float) animation.getAnimatedValue());
-                });
+                animator.addUpdateListener(animation -> binding.cornerSlider.setValue((Float) animation.getAnimatedValue()));
                 animator.start();
             } else {
                 binding.image.setCircle(binding.imageCircleCheckBox.isChecked());
